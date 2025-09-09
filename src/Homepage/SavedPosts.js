@@ -10,6 +10,7 @@ import LikesModal from "./LikesModal";
 import { FaRegCommentDots, FaShare, FaBookmark } from "react-icons/fa";
 
 function SavedPosts() {
+  const server = "https://aroundubackend.onrender.com";
   const [activePostId, setActivePostId] = useState(null);
   const [savedPostsState, setSavedPostsState] = useState({}); // postId -> saved_by_me
   const [savedPosts, setSavedPosts] = useState([]);
@@ -32,7 +33,7 @@ function SavedPosts() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/like`,
+        `${server}/api/posts/${postId}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -57,7 +58,7 @@ function SavedPosts() {
     const token = localStorage.getItem("token");
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/user/saved-posts?page=${page}`,
+        `${server}/api/user/saved-posts?page=${page}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -98,7 +99,7 @@ function SavedPosts() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `http://localhost:5000/api/posts/${postId}/save`,
+        `${server}/api/posts/${postId}/save`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

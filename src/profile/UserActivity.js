@@ -10,6 +10,7 @@ const UserActivity = ({ userId }) => {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+  const server = "https://aroundubackend.onrender.com";
   const loggedinuser = JSON.parse(localStorage.getItem("user"))?.id;
   const fetchUserPosts = async (
     append = false,
@@ -18,7 +19,7 @@ const UserActivity = ({ userId }) => {
   ) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/user/activity?userId=${userId}&limit=${limit}&offset=${currentOffset}`,
+        `${server}/api/user/activity?userId=${userId}&limit=${limit}&offset=${currentOffset}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -61,7 +62,7 @@ const UserActivity = ({ userId }) => {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/user/delete/${postId}`, {
+      await axios.delete(`${server}/api/user/delete/${postId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 

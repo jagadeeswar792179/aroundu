@@ -150,7 +150,10 @@ const RegisterForm = () => {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:5000/api/auth/register", payload);
+      await axios.post(
+        "https://aroundubackend.onrender.com/api/auth/register",
+        payload
+      );
       alert("Registration successful! You can now login.");
 
       // navigate to root and replace history entry

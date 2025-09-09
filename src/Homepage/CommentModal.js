@@ -11,13 +11,13 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
   const [page, setPage] = useState(1);
   const [newComment, setNewComment] = useState("");
   const [posting, setPosting] = useState(false);
-
+  const server = "https://aroundubackend.onrender.com";
   const loadComments = async () => {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/posts/${postId}/comments?page=${page}`,
+        `${server}/api/posts/${postId}/comments?page=${page}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -51,7 +51,7 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:5000/api/posts/comments/${commentId}/like`,
+        `${server}/api/posts/comments/${commentId}/like`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -108,17 +108,14 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
     if (!newComment.trim() || posting) return;
     setPosting(true);
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/posts/${postId}/comments`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ content: newComment }),
-        }
-      );
+      const res = await fetch(`${server}/api/posts/${postId}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ content: newComment }),
+      });
 
       const newC = await res.json();
       setComments((prev) => [

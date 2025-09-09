@@ -9,7 +9,7 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [finalBlob, setFinalBlob] = useState(null);
-
+  const server = "https://aroundubackend.onrender.com";
   const onCropComplete = useCallback((_, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
@@ -34,7 +34,7 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
 
     try {
       // Upload profile pic
-      const res = await fetch("http://localhost:5000/api/user/upload-profile", {
+      const res = await fetch(`${server}/api/user/upload-profile`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -46,8 +46,12 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
       if (data.key) {
         // Get presigned URL for display
         const urlRes = await fetch(
-          `http://localhost:5000/api/user/profile-url?key=${data.key}`,
-          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+          `${server}/api/user/profile-url?key=${data.key}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
         );
         const { url } = await urlRes.json();
 
@@ -69,11 +73,15 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
       <div className="modal">
         <h2>Upload Profile Picture</h2>
 
-        {!imageSrc && <input type="file" accept="image/*" onChange={handleFileChange} />}
+        {!imageSrc && (
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+        )}
 
         {imageSrc && !finalBlob && (
           <>
-            <div style={{ position: "relative", width: "300px", height: "300px" }}>
+            <div
+              style={{ position: "relative", width: "300px", height: "300px" }}
+            >
               <Cropper
                 image={imageSrc}
                 crop={crop}

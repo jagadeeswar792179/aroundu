@@ -14,7 +14,7 @@ export default function Uprofile() {
   const [profileUrl, setProfileUrl] = useState(null);
   const { location, status } = useLocation();
   const token = localStorage.getItem("token");
-
+  const server = "https://aroundubackend.onrender.com";
   // Send profile view to backend (always inserts a row).
   // Fire-and-forget: logs success/failure but doesn't block UI.
   const sendProfileView = async (targetId) => {
@@ -25,7 +25,7 @@ export default function Uprofile() {
     console.log("sendProfileView called for target:", targetId);
 
     try {
-      const res = await fetch("http://localhost:5000/api/profile-views", {
+      const res = await fetch(`${server}/api/profile-views`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,15 +62,12 @@ export default function Uprofile() {
     const loadProfile = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `http://localhost:5000/api/user/profile/${userId}`,
-          {
-            headers: {
-              Authorization: token ? `Bearer ${token}` : "",
-            },
-            signal,
-          }
-        );
+        const res = await fetch(`${server}/api/user/profile/${userId}`, {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          signal,
+        });
 
         if (!res.ok) {
           throw new Error(`Failed to load profile: ${res.status}`);

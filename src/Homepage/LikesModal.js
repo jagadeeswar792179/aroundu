@@ -6,13 +6,13 @@ const LikesModal = ({ postId, onClose }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-
+  const server = "https://aroundubackend.onrender.com";
   const loadLikes = async () => {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/posts/${postId}/likes?page=${page}`,
+        `${server}/api/posts/${postId}/likes?page=${page}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }

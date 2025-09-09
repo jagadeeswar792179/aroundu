@@ -10,7 +10,7 @@ export default function ProfileViewers() {
   const [totalUnique, setTotalUnique] = useState(0);
 
   const token = localStorage.getItem("token");
-
+  const server = "https://aroundubackend.onrender.com";
   useEffect(() => {
     fetchViewers(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -20,7 +20,7 @@ export default function ProfileViewers() {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/profile-views/me?page=${pageNo}&limit=${limit}`,
+        `${server}/api/profile-views/me?page=${pageNo}&limit=${limit}`,
         {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",

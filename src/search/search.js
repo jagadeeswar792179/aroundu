@@ -7,12 +7,12 @@ import Feed from "../Homepage/feed"; // your feed component (from feed.js)
 import "./search.css";
 import { FaBookmark, FaChevronDown } from "react-icons/fa";
 import SearchLoadingPeople from "../Loading/search-loading-people";
-
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
 export default function SearchPage() {
+  const server = "https://aroundubackend.onrender.com";
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
 
   const queryParams = useQuery();
@@ -51,8 +51,8 @@ export default function SearchPage() {
         const token = localStorage.getItem("token");
         const endpoint =
           type === "students"
-            ? "http://localhost:5000/api/search/students"
-            : "http://localhost:5000/api/search/professors";
+            ? `${server}/api/search/students`
+            : `${server}/api/search/professors`;
 
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
@@ -135,7 +135,7 @@ export default function SearchPage() {
               <Feed
                 key={`posts-${q}`}
                 fetchUrlBuilder={(page) => ({
-                  url: "http://localhost:5000/api/search/posts",
+                  url: `${server}/api/search/posts`,
                   params: { q: q, page },
                 })}
                 onNavigateProfile={(userId) => navigate(`/profile/${userId}`)}

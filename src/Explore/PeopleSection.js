@@ -17,6 +17,7 @@ function PeopleSection({
   cap = 30,
   onFollowChange = () => {},
 }) {
+  const server = "https://aroundubackend.onrender.com";
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const [sameUniversity, setSameUniversity] = useState(initialSameUniversity);
 
@@ -46,13 +47,10 @@ function PeopleSection({
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const res = await axios.get(
-          "http://localhost:5000/api/explore/people",
-          {
-            params: { page: pageToFetch, same_university: sameUniversity },
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await axios.get(`${server}/api/explore/people`, {
+          params: { page: pageToFetch, same_university: sameUniversity },
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const got = Array.isArray(res.data.people) ? res.data.people : [];
         const totalMatching = Number(res.data.totalMatching || 0);
@@ -125,7 +123,7 @@ function PeopleSection({
       try {
         const token = localStorage.getItem("token");
         const res = await axios.post(
-          `http://localhost:5000/api/follow/${targetId}`,
+          `${server}m/api/follow/${targetId}`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -158,7 +156,7 @@ function PeopleSection({
       try {
         const token = localStorage.getItem("token");
         await axios.post(
-          `http://localhost:5000/api/follow/${targetId}/cancel`,
+          `${server}/follow/${targetId}/cancel`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );

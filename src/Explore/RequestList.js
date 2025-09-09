@@ -16,6 +16,7 @@ export default function RequestList({
   nextLimit = 6,
   onChange = () => {},
 }) {
+  const server = "https://aroundubackend.onrender.com";
   const [requests, setRequests] = useState([]); // array of request rows
   const [cursor, setCursor] = useState(null); // { last_created_at, last_id }
   const [loading, setLoading] = useState(false);
@@ -43,13 +44,10 @@ export default function RequestList({
         : { limit: nextLimit, last_created_at, last_id };
 
       try {
-        const res = await axios.get(
-          "http://localhost:5000/api/follow/pending",
-          {
-            params,
-            headers: authHeaders(),
-          }
-        );
+        const res = await axios.get(`${server}/api/follow/pending`, {
+          params,
+          headers: authHeaders(),
+        });
 
         const items = Array.isArray(res.data.items) ? res.data.items : [];
         const next_cursor = res.data.next_cursor || null;
@@ -113,7 +111,7 @@ export default function RequestList({
       try {
         const headers = authHeaders();
         await axios.post(
-          `http://localhost:5000/api/follow/${reqRow.requester_id}/accept`,
+          `${server}/api/follow/${reqRow.requester_id}/accept`,
           {},
           { headers }
         );
@@ -151,7 +149,7 @@ export default function RequestList({
       try {
         const headers = authHeaders();
         await axios.post(
-          `http://localhost:5000/api/follow/${reqRow.requester_id}/reject`,
+          `${server}/api/follow/${reqRow.requester_id}/reject`,
           {},
           { headers }
         );

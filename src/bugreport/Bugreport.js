@@ -27,14 +27,17 @@ export default function Bugreport() {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/bug-reports", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        "https://aroundubackend.onrender.com/api/bug-reports",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify(form),
+        }
+      );
 
       if (res.status === 201) {
         const data = await res.json();

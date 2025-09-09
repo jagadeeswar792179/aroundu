@@ -20,6 +20,7 @@ export default function Feed({
   onTagNavigate,
   autoFetchOnMount = true,
 }) {
+  const server = "https://aroundubackend.onrender.com";
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
@@ -94,7 +95,7 @@ export default function Feed({
     try {
       const token = localStorage.getItem("token");
       const res = await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/like`,
+        `${server}/api/posts/${postId}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -116,7 +117,7 @@ export default function Feed({
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `http://localhost:5000/api/posts/${postId}/save`,
+        `${server}/api/posts/${postId}/save`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

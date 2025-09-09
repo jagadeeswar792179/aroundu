@@ -14,6 +14,7 @@ import PostUploadModal from "./PostUploadModal";
 import PostLoad from "../Loading/postload";
 
 function PostFetch({ profile }) {
+  const server = "https://aroundubackend.onrender.com";
   const navigate = useNavigate();
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const [activeLikesPostId, setActiveLikesPostId] = useState(null);
@@ -46,8 +47,8 @@ function PostFetch({ profile }) {
     // 🟢 pick endpoint based on tab
     const endpoint =
       tab === "interests"
-        ? `http://localhost:5000/api/posts/feed/interests?page=${cache[tab].page}`
-        : `http://localhost:5000/api/posts/feed/all?page=${cache[tab].page}`;
+        ? `${server}/api/posts/feed/interests?page=${cache[tab].page}`
+        : `${server}/api/posts/feed/all?page=${cache[tab].page}`;
 
     const res = await axios.get(endpoint, {
       headers: { Authorization: `Bearer ${token}` },
@@ -143,7 +144,7 @@ function PostFetch({ profile }) {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `http://localhost:5000/api/follow/${targetId}`,
+        `${server}/api/follow/${targetId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -178,7 +179,7 @@ function PostFetch({ profile }) {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:5000/api/follow/${targetId}/cancel`,
+        `${server}/api/follow/${targetId}/cancel`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -204,7 +205,7 @@ function PostFetch({ profile }) {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:5000/api/follow/${targetId}/unfollow`,
+        `${server}/api/follow/${targetId}/unfollow`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -229,7 +230,7 @@ function PostFetch({ profile }) {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/like`,
+        `${server}/api/posts/${postId}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -258,7 +259,7 @@ function PostFetch({ profile }) {
       formData.append("caption", caption);
       formData.append("tags", JSON.stringify(tags));
 
-      const uploadRes = await fetch("http://localhost:5000/api/posts/upload", {
+      const uploadRes = await fetch(`${server}/api/posts/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -309,7 +310,7 @@ function PostFetch({ profile }) {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `http://localhost:5000/api/posts/${postId}/save`,
+        `${server}/api/posts/${postId}/save`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -381,7 +382,7 @@ function PostFetch({ profile }) {
           try {
             const token = localStorage.getItem("token");
             const res = await axios.post(
-              `http://localhost:5000/api/follow/${authorId}`,
+              `${server}/api/follow/${authorId}`,
               {},
               { headers: { Authorization: `Bearer ${token}` } }
             );

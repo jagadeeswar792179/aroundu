@@ -11,6 +11,7 @@ import UserActivity from "./UserActivity";
 import Navbar from "../Homepage/Navbar";
 import ProfileLoadFull from "../Loading/profileLoadfull";
 export default function Profile() {
+  const server = "https://aroundubackend.onrender.com";
   const token = localStorage.getItem("token");
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const [profile, setProfile] = useState(null);

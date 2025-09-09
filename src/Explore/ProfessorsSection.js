@@ -25,7 +25,7 @@ function ProfessorsSection({
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-
+  const server = "https://aroundubackend.onrender.com";
   // per-user follow status and loading flags (local)
   const [followStatuses, setFollowStatuses] = useState({}); // id -> 'follow'|'requested'|'friends'
   const [loadingOps, setLoadingOps] = useState({}); // id -> boolean
@@ -47,16 +47,13 @@ function ProfessorsSection({
       }
       try {
         setLoading(true);
-        const res = await axios.get(
-          "http://localhost:5000/api/explore/professors",
-          {
-            params: {
-              page: pageToFetch,
-              same_university: sameUniversity ? "true" : "false",
-            },
-            headers: authHeaders(),
-          }
-        );
+        const res = await axios.get(`${server}/api/explore/professors`, {
+          params: {
+            page: pageToFetch,
+            same_university: sameUniversity ? "true" : "false",
+          },
+          headers: authHeaders(),
+        });
 
         const got = Array.isArray(res.data.professors)
           ? res.data.professors
@@ -135,7 +132,7 @@ function ProfessorsSection({
       try {
         const token = localStorage.getItem("token");
         const res = await axios.post(
-          `http://localhost:5000/api/follow/${targetId}`,
+          `${server}/api/follow/${targetId}`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -169,7 +166,7 @@ function ProfessorsSection({
       try {
         const token = localStorage.getItem("token");
         await axios.post(
-          `http://localhost:5000/api/follow/${targetId}/cancel`,
+          `${server}/api/follow/${targetId}/cancel`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );

@@ -20,13 +20,14 @@ import ProfileViewers from "../profileview/ProfileViewers";
 import Bugreport from "../bugreport/Bugreport";
 import UsercardLoad from "../Loading/usercardload";
 function Homepage() {
+  const server = "https://aroundubackend.onrender.com";
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [ModalType, setModalType] = useState(null);
   const { location, status } = useLocation();
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/user/me", {
+    fetch(`${server}/api/user/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

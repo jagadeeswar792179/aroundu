@@ -8,7 +8,7 @@ import { FaBookmark, FaChevronDown } from "react-icons/fa";
 import LoadMess2 from "../Loading/LoadMess2";
 import Navbar from "../Homepage/Navbar";
 
-const API_BASE = "http://localhost:5000"; // backend URL
+const API_BASE = "https://aroundubackend.onrender.com"; // backend URL
 function Messages() {
   const token = localStorage.getItem("token");
   const me = JSON.parse(localStorage.getItem("user"));

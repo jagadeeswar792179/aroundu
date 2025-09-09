@@ -20,7 +20,7 @@ import { FaBell } from "react-icons/fa";
  */
 
 export default function Notifications({
-  socketUrl = "http://localhost:5000",
+  socketUrl = "https://aroundubackend.onrender.com",
   pageSize = 20,
 }) {
   const navigate = useNavigate();
