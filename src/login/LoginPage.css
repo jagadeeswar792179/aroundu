@@ -1,0 +1,122 @@
+.login-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100vh;
+  background-color: #f2f2f2;
+}
+
+.login-box {
+  background-color: white;
+  padding: 15px 15px 30px 15px;
+  border-radius: 10px;
+  width: 350px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  height: 50px;
+  padding-right: 40px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.form-group input:focus {
+  border-color: blue;
+  outline: none;
+}
+
+.password-group {
+  position: relative;
+}
+.logo-login p:nth-of-type(1) {
+  color: #0066cc;
+  font-size: 60px;
+  margin: 0px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-weight: bolder;
+}
+.logo-login p:nth-of-type(2) {
+  font-size: 30px;
+  margin: 0px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  flex-wrap: wrap;
+}
+.eye-button {
+  position: absolute;
+  right: 10px;
+  top: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+}
+
+.login-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.register-button {
+  width: 50%;
+  padding: 10px;
+  background-color: #20760f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin: 30px 0 0 0;
+  font-size: 16px;
+  cursor: pointer;
+}
+.placing-login {
+  width: 100%;
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+}
+.login-button:hover {
+  background-color: #0052a3;
+}
+
+.link-buttons {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.text-button {
+  background: none;
+  border: none;
+  color: #0066cc;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.text-button:hover {
+  text-decoration: underline;
+}

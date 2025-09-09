@@ -1,0 +1,50 @@
+.load-1 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+  gap: 16px;
+  margin-top: 8px;
+}
+.load-2 {
+  display: flex;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  gap: 20px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #ffffff !important;
+  border: 1px solid rgba(20, 40, 80, 0.04);
+  align-items: center;
+}
+
+.load-4 {
+  width: 150px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #f8f3f3;
+}
+.load-3 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+.load-3-1 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+
+  justify-content: center;
+  align-items: center;
+}
+.sload-1 {
+  width: 170px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  outline: 1px solid #ccc;
+}

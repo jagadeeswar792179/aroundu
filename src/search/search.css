@@ -1,0 +1,59 @@
+.search-page {
+  display: flex;
+  flex-direction: column;
+  width: 600px;
+  padding: 20px;
+  min-height: 90vh;
+  background-color: rgb(255, 255, 255);
+  margin: 20px;
+  border-radius: 20px;
+  display: flex;
+  gap: 20px;
+}
+.search-tabs {
+  display: flex;
+  gap: 20px;
+}
+.search-btn-category {
+  background: #ffffff;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.search-btn-category:hover {
+  background: #f1f1f1;
+  border-color: #999;
+}
+.search-btn-category:active {
+  background: #e5e5e5;
+}
+.search-cont-2 {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #efeeee;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.clicked-active {
+  background-color: #efefef;
+}
+.search-res-people {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+  gap: 16px; /* space between cards */
+}
+.result-card {
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  outline: 1px solid #ccc;
+}

@@ -1,0 +1,61 @@
+.bugreport-container {
+  width: 400px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.bugreport-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+.bugreport-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bugreport-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* .bugreport-form input,
+.bugreport-form select,
+.bugreport-form textarea {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+} */
+
+.bugreport-form textarea {
+  resize: vertical;
+  min-height: 80px; /* starting height */
+  max-height: 200px; /* won’t grow past this */
+  overflow-y: auto;
+}
+
+.submit-btn {
+  background: #0073b1;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #005582;
+}

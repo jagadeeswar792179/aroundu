@@ -1,0 +1,225 @@
+.mess-0 {
+  width: 850px;
+  height: 700px;
+  margin: 20px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 🌟 Added soft shadow */
+  overflow: hidden; /* keeps rounded edges clean */
+}
+
+.mess-1 {
+  height: 60px;
+  display: flex;
+  padding: 0 0 0 20px;
+  align-items: center;
+  border-bottom: 1px solid #e0e0e0; /* softer border */
+  background: #f9f9f9; /* 🌟 subtle background for header */
+  font-weight: 600;
+  font-size: 18px; /* slightly bigger */
+}
+
+.mess-2 {
+  display: flex;
+  height: calc(100% - 60px); /* 🌟 keeps full height layout */
+}
+
+.mess-3 {
+  max-width: 300px;
+  height: 630px; /* 🌟 fixed height instead of max-height */
+  overflow-y: hidden; /* 🌟 no scroll in left bar */
+  background: #fafafa;
+  border-right: 1px solid #eee;
+}
+
+.mess-3::-webkit-scrollbar {
+  width: 6px;
+}
+.mess-3::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.mess-5 {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: antiquewhite;
+}
+
+.mess-6 {
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mess-7 {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: #fff;
+}
+
+.mess-8 {
+  height: 70px; /* slightly taller */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 20px;
+  border-bottom: 1px solid #eee;
+  background: #fafafa;
+  font-size: 15px;
+}
+
+.mess-9 {
+  flex: 1; /* 🌟 takes full space */
+  overflow-y: auto;
+  padding: 10px 15px; /* better spacing */
+  background: #fdfdfd;
+}
+
+.mess-10 {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+}
+
+.active {
+  background-color: #e6f0ff; /* 🌟 prettier active state */
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  background: #fff;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+  border-color: #007bff; /* 🌟 highlight on focus */
+}
+
+.message-input {
+  flex: 1;
+  padding: 10px 40px 10px 10px; /* 🌟 balanced padding */
+  border: none;
+  font-size: 14px;
+  resize: none;
+  max-height: 100px;
+  overflow-y: auto;
+  outline: none;
+  background: transparent; /* blend with wrapper */
+}
+
+.send-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 50%;
+  transform: translateY(50%);
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.send-btn:hover {
+  background: #0056b3;
+  transform: translateY(50%) scale(1.05); /* 🌟 slight pop effect */
+}
+
+.char-count {
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+  margin-top: 6px;
+  font-style: italic; /* 🌟 softer look */
+}
+
+.mess-3-1 {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px; /* 🌟 padding inside sidebar */
+}
+
+/* Left panel container */
+.left-panel {
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.left-panel::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+.left-panel {
+  scrollbar-width: none; /* Firefox */
+}
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 16px 5px 8px;
+  height: 90px; /* fixed height */
+  border-bottom: 1px solid #ddd; /* fixed your missing solid */
+  cursor: pointer;
+  background-color: #fff;
+
+  /* subtle shadow */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 8px; /* optional: smooth corners */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.conversation-item:hover {
+  transform: translateY(-2px); /* lift effect */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.conversation-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* show max 3 lines */
+  -webkit-box-orient: vertical; /* vertical orientation */
+  overflow: hidden; /* hide extra text */
+  font-size: 14px;
+  color: #555;
+  line-height: 1.4em;
+  text-overflow: ellipsis; /* adds the … at the end */
+  word-break: break-word; /* prevents overflow words */
+  max-height: calc(1.4em * 3);
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  justify-content: center; /* horizontal center */
+  align-items: center; /* vertical center */
+  flex-direction: column;
+  height: 100%;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  padding: 20px;
+}
+
+.empty-state .subtitle {
+  font-size: 13px;
+  margin-top: 4px;
+  color: #999;
+}

@@ -1,0 +1,367 @@
+.register-form {
+  width: auto;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 20px;
+  background-color: #ffffff;
+
+  /* ✨ Add shadow & outline */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
+
+  outline: 2px solid #ffffff;
+  outline-offset: -8px;
+  transition: all 0.3s ease;
+}
+.register-form-1 {
+  min-width: 350px;
+  padding: 30px;
+  font-family: Arial, sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fefefe;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.form-step {
+  display: flex;
+  height: auto;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bbtn {
+  width: 90%;
+  padding: 10px;
+  font-weight: bold;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.bbtn:hover {
+  background-color: #005fa3;
+}
+
+.form-step-2 {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.form-step-2 input {
+  flex: 1;
+  border-radius: 5px;
+  height: 30px;
+  padding: 5px;
+  border: 1px lsolid rgb(238, 232, 232);
+}
+.form-step-3 {
+  display: flex;
+  align-items: center;
+}
+.form-step-5 {
+  display: flex;
+  gap: 10px;
+}
+.form-step-5 :nth-child(1) {
+  flex: 1;
+}
+.form-step-5 :nth-child(2) {
+  flex: 2;
+}
+.gender-options {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+}
+
+.gender-options label,
+select {
+  flex: 1; /* each label takes equal space */
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: flex-start;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.form-step-4,
+select {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.form-step2-1 input,
+.form-step2-2 input,
+.form-step2-4 input {
+  width: 90%;
+  border-radius: 5px;
+  height: 30px;
+  padding: 5px;
+  border: 1px lsolid rgb(238, 232, 232);
+}
+.form-step2-2 {
+  background-color: #eaeef0;
+  border-radius: 5px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.form-step2-3 {
+  width: 100%;
+  display: flex;
+  gap: 50px;
+  justify-content: start;
+}
+.form-step2-5 {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-step label {
+  font-size: 12px;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  font-weight: 400;
+  margin: 2px 0 7px 0;
+}
+.form-step2-6 input {
+  border-radius: 5px;
+  height: 30px;
+  padding: 5px;
+  border: 1px lsolid rgb(238, 232, 232);
+}
+.form-step3-1 {
+  display: flex;
+  flex-direction: column;
+}
+.form-step3-1 input {
+  border-radius: 5px;
+  height: 30px;
+  padding: 5px;
+  border: 1px lsolid rgb(238, 232, 232);
+}
+
+.input-register {
+  width: 100%; /* fills parent width */
+  padding: 10px 14px; /* inner spacing */
+  font-size: 15px;
+  color: #111827; /* dark text */
+  background: #f9fafb; /* subtle gray background */
+  border: 1px solid #d1d5db; /* light gray border */
+  border-radius: 8px; /* rounded corners */
+  box-sizing: border-box; /* padding inside width */
+  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.input-register:focus {
+  outline: none;
+  background: #fff;
+  border-color: #2563eb; /* blue border highlight */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); /* glow */
+}
+
+.input-register::placeholder {
+  color: #9ca3af; /* softer placeholder */
+  font-size: 14px;
+}
+.input-register-label {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 6px; /* space between .modal-ins label & input */
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151; /* neutral gray */
+  letter-spacing: 0.2px; /* subtle spacing */
+}
+.label-register {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 6px; /* space between .modal-ins label & input */
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151; /* neutral gray */
+  letter-spacing: 0.2px; /* subtle spacing */
+}
+/* Container for the DOB fields */
+.dob-container {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* spacing between selects */
+  margin-top: 10px;
+}
+
+/* Select box styling */
+.dob-container select {
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1; /* makes all three equal width */
+  min-width: 100px;
+  appearance: none; /* removes default arrow */
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23666' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>")
+    no-repeat right 10px center;
+  background-size: 14px;
+}
+
+/* Hover and focus effects */
+.dob-container select:hover {
+  border-color: #999;
+}
+
+.dob-container select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+/* Container holding role + gender */
+.role-gender-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+/* Each field box */
+.role-gender-container > div {
+  flex: 1; /* equal width */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Role select styling */
+.role-gender-container select,
+.duration-select {
+  width: 100%;
+  padding: 10px 14px; /* same as input */
+  font-size: 15px; /* match input font */
+  line-height: 1.5; /* ensures consistent height */
+  color: #111827; /* same text color */
+  background: #f9fafb; /* same bg as input */
+  border: 1px solid #d1d5db; /* same border */
+  border-radius: 8px; /* same rounding */
+  box-sizing: border-box;
+  cursor: pointer;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+  appearance: none; /* remove native arrow */
+
+  /* custom arrow */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+
+  /* 👇 forces consistent height */
+  height: 44px; /* match input height */
+}
+/* Focus and hover */
+.role-gender-container select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
+}
+
+/* Gender radio group */
+.gender-options {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Label for each radio */
+.gender-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #444;
+}
+
+/* Radio button custom look */
+.gender-options input[type="radio"] {
+  accent-color: #4a90e2; /* modern browsers */
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+/* General button styling */
+.form-button {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+}
+
+/* Hover effect */
+.form-button:hover {
+  background: linear-gradient(135deg, #357abd, #2c5f9e);
+  box-shadow: 0 6px 14px rgba(74, 144, 226, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Active (click) effect */
+.form-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 6px rgba(74, 144, 226, 0.3);
+}
+
+/* Disabled state */
+.form-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper .input-register {
+  width: 100%;
+  padding-right: 40px; /* space for the icon */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  font-size: 18px;
+}
+
+.password-toggle:hover {
+  color: #111;
+}

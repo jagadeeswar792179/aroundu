@@ -1,0 +1,58 @@
+.otp-root {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* match your .input-register look but smaller */
+.otp-input {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #111827;
+  box-sizing: border-box;
+  transition: border 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+  outline: none;
+}
+
+/* focus state */
+.otp-input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.18);
+  transform: translateY(-1px);
+}
+
+/* subtle hover */
+.otp-input:hover {
+  border-color: #9ca3af;
+}
+
+/* small screens: reduce size */
+@media (max-width: 420px) {
+  .otp-input {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+.otp-div {
+  outline: 1px solid #ccc;
+  padding: 20px;
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  background-color: #fafafa;
+  border-radius: 20px;
+}
+.otp-div h3 {
+  margin: 0;
+  padding: 0;
+}
