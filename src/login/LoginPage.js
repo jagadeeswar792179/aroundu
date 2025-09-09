@@ -13,7 +13,7 @@ const LoginPage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const server = "https://aroundubackend.onrender.com";
   const validateEmail = (value) => {
     setEmail(value);
     // simple edu check (adjust regex to your needs)
