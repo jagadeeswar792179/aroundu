@@ -14,7 +14,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const server = process.env.REACT_APP_SERVER;
-  console.log(server + "fddgv f");
 
   const validateEmail = (value) => {
     setEmail(value);
