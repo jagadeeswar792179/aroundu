@@ -41,7 +41,6 @@
   width: 170px;
   height: 130px;
   display: flex;
-  flex-direction: column;
   flex-wrap: wrap;
   gap: 5px;
   padding: 10px;

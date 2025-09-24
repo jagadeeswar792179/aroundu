@@ -10,7 +10,7 @@ const UserActivity = ({ userId }) => {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
   const loggedinuser = JSON.parse(localStorage.getItem("user"))?.id;
   const fetchUserPosts = async (
     append = false,

@@ -20,7 +20,8 @@ import ProfileViewers from "../profileview/ProfileViewers";
 import Bugreport from "../bugreport/Bugreport";
 import UsercardLoad from "../Loading/usercardload";
 function Homepage() {
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
+
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [ModalType, setModalType] = useState(null);

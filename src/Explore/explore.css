@@ -139,6 +139,7 @@
 
 .prof-badge {
   font-size: 13px;
+  width: fit-content;
   color: #4b6b8a;
   background: rgba(99, 102, 241, 0.06);
   padding: 6px 8px;

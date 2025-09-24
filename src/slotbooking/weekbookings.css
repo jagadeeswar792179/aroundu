@@ -1,0 +1,479 @@
+.book-1 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.book-2 {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  flex: 1;
+}
+.book-3 {
+  width: 420px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 12px;
+}
+.book-3-1 {
+  display: "flex";
+  justify-content: "space-between";
+  align-items: "center";
+}
+/* src/slotbooking/weekbookings.css */
+
+/* Layout */
+.wb-root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+  color: #111827;
+  margin: 12px;
+}
+
+/* DAYS grid */
+.wb-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  flex: 1;
+}
+
+.wb-day {
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wb-day:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+.wb-day-selected {
+  border: 2px solid #2563eb;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.03), #fff);
+}
+.wb-day-past {
+  opacity: 0.85;
+}
+
+/* Day tile text */
+.wb-day-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.wb-day-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+.wb-day-count {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #111827;
+}
+
+/* Right panel */
+.wb-panel {
+  width: 420px;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.wb-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.wb-panel-title {
+  margin: 0;
+  font-size: 16px;
+}
+.wb-past-note {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* Panel body */
+.wb-panel-body {
+  margin-top: 12px;
+  overflow: auto;
+}
+.wb-loading,
+.wb-empty {
+  color: #6b7280;
+}
+
+/* Slot row */
+.wb-slot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 6px;
+  border-bottom: 1px dashed #f3f4f6;
+}
+.wb-slot-time {
+  font-weight: 600;
+  font-size: 14px;
+}
+.wb-prev-note {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* Buttons */
+.wb-btn {
+  border: 1px solid #e6e7ea;
+  background: #fff;
+  color: #111827;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.wb-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.wb-btn-primary {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.14);
+}
+.wb-btn-ghost {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+}
+
+/* Modal */
+.wb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.36);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.wb-modal {
+  width: 620px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.12);
+}
+
+/* Modal head */
+.wb-modal-head {
+  margin-bottom: 10px;
+}
+
+/* Modal form layout */
+.wb-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Time input row */
+.wb-time-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.wb-time-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+}
+.wb-time-caption {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* Nice-looking pure-CSS time input */
+.wb-time-input {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #e6e7ea;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  background: linear-gradient(180deg, #fff, #fafbfd);
+  box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.02);
+  transition: box-shadow 0.12s ease, border-color 0.12s ease,
+    transform 0.08s ease;
+}
+.wb-time-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.09);
+  transform: translateY(-1px);
+}
+/* ==========================
+   Modal & Requests UI styles
+   Paste into weekbookings.css
+   ========================== */
+
+/* predictable sizing */
+
+/* Prevent page scroll when modal open (toggle body.modal-open via JS if desired) */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Overlay */
+.wb-modal-overlay {
+  position: fixed;
+  inset: 0; /* top/right/bottom/left: 0 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px; /* space from viewport edge */
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1000;
+}
+
+/* Modal base */
+.wb-modal {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  color: #111827;
+  padding: 16px;
+  width: 100%;
+  max-width: 760px;
+  max-height: 85vh; /* keep within viewport */
+  overflow: hidden; /* important: only inner areas scroll */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial;
+}
+
+/* Wide modifier (keeps API friendly if you used wb-modal--wide before) */
+.wb-modal--wide {
+  max-width: 400px;
+}
+
+/* Header */
+.wb-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.wb-modal-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wb-modal-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+}
+.wb-modal-sub {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Close button */
+.wb-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #6b7280;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.wb-modal-close:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* Search area */
+.wb-modal-search {
+  margin: 6px 0 12px 0;
+}
+.wb-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  outline: none;
+  transition: box-shadow 0.12s, border-color 0.12s;
+}
+.wb-input:focus {
+  border-color: rgba(73, 113, 233, 1);
+  box-shadow: 0 0 0 3px rgba(73, 113, 233, 0.08);
+}
+
+/* Scrollable requests body (single scrollbar) */
+.wb-requests-body {
+  height: 420px; /* fixed inner scroll area */
+  overflow-y: auto;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 8px;
+  padding-right: 6px; /* room for scrollbar without layout shift */
+  scroll-behavior: smooth;
+}
+
+/* Empty / loading / end states */
+.wb-requests-empty,
+.wb-requests-loading,
+.wb-requests-end {
+  padding: 14px;
+  color: #6b7280;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Request row */
+.wb-request-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 8px;
+  border-bottom: 1px dashed #f3f4f6;
+  min-height: 64px;
+}
+
+/* Avatar */
+.wb-request-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #f9fafb;
+}
+
+/* Main content area */
+.wb-request-main {
+  flex: 1;
+  min-width: 0; /* allow text truncation */
+}
+.wb-request-name {
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wb-request-meta {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+.wb-request-message {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.25;
+  /* keep message visually limited */
+  max-height: 3.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Actions column (Accept button + timestamp) */
+.wb-request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  min-width: 120px;
+}
+.wb-request-time {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: right;
+}
+
+/* ---- Buttons ---- */
+/* Base button */
+.wb-btn {
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #f3f4f6;
+  color: #111827;
+  transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.06s;
+}
+.wb-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Primary */
+.wb-btn-primary {
+  background: rgba(73, 113, 233, 1);
+  color: #fff;
+  border-color: rgba(63, 108, 234, 0.95);
+}
+.wb-btn-primary:hover {
+  filter: brightness(0.98);
+}
+
+/* Disabled look for requested state */
+.wb-btn-disabled,
+.wb-btn:disabled {
+  background: #e6e7ea;
+  color: #8b8e92;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* Accept button tweaks (smaller) */
+.wb-request-accept {
+  padding: 8px 12px;
+  font-weight: 600;
+}
+
+/* Footer */
+.wb-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 820px) {
+  .wb-modal {
+    max-width: 95%;
+    padding: 12px;
+  }
+  .wb-request-actions {
+    min-width: 100px;
+  }
+  .wb-requests-body {
+    height: 340px;
+  }
+}

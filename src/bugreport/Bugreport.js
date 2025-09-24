@@ -7,6 +7,7 @@ export default function Bugreport() {
     type: "other",
     description: "",
   });
+  const server = process.env.REACT_APP_SERVER;
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
 
@@ -27,17 +28,14 @@ export default function Bugreport() {
 
     setLoading(true);
     try {
-      const res = await fetch(
-        "https://aroundubackend.onrender.com/api/bug-reports",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const res = await fetch(`${server}/api/bug-reports`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify(form),
+      });
 
       if (res.status === 201) {
         const data = await res.json();

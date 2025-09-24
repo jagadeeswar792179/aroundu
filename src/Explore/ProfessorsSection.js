@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import ExploreLoading1 from "../Loading/explore-loading-1";
+import MessageModal from "../messgaes/MessageModal";
+import { useNavigate } from "react-router-dom";
 
 /**
  * ProfessorsSection (self-contained)
@@ -19,13 +21,17 @@ function ProfessorsSection({
 }) {
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const [sameUniversity, setSameUniversity] = useState(initialSameUniversity);
+  const [selectedPeer, setSelectedPeer] = useState(null);
 
   const [profs, setProfs] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const server = "https://aroundubackend.onrender.com";
+  const navigate = useNavigate();
+
+  const server = process.env.REACT_APP_SERVER;
+
   // per-user follow status and loading flags (local)
   const [followStatuses, setFollowStatuses] = useState({}); // id -> 'follow'|'requested'|'friends'
   const [loadingOps, setLoadingOps] = useState({}); // id -> boolean
@@ -268,6 +274,13 @@ function ProfessorsSection({
   // rendered UI
   return (
     <div className="explore-2-1">
+      {selectedPeer && (
+        <MessageModal
+          isOpen={!!selectedPeer}
+          onClose={() => setSelectedPeer(null)}
+          peer={selectedPeer}
+        />
+      )}
       <div
         style={{
           display: "flex",
@@ -317,7 +330,15 @@ function ProfessorsSection({
 
             <div className="prof-card-body">
               <div className="prof-top">
-                <div className="prof-name">
+                <div
+                  className="prof-name"
+                  onClick={() => {
+                    if (p.id !== loggedInUserId) navigate(`/profile/${p.id}`);
+                  }}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
                   {p.first_name} {p.last_name}
                 </div>
               </div>
@@ -329,11 +350,18 @@ function ProfessorsSection({
                 <div className="prof-univ">{p.university || "—"}</div>
               </div>
 
-              <div className="prof-badge">
+              {/* <div className="prof-badge">
                 {p.followers_count
                   ? `${p.followers_count} Followers`
                   : "0 Followers"}
-              </div>
+              </div> */}
+              <button
+                onClick={() => setSelectedPeer(p)}
+                className="form-button"
+                style={{ width: "fit-content" }}
+              >
+                Message
+              </button>
             </div>
 
             <div className="prof-footer">{renderFollowStatusDiv(p.id)}</div>

@@ -8,7 +8,7 @@ import { FaBookmark, FaChevronDown } from "react-icons/fa";
 import LoadMess2 from "../Loading/LoadMess2";
 import Navbar from "../Homepage/Navbar";
 
-const API_BASE = "https://aroundubackend.onrender.com"; // backend URL
+const API_BASE = process.env.REACT_APP_SERVER;
 function Messages() {
   const token = localStorage.getItem("token");
   const me = JSON.parse(localStorage.getItem("user"));
@@ -279,56 +279,57 @@ function Messages() {
           </div>
 
           <div className="mess-2">
-            {/* LEFT: users + conversations */}
             <div className="mess-3 left-panel">
               {/* <div style={{ padding: 8 }}>
-            <div style={{ fontWeight: 700, marginBottom: 6 }}>
-              All Users (Test)
-            </div>
-            <div
-              style={{
-                maxHeight: 220,
-                overflowY: "auto",
-                border: "1px solid #eee",
-                borderRadius: 8,
-              }}
-            >
-              {users.map((u) => {
-                const name =
-                  `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim() ||
-                  u.email;
-                return (
-                  <div
-                    key={u.id}
-                    onClick={() => startChatWith(u)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "10px 12px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid #f5f5f5",
-                    }}
-                  >
-                    <img
-                      src={u.profile || "/avatar.jpg"}
-                      alt={name}
-                      style={{ width: 32, height: 32, borderRadius: "50%" }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: 600 }}>{name}</div>
-                      <div style={{ fontSize: 12, color: "#666" }}>
-                        {u.email}
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                  All Users (Test)
+                </div>
+                <div
+                  style={{
+                    maxHeight: 220,
+                    overflowY: "auto",
+                    border: "1px solid #eee",
+                    borderRadius: 8,
+                  }}
+                >
+                  {users.map((u) => {
+                    const name =
+                      `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim() ||
+                      u.email;
+                    return (
+                      <div
+                        key={u.id}
+                        onClick={() => startChatWith(u)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "10px 12px",
+                          cursor: "pointer",
+                          borderBottom: "1px solid #f5f5f5",
+                        }}
+                      >
+                        <img
+                          src={u.profile || "/avatar.jpg"}
+                          alt={name}
+                          style={{ width: 32, height: 32, borderRadius: "50%" }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: 600 }}>{name}</div>
+                          <div style={{ fontSize: 12, color: "#666" }}>
+                            {u.email}
+                          </div>
+                        </div>
                       </div>
+                    );
+                  })}
+                  {users.length === 0 && (
+                    <div style={{ padding: 12, color: "#666" }}>
+                      No users found
                     </div>
-                  </div>
-                );
-              })}
-              {users.length === 0 && (
-                <div style={{ padding: 12, color: "#666" }}>No users found</div>
-              )}
-            </div>
-          </div> */}
+                  )}
+                </div>
+              </div> */}
 
               <div className="mess-3-1">
                 {loadingConvos ? (

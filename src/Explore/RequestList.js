@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import ExploreLoading1 from "../Loading/explore-loading-1";
+import { useNavigate } from "react-router-dom";
 
 /**
  * RequestList (self-contained)
@@ -16,13 +17,17 @@ export default function RequestList({
   nextLimit = 6,
   onChange = () => {},
 }) {
-  const server = "https://aroundubackend.onrender.com";
+  const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
+
+  const server = process.env.REACT_APP_SERVER;
+
   const [requests, setRequests] = useState([]); // array of request rows
   const [cursor, setCursor] = useState(null); // { last_created_at, last_id }
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState({}); // map requestId -> boolean
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // reuse same token key as your ProfessorsSection
   const authHeaders = useCallback(() => {
@@ -226,12 +231,24 @@ export default function RequestList({
             />
 
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ fontWeight: 600 }}>
+              <div
+                onClick={() => {
+                  if (r.id !== loggedInUserId)
+                    navigate(`/profile/${r.requester_id}`);
+                }}
+                style={{
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
                 {r.first_name || "Unknown"} {r.last_name || ""}
               </div>
               <div style={{ fontSize: 12, color: "#666" }}>
-                {formatTime(r.created_at)}
+                {r.user_type} at {r.university}
               </div>
+              {/* <div style={{ fontSize: 12, color: "#666" }}>
+                {formatTime(r.created_at)}
+              </div> */}
             </div>
 
             <div

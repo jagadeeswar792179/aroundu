@@ -7,13 +7,16 @@ import Feed from "../Homepage/feed"; // your feed component (from feed.js)
 import "./search.css";
 import { FaBookmark, FaChevronDown } from "react-icons/fa";
 import SearchLoadingPeople from "../Loading/search-loading-people";
+import MessageModal from "../messgaes/MessageModal";
+
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
 export default function SearchPage() {
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
+  const [selectedPeer, setSelectedPeer] = useState(null);
 
   const queryParams = useQuery();
   const navigate = useNavigate();
@@ -95,6 +98,13 @@ export default function SearchPage() {
   ];
   return (
     <>
+      {selectedPeer && (
+        <MessageModal
+          isOpen={!!selectedPeer}
+          onClose={() => setSelectedPeer(null)}
+          peer={selectedPeer}
+        />
+      )}
       <div className="container-1">
         <Navbar />
       </div>
@@ -177,6 +187,15 @@ export default function SearchPage() {
                           {u.university}
                         </div>
                       </div>
+                      <button
+                        onClick={() =>
+                          setSelectedPeer({ ...u, profile: u.avatar_url })
+                        }
+                        className="form-button"
+                        style={{ width: "fit-content" }}
+                      >
+                        Message
+                      </button>
                     </div>
                   ))}
                   {users.length === 0 && !loadingUsers && (

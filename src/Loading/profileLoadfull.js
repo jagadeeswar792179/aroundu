@@ -29,9 +29,8 @@ export default function ProfileLoadFull() {
             </div>
           </div>
           {[...Array(1)].map((_, index) => (
-            <>
+            <div key={index}>
               <div
-                key={index}
                 className="prof-2"
                 style={{
                   display: "flex",
@@ -102,7 +101,7 @@ export default function ProfileLoadFull() {
                 <div className="exp-div" style={{ height: "60px" }}></div>
                 <div className="exp-div" style={{ height: "60px" }}></div>
               </div>
-            </>
+            </div>
           ))}
         </div>
       </div>

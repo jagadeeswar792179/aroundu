@@ -258,17 +258,15 @@ select {
   width: 100%;
   padding: 10px 14px; /* same as input */
   font-size: 15px; /* match input font */
-  line-height: 1.5; /* ensures consistent height */
   color: #111827; /* same text color */
   background: #f9fafb; /* same bg as input */
   border: 1px solid #d1d5db; /* same border */
   border-radius: 8px; /* same rounding */
-  box-sizing: border-box;
   cursor: pointer;
   outline: none;
   transition: border 0.2s, box-shadow 0.2s, background 0.2s;
   appearance: none; /* remove native arrow */
-
+  height: 30px;
   /* custom arrow */
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
   background-repeat: no-repeat;
@@ -276,7 +274,6 @@ select {
   background-size: 16px;
 
   /* 👇 forces consistent height */
-  height: 44px; /* match input height */
 }
 /* Focus and hover */
 .role-gender-container select:focus {
@@ -311,8 +308,8 @@ select {
 /* General button styling */
 .form-button {
   display: inline-block;
-  padding: 12px 24px;
-  font-size: 16px;
+  padding: 10px 8px;
+  font-size: 13px;
   font-weight: 600;
   color: #fff;
   background: linear-gradient(135deg, #4a90e2, #357abd);

@@ -6,6 +6,7 @@ import UserActivity from "../profile/UserActivity";
 import { useParams } from "react-router-dom";
 import Navbar from "./Navbar";
 import ProfileLoadFull from "../Loading/profileLoadfull";
+import ProfileWeekBookings from "../slotbooking/ProfileWeekBookings";
 
 export default function Uprofile() {
   const { userId } = useParams();
@@ -14,7 +15,8 @@ export default function Uprofile() {
   const [profileUrl, setProfileUrl] = useState(null);
   const { location, status } = useLocation();
   const token = localStorage.getItem("token");
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
+
   // Send profile view to backend (always inserts a row).
   // Fire-and-forget: logs success/failure but doesn't block UI.
   const sendProfileView = async (targetId) => {
@@ -169,6 +171,10 @@ export default function Uprofile() {
           <div className="prof-3">
             <h2>About</h2>
             <div>{profile.about || "No bio available"}</div>
+          </div>
+          <div className="prof-3">
+            <h2>tutoring help</h2>
+            <ProfileWeekBookings profileOwnerId={userId} />
           </div>
 
           <div className="prof-4">

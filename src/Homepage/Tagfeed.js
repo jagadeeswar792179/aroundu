@@ -8,7 +8,8 @@ import { FaBookmark, FaChevronDown } from "react-icons/fa";
 export default function TagFeed() {
   const { tag } = useParams();
   const navigate = useNavigate();
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
+
   // feed expects an object: { url, params }
   const fetchUrlBuilder = (page) => ({
     url: `${server}/api/posts/tag/${encodeURIComponent(tag)}`,

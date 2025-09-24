@@ -6,7 +6,8 @@ const LikesModal = ({ postId, onClose }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
+
   const loadLikes = async () => {
     if (loading || !hasMore) return;
     setLoading(true);

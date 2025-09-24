@@ -11,7 +11,8 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
   const [page, setPage] = useState(1);
   const [newComment, setNewComment] = useState("");
   const [posting, setPosting] = useState(false);
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
+
   const loadComments = async () => {
     if (loading || !hasMore) return;
     setLoading(true);

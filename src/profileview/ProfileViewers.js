@@ -10,7 +10,7 @@ export default function ProfileViewers() {
   const [totalUnique, setTotalUnique] = useState(0);
 
   const token = localStorage.getItem("token");
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
   useEffect(() => {
     fetchViewers(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -11,7 +11,7 @@ const RegisterForm = () => {
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const server = process.env.REACT_APP_SERVER;
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -19,6 +19,7 @@ const RegisterForm = () => {
     password: "",
     confirmPassword: "",
     gender: "",
+    other_gender: "",
     specialization: "",
     course: "",
     duration: "",
@@ -26,6 +27,7 @@ const RegisterForm = () => {
     birthMonth: "",
     birthYear: "",
     university: "",
+    universityOther: "",
   });
 
   const months = [
@@ -68,60 +70,112 @@ const RegisterForm = () => {
   useEffect(() => {
     if (formData.birthMonth && formData.birthYear) {
       const monthIndex = months.indexOf(formData.birthMonth);
-      // Ensure birthYear is a number for Date()
-      const daysInMonth = new Date(
-        Number(formData.birthYear),
-        monthIndex + 1,
-        0
-      ).getDate();
-      setDays(Array.from({ length: daysInMonth }, (_, i) => i + 1));
+      if (monthIndex >= 0 && formData.birthYear) {
+        const daysInMonth = new Date(
+          Number(formData.birthYear),
+          monthIndex + 1,
+          0
+        ).getDate();
+        setDays(Array.from({ length: daysInMonth }, (_, i) => i + 1));
+      } else {
+        setDays([]);
+      }
     } else {
       setDays([]);
     }
   }, [formData.birthMonth, formData.birthYear]);
 
+  // handle multi-select interests (limit to 4)
   const handleChange = (selected) => {
-    if (selected.length <= 4) {
-      setSelectedOptions(selected);
+    const sel = selected || [];
+    if (sel.length <= 4) {
+      setSelectedOptions(sel);
+    } else {
+      // if library allows selecting quickly, ensure we only keep first 4
+      setSelectedOptions(sel.slice(0, 4));
     }
+  };
+
+  // helper to get Select value that handles custom values too
+  const findOrCreateOption = (options, value) => {
+    if (!value) return null;
+    const found = options.find((opt) => opt.value === value);
+    return found || { value, label: value };
   };
 
   // Extracted finish handler (calls API and navigates to "/")
   const handleFinish = async () => {
-    const dob = `${formData.birthYear}-${(
-      "0" +
-      (months.indexOf(formData.birthMonth) + 1)
-    ).slice(-2)}-${("0" + formData.birthDay).slice(-2)}`;
-    const interests = selectedOptions.map((opt) => opt.value);
+    // Basic validations
     const errors = [];
 
-    if (!formData.university) errors.push("University is required");
+    // Validate DOB
+    if (!formData.birthDay || !formData.birthMonth || !formData.birthYear) {
+      errors.push("Please select a complete date of birth (day, month, year).");
+    }
+
+    // Build DOB only if valid
+    let dob = "";
+    if (errors.length === 0) {
+      const monthIndex = months.indexOf(formData.birthMonth);
+      if (monthIndex < 0) errors.push("Invalid month selected.");
+      else {
+        dob = `${formData.birthYear}-${("0" + (monthIndex + 1)).slice(-2)}-${(
+          "0" + formData.birthDay
+        ).slice(-2)}`;
+      }
+    }
+
+    // required fields
     if (
       !formData.firstName ||
       !formData.lastName ||
       !formData.email ||
       !formData.gender ||
-      !userType ||
-      !dob.includes("-")
-    )
-      errors.push("Missing required personal info");
+      !userType
+    ) {
+      errors.push("Missing required personal info.");
+    }
+
+    // if gender other but no text
+    if (formData.gender === "other" && !(formData.other_gender || "").trim()) {
+      errors.push("Please specify your gender in the 'Other' field.");
+    }
+
+    // university: if "Other" chosen require universityOther
+    let finalUniversity = formData.university;
+    if (formData.university === "Other") {
+      if (!(formData.universityOther || "").trim()) {
+        errors.push("Please specify your university.");
+      } else {
+        finalUniversity = formData.universityOther.trim();
+      }
+    }
 
     if (userType === "student" && (!formData.course || !formData.duration)) {
-      errors.push("Course and duration are required for students");
+      errors.push("Course and duration are required for students.");
     }
 
     if (userType === "professor" && !formData.specialization) {
-      errors.push("Specialization is required for professors");
+      errors.push("Specialization is required for professors.");
     }
 
+    const interests = (selectedOptions || []).map((opt) => opt.value);
     if (interests.length === 0 || interests.length > 4) {
-      errors.push("Select up to 4 interests");
+      errors.push("Select between 1 and 4 interests.");
     }
 
     if (!formData.password || !formData.confirmPassword) {
-      errors.push("Password and confirm password are required");
+      errors.push("Password and confirm password are required.");
     } else if (formData.password !== formData.confirmPassword) {
-      errors.push("Passwords do not match");
+      errors.push("Passwords do not match.");
+    } else if (formData.password.length < 6) {
+      errors.push("Password must be at least 6 characters.");
+    }
+
+    // simple email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      errors.push("Please enter a valid email address.");
     }
 
     if (errors.length > 0) {
@@ -130,14 +184,17 @@ const RegisterForm = () => {
     }
 
     const payload = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
       password: formData.password,
-      gender: formData.gender,
+      gender:
+        formData.gender === "other"
+          ? formData.other_gender.trim()
+          : formData.gender,
       userType,
       dob,
-      university: formData.university,
+      university: finalUniversity,
       interests,
       ...(userType === "student" && {
         course: formData.course,
@@ -150,13 +207,8 @@ const RegisterForm = () => {
 
     try {
       setLoading(true);
-      await axios.post(
-        "https://aroundubackend.onrender.com/api/auth/register",
-        payload
-      );
+      await axios.post(`${server}/api/auth/register`, payload);
       alert("Registration successful! You can now login.");
-
-      // navigate to root and replace history entry
       navigate("/", { replace: true });
     } catch (err) {
       alert("Error: " + (err.response?.data?.msg || err.message));
@@ -167,8 +219,6 @@ const RegisterForm = () => {
 
   const renderStepOne = () => (
     <div className="form-step">
-      {/* <h2>personal info</h2> */}
-
       <div style={{ display: "flex", gap: "10px" }}>
         <label className="label-register">
           FirstName
@@ -214,6 +264,10 @@ const RegisterForm = () => {
             value={userType}
             onChange={(e) => setUserType(e.target.value)}
             className="select-register"
+            style={{
+              flexGrow: 0, // don't expand with flex
+              flexShrink: 0, // don't shrink when siblings expand
+            }}
           >
             <option value="" disabled>
               Select Role
@@ -223,6 +277,7 @@ const RegisterForm = () => {
           </select>
         </div>
 
+        {/* GENDER FIELD */}
         <div>
           <label className="label-register">Gender:</label>
           <div className="gender-options">
@@ -230,21 +285,66 @@ const RegisterForm = () => {
               <input
                 type="radio"
                 name="gender"
+                value="male"
                 checked={formData.gender === "male"}
-                onChange={() => setFormData({ ...formData, gender: "male" })}
+                onChange={() =>
+                  setFormData({ ...formData, gender: "male", other_gender: "" })
+                }
               />
               Male
             </label>
+
             <label>
               <input
                 type="radio"
                 name="gender"
+                value="female"
                 checked={formData.gender === "female"}
-                onChange={() => setFormData({ ...formData, gender: "female" })}
+                onChange={() =>
+                  setFormData({
+                    ...formData,
+                    gender: "female",
+                    other_gender: "",
+                  })
+                }
               />
               Female
             </label>
+
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="other"
+                checked={formData.gender === "other"}
+                onChange={() => setFormData({ ...formData, gender: "other" })}
+              />
+              Other
+            </label>
           </div>
+
+          {formData.gender === "other" && (
+            <div style={{ marginTop: 8 }}>
+              <input
+                type="text"
+                placeholder="Specify"
+                value={formData.other_gender || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, other_gender: e.target.value })
+                }
+                style={{
+                  width: formData.gender === "other" ? "160px" : "0px",
+                  opacity: formData.gender === "other" ? 1 : 0,
+                  padding: formData.gender === "other" ? "6px 8px" : "0px",
+                  border:
+                    formData.gender === "other" ? "1px solid #ccc" : "none",
+                  borderRadius: "6px",
+                  transition: "all 0.3s ease",
+                  overflow: "hidden",
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -323,6 +423,11 @@ const RegisterForm = () => {
             ];
             if (required.some((r) => !r))
               return alert("Please fill all required fields");
+            if (
+              formData.gender === "other" &&
+              !(formData.other_gender || "").trim()
+            )
+              return alert("Please specify your gender.");
             setStep(2);
           }}
         >
@@ -334,18 +439,29 @@ const RegisterForm = () => {
 
   const renderStepTwo = () => (
     <div className="form-step">
-      {/* <h2> Academic Info</h2> */}
-
       <label>University:</label>
       <Select
         options={universityOptions}
-        value={universityOptions.find(
-          (opt) => opt.value === formData.university
-        )}
+        value={findOrCreateOption(universityOptions, formData.university)}
         onChange={(selected) =>
           setFormData({ ...formData, university: selected?.value || "" })
         }
+        isClearable
       />
+
+      {formData.university === "Other" && (
+        <div style={{ marginTop: 8 }}>
+          <input
+            type="text"
+            placeholder="Please specify your university"
+            value={formData.universityOther}
+            onChange={(e) =>
+              setFormData({ ...formData, universityOther: e.target.value })
+            }
+            className="input-register"
+          />
+        </div>
+      )}
 
       {userType === "student" && (
         <>
@@ -428,14 +544,20 @@ const RegisterForm = () => {
               { value: "Cloud Computing", label: "Cloud Computing" },
               { value: "Other", label: "Other" },
             ]}
-            value={
+            value={findOrCreateOption(
+              [
+                {
+                  value: "Artificial Intelligence",
+                  label: "Artificial Intelligence",
+                },
+                { value: "Machine Learning", label: "Machine Learning" },
+                { value: "Data Science", label: "Data Science" },
+                { value: "Cybersecurity", label: "Cybersecurity" },
+                { value: "Cloud Computing", label: "Cloud Computing" },
+                { value: "Other", label: "Other" },
+              ],
               formData.specialization
-                ? {
-                    value: formData.specialization,
-                    label: formData.specialization,
-                  }
-                : null
-            }
+            )}
             onChange={(selected) =>
               setFormData({
                 ...formData,
@@ -456,8 +578,8 @@ const RegisterForm = () => {
         value={selectedOptions}
         onChange={handleChange}
         isOptionDisabled={(option) =>
-          selectedOptions.length >= 4 &&
-          !selectedOptions.find((s) => s.value === option.value)
+          (selectedOptions || []).length >= 4 &&
+          !(selectedOptions || []).find((s) => s.value === option.value)
         }
       />
 

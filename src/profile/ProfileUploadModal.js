@@ -9,7 +9,7 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [finalBlob, setFinalBlob] = useState(null);
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
   const onCropComplete = useCallback((_, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);

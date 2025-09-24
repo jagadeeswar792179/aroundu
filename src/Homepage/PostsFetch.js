@@ -1,3 +1,4 @@
+// src/components/PostFetch.jsx
 import Line from "../utils/line";
 import InfiniteScroll from "react-infinite-scroll-component";
 import TimeAgo from "../utils/TimeAgo";
@@ -8,22 +9,27 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import LikesModal from "./LikesModal";
 import { FaRegCommentDots, FaShare, FaBookmark } from "react-icons/fa";
-import { MdArticle, MdImage } from "react-icons/md";
+import { MdImage } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import PostUploadModal from "./PostUploadModal";
 import PostLoad from "../Loading/postload";
 
 function PostFetch({ profile }) {
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
+
   const navigate = useNavigate();
-  const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
+
+  // try localStorage user first (login stores it), else fallback to profile prop
+  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+  const loggedInUserId = storedUser?.id || profile?.id || null;
+
   const [activeLikesPostId, setActiveLikesPostId] = useState(null);
   const [savedPosts, setSavedPosts] = useState({});
 
   const [modalOpen, setModalOpen] = useState(false);
   const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
   const [likeCounts, setLikeCounts] = useState({}); // postId -> count
   const [likedPosts, setLikedPosts] = useState({});
 
@@ -34,113 +40,164 @@ function PostFetch({ profile }) {
 
   const [activePostId, setActivePostId] = useState(null);
 
-  // 🟢 new states for caching + tab
-  const [tab, setTab] = useState("all"); // "all" | "interests"
+  // Tabs: all | interests | university | course
+  const [tab, setTab] = useState("all");
+
+  // selected filters for uni/course (used when user clicks a card or clicks the button)
+  const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
+  // cache per tab: store posts, next page to fetch, hasMore
   const [cache, setCache] = useState({
     all: { posts: [], page: 1, hasMore: true },
     interests: { posts: [], page: 1, hasMore: true },
+    university: { posts: [], page: 1, hasMore: true },
+    course: { posts: [], page: 1, hasMore: true },
   });
-
-  const fetchPosts = async () => {
-    const token = localStorage.getItem("token");
-
-    // 🟢 pick endpoint based on tab
-    const endpoint =
-      tab === "interests"
-        ? `${server}/api/posts/feed/interests?page=${cache[tab].page}`
-        : `${server}/api/posts/feed/all?page=${cache[tab].page}`;
-
-    const res = await axios.get(endpoint, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const newPosts = res.data.posts;
-
-    if (!newPosts || newPosts.length === 0) {
-      setHasMore(false);
-      setCache((prev) => ({
-        ...prev,
-        [tab]: { ...prev[tab], hasMore: false },
-      }));
-      return;
-    }
-
-    // Avoid duplicates
-    setPosts((prev) => {
-      const newSet = new Set(prev.map((p) => p.id));
-      const unique = newPosts.filter((p) => !newSet.has(p.id));
-      return [...prev, ...unique];
-    });
-
-    // hydrate like/saved/follow states
-    const likes = {};
-    const counts = {};
-    const saved = {};
-    const newFollowStatuses = {};
-    newPosts.forEach((p) => {
-      likes[p.id] = p.liked_by_me;
-      counts[p.id] = p.like_count;
-      saved[p.id] = p.saved_by_me;
-      if (p.follow_status) newFollowStatuses[p.user_id] = p.follow_status;
-    });
-    setLikedPosts((prev) => ({ ...prev, ...likes }));
-    setLikeCounts((prev) => ({ ...prev, ...counts }));
-    setSavedPosts((prev) => ({ ...prev, ...saved }));
-    setFollowStatuses((prev) => ({ ...prev, ...newFollowStatuses }));
-
-    // ✅ update cache only
-    setCache((prev) => {
-      const existingIds = new Set(prev[tab].posts.map((p) => p.id));
-      const unique = newPosts.filter((p) => !existingIds.has(p.id));
-      const updated = {
-        posts: [...prev[tab].posts, ...unique],
-        page: prev[tab].page + 1,
-        hasMore: true,
-      };
-      return { ...prev, [tab]: updated };
-    });
-
-    // ✅ sync posts from cache
-    setPosts((prev) => {
-      const existingIds = new Set(prev.map((p) => p.id));
-      const unique = newPosts.filter((p) => !existingIds.has(p.id));
-      return [...prev, ...unique];
-    });
-
-    setPage((prev) => prev + 1);
-    setHasMore(true);
-  };
-
-  // 🟢 When tab changes
-  useEffect(() => {
-    if (cache[tab].posts.length > 0) {
-      // restore from cache
-      setPosts(cache[tab].posts);
-      setPage(cache[tab].page);
-      setHasMore(cache[tab].hasMore);
-    } else {
-      // fetch fresh
-      setPosts([]);
-      setPage(1);
-      setHasMore(true);
-      fetchPosts();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
 
   // helper to set loading flag for a user
   const setFollowLoading = (userId, val) => {
     setLoadingFollowOps((m) => ({ ...m, [userId]: val }));
   };
 
-  // send follow request (current user -> target)
+  // Build endpoint for current tab using cached page
+  const buildEndpoint = () => {
+    const page = cache[tab]?.page || 1;
+
+    if (tab === "interests") {
+      // allow passing filters as well if selected
+      let url = `${server}/api/posts/feed/interests?page=${page}`;
+      if (selectedUniversity)
+        url += `&university=${encodeURIComponent(selectedUniversity)}`;
+      if (selectedCourse)
+        url += `&course=${encodeURIComponent(selectedCourse)}`;
+      return url;
+    }
+
+    if (tab === "university") {
+      // require selectedUniversity else fallback to storedUser / profile
+      const uni =
+        selectedUniversity || storedUser?.university || profile?.university;
+      return `${server}/api/posts/feed/university?page=${page}&university=${encodeURIComponent(
+        uni || ""
+      )}`;
+    }
+
+    if (tab === "course") {
+      const course = selectedCourse || storedUser?.course || profile?.course;
+      return `${server}/api/posts/feed/course?page=${page}&course=${encodeURIComponent(
+        course || ""
+      )}`;
+    }
+
+    // default all
+    let url = `${server}/api/posts/feed/all?page=${page}`;
+    if (selectedUniversity)
+      url += `&university=${encodeURIComponent(selectedUniversity)}`;
+    if (selectedCourse) url += `&course=${encodeURIComponent(selectedCourse)}`;
+    return url;
+  };
+
+  // Fetch posts for current tab (uses cache[tab].page)
+  const fetchPosts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const endpoint = buildEndpoint();
+
+      const res = await axios.get(endpoint, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const newPosts = res.data.posts || [];
+
+      if (!newPosts || newPosts.length === 0) {
+        // update cache and UI
+        setHasMore(false);
+        setCache((prev) => ({
+          ...prev,
+          [tab]: { ...prev[tab], hasMore: false },
+        }));
+        return;
+      }
+
+      // hydrate like/saved/follow states for new posts
+      const likes = {};
+      const counts = {};
+      const saved = {};
+      const newFollowStatuses = {};
+      newPosts.forEach((p) => {
+        likes[p.id] = !!p.liked_by_me;
+        counts[p.id] = Number(p.like_count) || 0;
+        saved[p.id] = !!p.saved_by_me;
+        if (p.follow_status) newFollowStatuses[p.user_id] = p.follow_status;
+      });
+      setLikedPosts((prev) => ({ ...prev, ...likes }));
+      setLikeCounts((prev) => ({ ...prev, ...counts }));
+      setSavedPosts((prev) => ({ ...prev, ...saved }));
+      setFollowStatuses((prev) => ({ ...prev, ...newFollowStatuses }));
+
+      // update cache (avoid duplicates)
+      setCache((prev) => {
+        const existingIds = new Set(prev[tab].posts.map((p) => p.id));
+        const unique = newPosts.filter((p) => !existingIds.has(p.id));
+        return {
+          ...prev,
+          [tab]: {
+            posts: [...prev[tab].posts, ...unique],
+            page: prev[tab].page + 1,
+            hasMore: true,
+          },
+        };
+      });
+
+      // append to visible posts (dedupe)
+      setPosts((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const unique = newPosts.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...unique];
+      });
+
+      setHasMore(true);
+    } catch (err) {
+      console.error("fetchPosts error:", err);
+      setHasMore(false);
+    }
+  };
+
+  // When tab or selected filters change, restore from cache or fetch new
+  useEffect(() => {
+    const c = cache[tab];
+    // If cache has posts and the filter matches (we treat selectedUniversity/course as part of identity)
+    if (c && c.posts && c.posts.length > 0) {
+      setPosts(c.posts);
+      setHasMore(c.hasMore);
+      return;
+    }
+    // reset visible posts & fetch fresh
+    setPosts([]);
+    setHasMore(true);
+    // ensure page is set to 1 in cache for this tab when starting fresh
+    setCache((prev) => ({
+      ...prev,
+      [tab]: { posts: [], page: 1, hasMore: true },
+    }));
+    // fetch first page
+    fetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, selectedUniversity, selectedCourse]);
+
+  // initial load
+  useEffect(() => {
+    fetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // FOLLOW helpers (send / cancel / unfollow)
   const sendFollowRequest = async (targetId) => {
     if (!targetId) return;
     const prev = followStatuses[targetId] || "follow";
-    // optimistic
     setFollowStatuses((s) => ({ ...s, [targetId]: "requested" }));
     setFollowLoading(targetId, true);
-
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
@@ -148,19 +205,12 @@ function PostFetch({ profile }) {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // server may return { status: 'pending' } or { status: 'accepted' } etc.
       const serverStatus = res.data?.status || res.data?.follow_status;
-      if (serverStatus === "accepted" || serverStatus === "friends") {
+      if (serverStatus === "accepted" || serverStatus === "friends")
         setFollowStatuses((s) => ({ ...s, [targetId]: "friends" }));
-      } else if (serverStatus === "pending" || serverStatus === "requested") {
-        setFollowStatuses((s) => ({ ...s, [targetId]: "requested" }));
-      } else {
-        // default
-        setFollowStatuses((s) => ({ ...s, [targetId]: "requested" }));
-      }
+      else setFollowStatuses((s) => ({ ...s, [targetId]: "requested" }));
     } catch (err) {
       console.error("Failed to send follow request", err);
-      // rollback
       setFollowStatuses((s) => ({ ...s, [targetId]: prev }));
       alert("Could not send follow request");
     } finally {
@@ -168,14 +218,11 @@ function PostFetch({ profile }) {
     }
   };
 
-  // cancel follow request (only if current user had requested)
   const cancelFollowRequest = async (targetId) => {
     if (!targetId) return;
     const prev = followStatuses[targetId] || "follow";
-    // optimistic
     setFollowStatuses((s) => ({ ...s, [targetId]: "follow" }));
     setFollowLoading(targetId, true);
-
     try {
       const token = localStorage.getItem("token");
       await axios.post(
@@ -183,10 +230,8 @@ function PostFetch({ profile }) {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // success -> already set to 'follow'
     } catch (err) {
       console.error("Failed to cancel follow request", err);
-      // rollback
       setFollowStatuses((s) => ({ ...s, [targetId]: prev }));
       alert("Could not cancel request");
     } finally {
@@ -194,14 +239,11 @@ function PostFetch({ profile }) {
     }
   };
 
-  // unfollow (if accepted)
   const unfollow = async (targetId) => {
     if (!targetId) return;
     const prev = followStatuses[targetId] || "friends";
-    // optimistic
     setFollowStatuses((s) => ({ ...s, [targetId]: "follow" }));
     setFollowLoading(targetId, true);
-
     try {
       const token = localStorage.getItem("token");
       await axios.post(
@@ -218,8 +260,8 @@ function PostFetch({ profile }) {
     }
   };
 
+  // Likes (optimistic)
   const toggleLike = async (postId) => {
-    // Optimistic UI update
     const currentlyLiked = likedPosts[postId];
     setLikedPosts((prev) => ({ ...prev, [postId]: !currentlyLiked }));
     setLikeCounts((prev) => ({
@@ -234,14 +276,11 @@ function PostFetch({ profile }) {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      // sync with backend response (in case of mismatch)
       setLikedPosts((prev) => ({ ...prev, [postId]: res.data.liked_by_me }));
       setLikeCounts((prev) => ({ ...prev, [postId]: res.data.like_count }));
     } catch (err) {
       console.error("❌ Failed to toggle like:", err);
-
-      // rollback if API failed
+      // rollback
       setLikedPosts((prev) => ({ ...prev, [postId]: currentlyLiked }));
       setLikeCounts((prev) => ({
         ...prev,
@@ -250,59 +289,7 @@ function PostFetch({ profile }) {
     }
   };
 
-  const handlePost = async (file, caption, tags) => {
-    try {
-      const token = localStorage.getItem("token");
-
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("caption", caption);
-      formData.append("tags", JSON.stringify(tags));
-
-      const uploadRes = await fetch(`${server}/api/posts/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!uploadRes.ok) throw new Error("Upload failed");
-      const newPost = await uploadRes.json();
-
-      // ✅ Prepend new post instantly
-      setPosts((prev) => [newPost, ...prev]);
-
-      // ✅ Initialize like/comment state for new post
-      setLikedPosts((prev) => ({
-        ...prev,
-        [newPost.id]: newPost.liked_by_me || false,
-      }));
-      setLikeCounts((prev) => ({
-        ...prev,
-        [newPost.id]: newPost.like_count || 0,
-      }));
-
-      // initialize follow status for the newly created post's author (if provided)
-      if (newPost.follow_status) {
-        setFollowStatuses((s) => ({
-          ...s,
-          [newPost.user_id]: newPost.follow_status,
-        }));
-      }
-
-      setModalOpen(false);
-    } catch (err) {
-      console.error(err);
-      alert("❌ Failed to upload post");
-    }
-  };
-
-  useEffect(() => {
-    fetchPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // Save toggle
   const toggleSave = async (postId) => {
     const currentlySaved = savedPosts[postId];
     setSavedPosts((prev) => ({ ...prev, [postId]: !currentlySaved }));
@@ -314,7 +301,6 @@ function PostFetch({ profile }) {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setSavedPosts((prev) => ({ ...prev, [postId]: res.data.saved }));
     } catch (err) {
       console.error("❌ Failed to toggle saved post:", err);
@@ -322,16 +308,84 @@ function PostFetch({ profile }) {
     }
   };
 
-  // render the simple follow-status div per your requirement:
-  // only three states shown: 'follow' | 'requested' | 'friends'
-  // Put this inside PostFetch (replace the previous renderFollowStatusDiv)
+  // Handle post upload (PostUploadModal should pass file, caption, tags, optionally visibility)
+  const handlePost = async (file, caption, tags, visibility = "public") => {
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("caption", caption || "");
+      formData.append("tags", JSON.stringify(tags || []));
+      formData.append("visibility", visibility);
+
+      const uploadRes = await fetch(`${server}/api/posts/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      alert("✅ Post uploaded successfully");
+      const resJson = await uploadRes.json();
+      const newPost = resJson.post || resJson;
+
+      // Prepend to UI if it matches current filters (or if tab has no restricting filter)
+      const matchesUni =
+        !selectedUniversity ||
+        selectedUniversity === newPost.user?.university ||
+        tab !== "university";
+      const matchesCourse =
+        !selectedCourse ||
+        selectedCourse === newPost.user?.course ||
+        tab !== "course";
+
+      if (matchesUni && matchesCourse) setPosts((prev) => [newPost, ...prev]);
+
+      // also insert into cache for current tab
+      setCache((prev) => {
+        const has = prev[tab].posts.some((p) => p.id === newPost.id);
+        return {
+          ...prev,
+          [tab]: {
+            ...prev[tab],
+            posts: has ? prev[tab].posts : [newPost, ...prev[tab].posts],
+          },
+        };
+      });
+
+      // init engagement states
+      setLikedPosts((prev) => ({
+        ...prev,
+        [newPost.id]: newPost.liked_by_me || false,
+      }));
+      setLikeCounts((prev) => ({
+        ...prev,
+        [newPost.id]: newPost.like_count || 0,
+      }));
+      setSavedPosts((prev) => ({
+        ...prev,
+        [newPost.id]: newPost.saved_by_me || false,
+      }));
+      if (newPost.follow_status)
+        setFollowStatuses((s) => ({
+          ...s,
+          [newPost.user_id]: newPost.follow_status,
+        }));
+
+      setModalOpen(false);
+    } catch (err) {
+      console.error("handlePost error", err);
+      alert("❌ Failed to upload post");
+    }
+  };
+
+  // render the simple follow-status div
   const renderFollowStatusDiv = (authorId) => {
     if (!authorId || authorId === loggedInUserId) return null;
 
     const status = followStatuses[authorId] || "follow";
     const loading = !!loadingFollowOps[authorId];
 
-    // If state is friends -> static label
     if (status === "friends") {
       return (
         <div
@@ -348,7 +402,6 @@ function PostFetch({ profile }) {
       );
     }
 
-    // If state is requested -> show label + small cancel button (no clickable div)
     if (status === "requested") {
       return (
         <div className="requested-wrapper">
@@ -364,18 +417,14 @@ function PostFetch({ profile }) {
       );
     }
 
-    // Default state is "follow" — make the entire div clickable
-    // Only respond to clicks when not loading and when status === 'follow'
     return (
       <div
         role="button"
         onClick={async () => {
-          // guard: only act if the current status still 'follow' and not loading
           if (loading) return;
           const current = followStatuses[authorId] || "follow";
           if (current !== "follow") return;
 
-          // optimistic UI
           setFollowStatuses((s) => ({ ...s, [authorId]: "requested" }));
           setLoadingFollowOps((m) => ({ ...m, [authorId]: true }));
 
@@ -386,19 +435,13 @@ function PostFetch({ profile }) {
               {},
               { headers: { Authorization: `Bearer ${token}` } }
             );
-
-            // server may return status 'pending' or 'accepted'
             const serverStatus = res.data?.status || res.data?.follow_status;
-            if (serverStatus === "accepted" || serverStatus === "friends") {
+            if (serverStatus === "accepted" || serverStatus === "friends")
               setFollowStatuses((s) => ({ ...s, [authorId]: "friends" }));
-            } else {
-              setFollowStatuses((s) => ({ ...s, [authorId]: "requested" }));
-            }
+            else setFollowStatuses((s) => ({ ...s, [authorId]: "requested" }));
           } catch (err) {
             console.error("Failed to send follow request", err);
-            // rollback
             setFollowStatuses((s) => ({ ...s, [authorId]: "follow" }));
-            // optional: show a toast / alert
             alert("Could not send follow request. Try again.");
           } finally {
             setLoadingFollowOps((m) => ({ ...m, [authorId]: false }));
@@ -413,13 +456,76 @@ function PostFetch({ profile }) {
     );
   };
 
+  // Header button handlers
+  const onClickAll = () => {
+    setTab("all");
+    setSelectedUniversity(null);
+    setSelectedCourse(null);
+  };
+  const onClickInterests = () => {
+    setTab("interests");
+    setSelectedUniversity(null);
+    setSelectedCourse(null);
+  };
+  const onClickSameUniversity = () => {
+    const uni = storedUser?.university || profile?.university;
+    if (!uni) {
+      alert("Please set your university in profile to use this filter.");
+      return;
+    }
+    setSelectedUniversity(uni);
+    setSelectedCourse(null);
+    setTab("university");
+    // reset cache page for university so we fetch fresh from page 1
+    setCache((prev) => ({
+      ...prev,
+      university: { posts: [], page: 1, hasMore: true },
+    }));
+  };
+  const onClickSameCourse = () => {
+    const course = storedUser?.course || profile?.course;
+    if (!course) {
+      alert("Please set your course in profile to use this filter.");
+      return;
+    }
+    setSelectedCourse(course);
+    setSelectedUniversity(null);
+    setTab("course");
+    setCache((prev) => ({
+      ...prev,
+      course: { posts: [], page: 1, hasMore: true },
+    }));
+  };
+
+  // clicking on a post's university or course will switch to that tab and filter
+  // const onClickPostUniversity = (uni) => {
+  //   if (!uni) return;
+  //   setSelectedUniversity(uni);
+  //   setSelectedCourse(null);
+  //   setTab("university");
+  //   setCache((prev) => ({
+  //     ...prev,
+  //     university: { posts: [], page: 1, hasMore: true },
+  //   }));
+  // };
+  // const onClickPostCourse = (course) => {
+  //   if (!course) return;
+  //   setSelectedCourse(course);
+  //   setSelectedUniversity(null);
+  //   setTab("course");
+  //   setCache((prev) => ({
+  //     ...prev,
+  //     course: { posts: [], page: 1, hasMore: true },
+  //   }));
+  // };
+
   return (
     <>
       <div className="homecontainer-2">
         <div className="postcontainer">
           <div className="postwrite-container">
             <img
-              src={profile?.profile || "/avatar.jpg"} // replace with your profile image url
+              src={profile?.profile || "/avatar.jpg"}
               alt="profile"
               className="postwrite-avatar"
             />
@@ -443,7 +549,6 @@ function PostFetch({ profile }) {
                 onClick={() => setModalOpen(true)}
                 style={{ cursor: "pointer" }}
               />
-
               {modalOpen && (
                 <PostUploadModal
                   isOpen={modalOpen}
@@ -453,16 +558,9 @@ function PostFetch({ profile }) {
               )}
               <p>Photo</p>
             </div>
-            {/* <div className="postcontainer-2-1">
-              <MdArticle
-                className="icon icon3"
-                title="Write Article"
-                size={24}
-              />
-              <p>Write Article</p>
-            </div> */}
           </div>
         </div>
+
         <Line
           length={550}
           size={1}
@@ -471,18 +569,31 @@ function PostFetch({ profile }) {
           padding={10}
           transparency={0.3}
         />
+
         <div className="switch-container">
           <button
-            onClick={() => setTab("all")}
+            onClick={onClickAll}
             className={`switch-btn ${tab === "all" ? "active" : ""}`}
           >
             All
           </button>
           <button
-            onClick={() => setTab("interests")}
+            onClick={onClickInterests}
             className={`switch-btn ${tab === "interests" ? "active" : ""}`}
           >
             Interests
+          </button>
+          <button
+            onClick={onClickSameUniversity}
+            className={`switch-btn ${tab === "university" ? "active" : ""}`}
+          >
+            Same University
+          </button>
+          <button
+            onClick={onClickSameCourse}
+            className={`switch-btn ${tab === "course" ? "active" : ""}`}
+          >
+            Same Course
           </button>
         </div>
 
@@ -508,9 +619,8 @@ function PostFetch({ profile }) {
                           post.user_id !== loggedInUserId ? "clickable" : ""
                         }`}
                         onClick={() => {
-                          if (post.user_id !== loggedInUserId) {
+                          if (post.user_id !== loggedInUserId)
                             navigate(`/profile/${post.user_id}`);
-                          }
                         }}
                       >
                         {`${post.user?.first_name || ""} ${
@@ -518,13 +628,35 @@ function PostFetch({ profile }) {
                         }`.trim() || "Unknown User"}
                       </b>
 
-                      <p>{post.user?.course}</p>
-                      <p>{post.user?.university}</p>
+                      <p
+                      // style={{
+                      //   cursor: post.user?.course ? "pointer" : "default",
+                      //   textDecoration: post.user?.course
+                      //     ? "underline"
+                      //     : "none",
+                      // }}
+                      // onClick={() => onClickPostCourse(post.user?.course)}
+                      >
+                        {post.user?.course}
+                      </p>
+                      <p
+                      // style={{
+                      //   cursor: post.user?.university ? "pointer" : "default",
+                      //   textDecoration: post.user?.university
+                      //     ? "underline"
+                      //     : "none",
+                      // }}
+                      // onClick={() =>
+                      //   onClickPostUniversity(post.user?.university)
+                      // }
+                      >
+                        {post.user?.role} at {post.user?.university}
+                      </p>
                     </div>
                   </div>
 
                   {/* Follow status DIV */}
-                  {renderFollowStatusDiv(post.user_id, post)}
+                  {renderFollowStatusDiv(post.user_id)}
                 </div>
               </div>
 
@@ -591,6 +723,7 @@ function PostFetch({ profile }) {
                   )}
                 </div>
               </div>
+
               <Line
                 length={550}
                 size={1}
@@ -598,6 +731,7 @@ function PostFetch({ profile }) {
                 center={true}
                 transparency={0.3}
               />
+
               <div className="feed-container-4">
                 <div className="feed-container-4-1">
                   <b
@@ -605,9 +739,8 @@ function PostFetch({ profile }) {
                       post.user_id !== loggedInUserId ? "clickable" : ""
                     }`}
                     onClick={() => {
-                      if (post.user_id !== loggedInUserId) {
+                      if (post.user_id !== loggedInUserId)
                         navigate(`/profile/${post.user_id}`);
-                      }
                     }}
                   >
                     {`${post.user?.first_name || ""} ${
@@ -623,9 +756,7 @@ function PostFetch({ profile }) {
                       <p
                         key={i}
                         className="tags-tab"
-                        onClick={() => {
-                          navigate(`/tag/${tag}`);
-                        }}
+                        onClick={() => navigate(`/tag/${tag}`)}
                       >
                         #{tag}
                       </p>
@@ -638,7 +769,7 @@ function PostFetch({ profile }) {
               </div>
             </div>
           ))}
-          {/* Render modal AFTER the list to avoid duplication */}
+
           {activePostId && (
             <CommentModal
               postId={activePostId}
@@ -658,11 +789,7 @@ function PostFetch({ profile }) {
 
         {posts.length === 0 && !hasMore && (
           <div
-            style={{
-              textAlign: "center",
-              marginTop: "2rem",
-              color: "#888",
-            }}
+            style={{ textAlign: "center", marginTop: "2rem", color: "#888" }}
           >
             No posts found.
           </div>
@@ -671,4 +798,5 @@ function PostFetch({ profile }) {
     </>
   );
 }
+
 export default PostFetch;

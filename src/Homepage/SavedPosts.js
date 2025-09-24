@@ -10,7 +10,8 @@ import LikesModal from "./LikesModal";
 import { FaRegCommentDots, FaShare, FaBookmark } from "react-icons/fa";
 
 function SavedPosts() {
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
+
   const [activePostId, setActivePostId] = useState(null);
   const [savedPostsState, setSavedPostsState] = useState({}); // postId -> saved_by_me
   const [savedPosts, setSavedPosts] = useState([]);

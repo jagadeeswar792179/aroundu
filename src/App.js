@@ -8,6 +8,7 @@ import Uprofile from "./Homepage/Uprofile";
 import TagFeed from "./Homepage/Tagfeed";
 import Explore from "./Explore/explore";
 import SearchPage from "./search/search";
+
 import Profile from "./profile/profile";
 import "./App.css";
 import ProfileViewers from "./profileview/ProfileViewers";

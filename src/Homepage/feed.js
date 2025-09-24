@@ -20,7 +20,8 @@ export default function Feed({
   onTagNavigate,
   autoFetchOnMount = true,
 }) {
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
+
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);

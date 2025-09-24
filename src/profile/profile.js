@@ -10,8 +10,9 @@ import { MdDelete } from "react-icons/md";
 import UserActivity from "./UserActivity";
 import Navbar from "../Homepage/Navbar";
 import ProfileLoadFull from "../Loading/profileLoadfull";
+import WeekBooking from "../slotbooking/weekbookings";
 export default function Profile() {
-  const server = "https://aroundubackend.onrender.com";
+  const server = process.env.REACT_APP_SERVER;
   const token = localStorage.getItem("token");
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const [profile, setProfile] = useState(null);
@@ -33,7 +34,7 @@ export default function Profile() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/user/me", {
+        const res = await fetch(`${server}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to load");
@@ -62,12 +63,103 @@ export default function Profile() {
     { value: "Python", label: "Python" },
     { value: "React", label: "React" },
     { value: "Node.js", label: "Node.js" },
+
+    // Technical & Professional
+    { value: "Programming", label: "Programming" },
+    { value: "Java", label: "Java" },
+    { value: "C++", label: "C++" },
+    {
+      value: "Data Analysis & Statistics",
+      label: "Data Analysis & Statistics",
+    },
+    { value: "Web / App Development", label: "Web / App Development" },
+    { value: "UI/UX Design", label: "UI/UX Design" },
+    { value: "Graphic Design", label: "Graphic Design" },
+
+    // Communication & Leadership
+    { value: "Public Speaking", label: "Public Speaking" },
+    { value: "Writing & Editing", label: "Writing & Editing" },
+    { value: "Research Assistance", label: "Research Assistance" },
+    { value: "Time Management", label: "Time Management" },
+    {
+      value: "Leadership (Student Clubs)",
+      label: "Leadership (Student Clubs)",
+    },
+    { value: "Event Coordination", label: "Event Coordination" },
+
+    // Newly added academic / research skills
+    {
+      value: "Teaching & Curriculum Development",
+      label: "Teaching & Curriculum Development",
+    },
+    {
+      value: "Academic Research & Publishing",
+      label: "Academic Research & Publishing",
+    },
+    {
+      value: "Mentoring & Student Guidance",
+      label: "Mentoring & Student Guidance",
+    },
+    { value: "Grant Writing", label: "Grant Writing" },
+    { value: "Conference Presentations", label: "Conference Presentations" },
+    {
+      value: "Leadership & Administration",
+      label: "Leadership & Administration",
+    },
+    {
+      value: "Data Analysis / Advanced Stats",
+      label: "Data Analysis / Advanced Stats",
+    },
+    {
+      value: "Public Speaking / Workshops",
+      label: "Public Speaking / Workshops",
+    },
+    {
+      value: "Interdisciplinary Collaboration",
+      label: "Interdisciplinary Collaboration",
+    },
   ];
+
   const interestOptions = [
-    { value: "JavaScript", label: "JavaScript" },
-    { value: "Python", label: "Python" },
-    { value: "React", label: "React" },
-    { value: "Node.js", label: "Node.js" },
+    {
+      value: "Artificial Intelligence & Machine Learning",
+      label: "Artificial Intelligence & Machine Learning",
+    },
+    { value: "Cybersecurity", label: "Cybersecurity" },
+    { value: "Cloud Computing", label: "Cloud Computing" },
+    { value: "Robotics", label: "Robotics" },
+    { value: "Blockchain", label: "Blockchain" },
+    { value: "VR / AR", label: "VR / AR" },
+    { value: "Environmental Issues", label: "Environmental Issues" },
+    { value: "Finance & Investing", label: "Finance & Investing" },
+    { value: "Marketing & Branding", label: "Marketing & Branding" },
+    { value: "Creative Writing", label: "Creative Writing" },
+    { value: "Sports & Fitness", label: "Sports & Fitness" },
+    { value: "Music & Performing Arts", label: "Music & Performing Arts" },
+    { value: "Traveling & Culture", label: "Traveling & Culture" },
+
+    // Newly added interests you requested
+    {
+      value: "Emerging Technologies in Education",
+      label: "Emerging Technologies in Education",
+    },
+    { value: "AI / ML Applications", label: "AI / ML Applications" },
+    {
+      value: "Sustainability & Environmental Research",
+      label: "Sustainability & Environmental Research",
+    },
+    { value: "Policy & Governance", label: "Policy & Governance" },
+    {
+      value: "Community Outreach & Service Learning",
+      label: "Community Outreach & Service Learning",
+    },
+    {
+      value: "Cross-Disciplinary Research",
+      label: "Cross-Disciplinary Research",
+    },
+    { value: "Educational Technology", label: "Educational Technology" },
+    { value: "Industry Partnerships", label: "Industry Partnerships" },
+    { value: "Lifelong Learning", label: "Lifelong Learning" },
   ];
   if (loading) return <ProfileLoadFull />;
   if (!profile) return <div>No data</div>;
@@ -138,7 +230,7 @@ export default function Profile() {
   const saveField = async () => {
     if (modalType === "about") {
       try {
-        const res = await fetch("http://localhost:5000/api/user/about", {
+        const res = await fetch(`${server}/api/user/about`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -166,7 +258,7 @@ export default function Profile() {
       }
 
       try {
-        const res = await fetch("http://localhost:5000/api/user/experience", {
+        const res = await fetch(`${server}/api/user/experience`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -195,7 +287,7 @@ export default function Profile() {
       }
 
       try {
-        const res = await fetch("http://localhost:5000/api/user/education", {
+        const res = await fetch(`${server}/api/user/education`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -224,7 +316,7 @@ export default function Profile() {
       }
 
       try {
-        const res = await fetch("http://localhost:5000/api/user/projects", {
+        const res = await fetch(`${server}/api/user/projects`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -247,7 +339,7 @@ export default function Profile() {
         return;
       }
       try {
-        const res = await fetch("http://localhost:5000/api/user/skills", {
+        const res = await fetch(`${server}/api/user/skills`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -268,7 +360,7 @@ export default function Profile() {
         return;
       }
       try {
-        const res = await fetch("http://localhost:5000/api/user/interests", {
+        const res = await fetch(`${server}/api/user/interests`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -327,7 +419,7 @@ export default function Profile() {
       updated.splice(index, 1);
 
       try {
-        const res = await fetch("http://localhost:5000/api/user/experience", {
+        const res = await fetch(`${server}/api/user/experience`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -348,7 +440,7 @@ export default function Profile() {
       updated.splice(index, 1);
 
       try {
-        const res = await fetch("http://localhost:5000/api/user/education", {
+        const res = await fetch(`${server}/api/user/education`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -369,7 +461,7 @@ export default function Profile() {
       updated.splice(index, 1);
 
       try {
-        const res = await fetch("http://localhost:5000/api/user/projects", {
+        const res = await fetch(`${server}/api/user/projects`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -754,6 +846,11 @@ export default function Profile() {
               )}
               {/* <div>37 connections</div> */}
             </div>
+          </div>
+          <div className="prof-1">
+            <h1>Have free time! Help students And earn Money</h1>
+
+            <WeekBooking user={profile} />
           </div>
           {/* <div className="prof-2">Suggested for you</div> */}
           <div className="prof-3">

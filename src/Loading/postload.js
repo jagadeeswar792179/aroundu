@@ -6,10 +6,12 @@ export default function PostLoad() {
         <div className="feed-container" key={index}>
           <div className="feed-container-sep">
             <div className="feed-container-1">
-              <img src={"/avatar.jpg"} className="icon" alt="profile" />
-              <div className="load-3">
-                <div className="load-4"></div>
-                <div className="load-4"></div>
+              <div style={{ display: "flex" }}>
+                <img src={"/avatar.jpg"} className="icon" alt="profile" />
+                <div className="load-3">
+                  <div className="load-4"></div>
+                  <div className="load-4"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -17,7 +19,7 @@ export default function PostLoad() {
           <div className="feed-container-2">
             <div
               style={{
-                width: "570px",
+                width: "558px",
                 height: "500px",
                 backgroundColor: "#e8e8e8ff",
               }}

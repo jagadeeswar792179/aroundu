@@ -24,31 +24,38 @@ export default function PostCard({
   onTagClick, // NEW: callback when tag clicked
 }) {
   return (
-    <div className="feed-container" key={post.id}>
+    <div
+      className="feed-container"
+      key={post.id}
+      style={{ border: "1px solid black", boxSizing: "border-box" }}
+    >
       <div className="feed-container-sep">
         <div className="feed-container-1">
-          <img
-            src={post.user?.avatar_url || "/avatar.jpg"}
-            className="icon"
-            alt="profile"
-          />
-          <div className="feed-container-1-2">
-            <b
-              style={{
-                color: post.user_id !== loggedInUserId ? "blue" : "black",
-                cursor: post.user_id !== loggedInUserId ? "pointer" : "default",
-              }}
-              onClick={() => {
-                if (post.user_id !== loggedInUserId && onNavigateProfile)
-                  onNavigateProfile(post.user_id);
-              }}
-            >
-              {`${post.user?.first_name || ""} ${
-                post.user?.last_name || ""
-              }`.trim() || "Unknown User"}
-            </b>
-            <p>{post.user?.course}</p>
-            <p>{post.user?.university}</p>
+          <div style={{ display: "flex" }}>
+            <img
+              src={post.user?.avatar_url || "/avatar.jpg"}
+              className="icon"
+              alt="profile"
+            />
+            <div className="feed-container-1-2">
+              <b
+                style={{
+                  color: post.user_id !== loggedInUserId ? "blue" : "black",
+                  cursor:
+                    post.user_id !== loggedInUserId ? "pointer" : "default",
+                }}
+                onClick={() => {
+                  if (post.user_id !== loggedInUserId && onNavigateProfile)
+                    onNavigateProfile(post.user_id);
+                }}
+              >
+                {`${post.user?.first_name || ""} ${
+                  post.user?.last_name || ""
+                }`.trim() || "Unknown User"}
+              </b>
+              <p>{post.user?.course}</p>
+              <p>{post.user?.university}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -58,7 +65,7 @@ export default function PostCard({
           src={post.image_url}
           alt="post"
           className="feed-image"
-          style={{ width: "570px", height: "500px", objectFit: "cover" }}
+          style={{ width: "575px", height: "500px", objectFit: "cover" }}
         />
       </div>
 

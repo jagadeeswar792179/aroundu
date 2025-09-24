@@ -3,7 +3,7 @@ export default function LoadMessage() {
   return (
     <div>
       {[...Array(5)].map((_, index) => (
-        <div className="mess-3-1">
+        <div className="mess-3-1" key={index}>
           <div className="mess-4 conversation-item" style={{ width: 245 }}>
             <img
               src={"/avatar.jpg"}
