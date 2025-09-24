@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Server } from "lucide-react";
 import "./LoginPage.css";
 import Line from "../utils/line";
 
@@ -14,6 +14,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const server = process.env.REACT_APP_SERVER;
+  console.log(server + "fddgv f");
 
   const validateEmail = (value) => {
     setEmail(value);
