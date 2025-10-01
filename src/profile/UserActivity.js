@@ -135,11 +135,16 @@ const UserActivity = ({ userId }) => {
         {posts.map((post) => (
           <div key={post.id} className="post-card">
             {post.image_url && (
-              <img src={post.image_url} alt="Post" className="post-image" />
-            )}
-            {post.id == loggedinuser && (
               <>
-                <MdDeleteOutline onClick={() => handleDelete(post.id)} />
+                <img src={post.image_url} alt="Post" className="post-image" />
+                <button
+                  className="delete-btn"
+                  aria-label="Delete post"
+                  onClick={() => handleDelete(post.id)}
+                  title="Delete post"
+                >
+                  <MdDeleteOutline size={20} />
+                </button>
               </>
             )}
           </div>

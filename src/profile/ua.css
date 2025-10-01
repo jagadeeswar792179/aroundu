@@ -71,3 +71,40 @@
 .show-more-btn:hover {
   background-color: #0056b3;
 }
+.post-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 220px; /* ensure card has height so absolute button overlays image */
+  background: #eee; /* fallback while image loads */
+}
+
+/* image fills card */
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* absolute delete button on top-right */
+.delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* optional hover state */
+.delete-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
