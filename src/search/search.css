@@ -58,3 +58,44 @@
   border-radius: 10px;
   outline: 1px solid #ccc;
 }
+.homecontainer-22 {
+  margin: 10px;
+  width: 569px;
+  min-height: 100vh;
+  border-radius: 10px;
+  padding: 10px;
+}
+.feed-image-1 {
+  width: 575px;
+  height: 500px;
+  object-fit: cover;
+}
+@media (min-width: 0px) and (max-width: 465px) {
+  .search-res-people {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .result-card {
+    width: 132px;
+  }
+
+  .search-page {
+    width: 350px;
+  }
+  .search-tabs {
+    gap: 5px;
+  }
+  .search-results {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .feed-image-1 {
+    width: 346px;
+    height: 436px;
+    object-fit: cover;
+  }
+}
+@media (min-width: 466px) and (max-width: 770px) {
+}
+@media (min-width: 771px) and (max-width: 1030px) {
+}

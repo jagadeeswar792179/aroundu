@@ -108,3 +108,14 @@
 .delete-btn:hover {
   background: rgba(0, 0, 0, 0.7);
 }
+@media (min-width: 0px) and (max-width: 465px) {
+  .post-card {
+    height: 135px;
+  }
+  .load-4 {
+    width: 138px;
+  }
+  .sload-1 {
+    width: 145px;
+  }
+}

@@ -39,11 +39,13 @@ export default function PostCard({
             />
             <div className="feed-container-1-2">
               <b
-                style={{
-                  color: post.user_id !== loggedInUserId ? "blue" : "black",
-                  cursor:
-                    post.user_id !== loggedInUserId ? "pointer" : "default",
-                }}
+                // style={{
+                //   cursor:
+                //     post.user_id !== loggedInUserId ? "pointer" : "default",
+                // }}
+                className={`username ${
+                  post.user_id !== loggedInUserId ? "clickable" : ""
+                }`}
                 onClick={() => {
                   if (post.user_id !== loggedInUserId && onNavigateProfile)
                     onNavigateProfile(post.user_id);
@@ -61,12 +63,7 @@ export default function PostCard({
       </div>
 
       <div className="feed-container-2">
-        <img
-          src={post.image_url}
-          alt="post"
-          className="feed-image"
-          style={{ width: "575px", height: "500px", objectFit: "cover" }}
-        />
+        <img src={post.image_url} alt="post" className="feed-image-1" />
       </div>
 
       <div className="feed-container-3-2">

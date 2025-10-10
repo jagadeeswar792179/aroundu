@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ExploreLoading1 from "../Loading/explore-loading-1";
+import { AiOutlineClose } from "react-icons/ai";
 
 const LikesModal = ({ postId, onClose }) => {
   const [users, setUsers] = useState([]);
@@ -45,19 +46,13 @@ const LikesModal = ({ postId, onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h3>Likes</h3>
-        <div
-          className="likes-list"
-          style={{
-            maxHeight: "600px",
-            height: "500px",
-            overflowY: "auto",
-            padding: "20px",
-          }}
-          onScroll={handleScroll}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <h3>Likes</h3>
+          <AiOutlineClose size={20} className="close-btn" onClick={onClose} />
+        </div>
+        <div className="likes-list" onScroll={handleScroll}>
           {users.map((u) => (
-            <div key={u.id} className="prof-card" style={{ width: "230px" }}>
+            <div key={u.id} className="prof-card">
               <img
                 src={u.avatar_url || "/avatar.jpg"}
                 alt="avatar"

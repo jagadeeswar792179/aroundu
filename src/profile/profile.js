@@ -716,17 +716,25 @@ export default function Profile() {
                   </div>
 
                   {skillsTemp.length < 15 && (
-                    <div
-                      style={{ display: "flex", gap: 8, alignItems: "center" }}
-                    >
-                      <div style={{ minWidth: "80%" }}>
+                    <div className="select-container">
+                      <div>
                         <Select
+                          className="skill-select"
                           options={filteredSkillOptions} // only show skills not already selected
                           value={selectedSkill}
                           onChange={setSelectedSkill}
                           isClearable
                           isSearchable
                           placeholder="Select a skill"
+                          menuPortalTarget={null} // keep it inside the modal
+                          menuPosition="absolute" // ensures it positions properly inside modal
+                          styles={{
+                            menuList: (provided) => ({
+                              ...provided,
+                              maxHeight: 150, // fixed height in px
+                              overflowY: "auto", // makes it scrollable if too many options
+                            }),
+                          }}
                         />
                       </div>
                       <button
@@ -780,17 +788,25 @@ export default function Profile() {
                   </div>
 
                   {interestsTemp.length < 7 && (
-                    <div
-                      style={{ display: "flex", gap: 8, alignItems: "center" }}
-                    >
-                      <div style={{ minWidth: "80%" }}>
+                    <div className="select-container">
+                      <div>
                         <Select
+                          className="skill-select"
                           options={filteredInterestOptions}
                           value={selectedInterest}
                           onChange={setSelectedInterest}
                           isClearable
                           isSearchable
                           placeholder="Select a interest"
+                          menuPortalTarget={null} // keep it inside the modal
+                          menuPosition="absolute" // ensures it positions properly inside modal
+                          styles={{
+                            menuList: (provided) => ({
+                              ...provided,
+                              maxHeight: 150, // fixed height in px
+                              overflowY: "auto", // makes it scrollable if too many options
+                            }),
+                          }}
                         />
                       </div>
                       <button

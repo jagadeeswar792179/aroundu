@@ -15,6 +15,7 @@
   flex-direction: column;
   gap: 20px;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .prof-12 {
@@ -215,63 +216,21 @@ h3 {
   flex-wrap: wrap;
   gap: 15px;
 }
-/* .css-13cymwt-control {
-  border-radius: 8px !important;
-  border: 1px solid #d1d5db !important;
-  min-height: 40px !important;
-  padding: 2px 6px;
-  box-shadow: none !important;
-  transition: all 0.2s ease-in-out;
-}
-
-.css-13cymwt-control:hover {
-  border-color: #2563eb !important;
-}
-
-.css-1u9des2-indicatorSeparator {
-  display: none !important;
-}
-
-.css-t3ipsp-control {
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3) !important;
-}
-
-.css-1nmdiq5-menu {
-  border-radius: 8px !important;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.css-d7l1ni-option {
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.css-d7l1ni-option:hover {
-  background-color: #f3f4f6 !important;
-}
-
-.css-d7l1ni-option.css-d7l1ni-option--is-selected {
-  background-color: #2563eb !important;
-  color: #fff !important;
-} */
 
 .add-btn {
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
-  background: #6d90dd;
   color: #fff;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+  background: #1e40af;
   transition: all 0.2s ease;
 }
 
 .add-btn:hover {
-  background: #1e40af;
+  background: #6d90dd;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
@@ -318,4 +277,43 @@ h3 {
 /* Hover effect */
 .interests-dis:hover {
   opacity: 0.9;
+}
+
+@media (min-width: 0px) and (max-width: 465px) {
+  .wb-panel {
+    width: 272px;
+  }
+  .prof {
+    width: 330px;
+  }
+  .post-card {
+    height: 135px;
+  }
+  .modal-ins {
+    width: 85%;
+  }
+
+  .select-container {
+    display: block;
+    flex-direction: column;
+  }
+  .interests-dis {
+    min-width: 74px;
+  }
+}
+@media (min-width: 466px) and (max-width: 770px) {
+}
+@media (min-width: 771px) and (max-width: 1030px) {
+}
+.select-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.skill-select {
+  flex: 1;
+  min-width: 0; /* prevents react-select from overflowing in flex layouts */
+}
+.skill-select .select__menu {
+  width: 100px !important; /* fixed width */
 }

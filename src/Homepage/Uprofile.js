@@ -7,9 +7,11 @@ import { useParams } from "react-router-dom";
 import Navbar from "./Navbar";
 import ProfileLoadFull from "../Loading/profileLoadfull";
 import ProfileWeekBookings from "../slotbooking/ProfileWeekBookings";
+import MessageModal from "../messgaes/MessageModal";
 
 export default function Uprofile() {
   const { userId } = useParams();
+  const [selectedPeer, setSelectedPeer] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileUrl, setProfileUrl] = useState(null);
@@ -131,6 +133,13 @@ export default function Uprofile() {
 
   return (
     <>
+      {selectedPeer && (
+        <MessageModal
+          isOpen={!!selectedPeer}
+          onClose={() => setSelectedPeer(null)}
+          peer={selectedPeer}
+        />
+      )}
       <div className="container-1">
         <Navbar />
       </div>
@@ -157,14 +166,20 @@ export default function Uprofile() {
               </div>
               {profile.course && <p>{profile.course}</p>}
               {profile.university && <p>{profile.university}</p>}
-              {status ? (
+              {/* {status ? (
                 <div>{status}</div>
               ) : (
                 <div>
                   {location?.city}, {location?.state}, {location?.country}
                 </div>
-              )}
-              <div>37 connections</div>
+              )} */}
+              <button
+                onClick={() => setSelectedPeer(profile)}
+                className="form-button"
+                style={{ width: "fit-content" }}
+              >
+                Message
+              </button>
             </div>
           </div>
 

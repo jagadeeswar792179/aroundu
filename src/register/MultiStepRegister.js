@@ -359,20 +359,19 @@ const RegisterForm = () => {
             }}
           >
             <select
-              value={formData.birthDay}
+              value={formData.birthYear}
               onChange={(e) =>
-                setFormData({ ...formData, birthDay: e.target.value })
+                setFormData({ ...formData, birthYear: e.target.value })
               }
               className="select-register"
             >
-              <option value="">Day</option>
-              {days.map((d) => (
-                <option key={d} value={d}>
-                  {d}
+              <option value="">Year</option>
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
                 </option>
               ))}
             </select>
-
             <select
               value={formData.birthMonth}
               onChange={(e) =>
@@ -387,18 +386,17 @@ const RegisterForm = () => {
                 </option>
               ))}
             </select>
-
             <select
-              value={formData.birthYear}
+              value={formData.birthDay}
               onChange={(e) =>
-                setFormData({ ...formData, birthYear: e.target.value })
+                setFormData({ ...formData, birthDay: e.target.value })
               }
               className="select-register"
             >
-              <option value="">Year</option>
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
+              <option value="">Day</option>
+              {days.map((d) => (
+                <option key={d} value={d}>
+                  {d}
                 </option>
               ))}
             </select>
@@ -573,6 +571,7 @@ const RegisterForm = () => {
       <label>Interests (Max 4):</label>
       <Select
         options={interestOptions}
+        classNamePrefix="my-select"
         isMulti
         closeMenuOnSelect={false}
         value={selectedOptions}
@@ -641,7 +640,6 @@ const RegisterForm = () => {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        backgroundColor: "#f2f2f2",
       }}
     >
       <div className="register-form">

@@ -60,6 +60,12 @@
   flex: 1;
   background: #fff;
 }
+.mess-77 {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: #fff;
+}
 
 .mess-8 {
   height: 70px; /* slightly taller */
@@ -222,4 +228,139 @@
   font-size: 13px;
   margin-top: 4px;
   color: #999;
+}
+
+@media (min-width: 771px) and (max-width: 1030px) {
+}
+/* base layout (keeps your existing rules) */
+.mess-2 {
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* left panel */
+.left-panel {
+  width: 380px;
+  min-width: 240px;
+  max-width: 45%;
+  background: #fff;
+  z-index: 1;
+  overflow-y: auto;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* right panel default (desktop) */
+.mess-7 {
+  flex: 1;
+  background: #fafafa;
+  z-index: 0;
+  transition: transform 0.35s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- mobile behavior ---------- */
+@media (max-width: 700px) {
+  /* right is overlayed and starts off-screen to the right */
+  .mess-7 {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    transform: translateX(100%); /* off-screen */
+    box-shadow: -12px 0 28px rgba(0, 0, 0, 0.12);
+    z-index: 4;
+    background: #fff;
+    transition: transform 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* when open, slide in (right -> left) */
+  .mess-2.mobile-open .mess-7 {
+    transform: translateX(0);
+  }
+
+  /* optional slight peeking effect (left moves a bit left) */
+  .mess-2.mobile-open .left-panel {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-6%);
+  }
+
+  /* overlay behind the right panel to dim and capture outside taps */
+  .mess-2 .mobile-overlay {
+    display: none;
+  }
+  .mess-2.mobile-open .mobile-overlay {
+    display: block;
+    position: absolute;
+    inset: 0; /* top:0; right:0; bottom:0; left:0 */
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 3; /* sits between left (z=1) and right (z=4) */
+    transition: opacity 0.25s ease;
+    opacity: 1;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* back button visible on mobile */
+  .mobile-back-btn {
+    display: inline-block;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+
+  .mess-9 {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .mess-10 {
+    border-top: 1px solid #eee;
+    padding: 8px;
+    background: #fff;
+  }
+}
+
+/* Desktop tweaks */
+@media (min-width: 701px) {
+  .mess-7 {
+    position: relative;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* hide mobile-only back button on desktop */
+  .mobile-back-btn {
+    display: none;
+  }
+
+  /* hide overlay on desktop */
+  .mess-2 .mobile-overlay {
+    display: none !important;
+  }
+}
+
+/* small niceties */
+.conversation-item {
+  cursor: pointer;
+}
+.conversation-item.active {
+  background: rgba(0, 0, 0, 0.03);
+}
+@media (min-width: 0px) and (max-width: 465px) {
+  /* left becomes full width (stacked) */
+  .left-panel {
+    min-width: 330px;
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
 }

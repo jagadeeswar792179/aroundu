@@ -143,7 +143,7 @@ export default function Feed({
 
   return (
     <>
-      <div className="homecontainer-2">
+      <div className="homecontainer-22">
         <InfiniteScroll
           dataLength={posts.length}
           next={fetchPosts}

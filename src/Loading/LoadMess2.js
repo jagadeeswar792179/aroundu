@@ -16,8 +16,8 @@ export default function LoadMess2() {
           >
             {index % 2 !== 0 && (
               <img
-                src={"avatar.jpg"}
-                alt="profile"
+                src={"/avatar.jpg"}
+                alt="p"
                 style={{ width: 28, height: 28, borderRadius: "50%" }}
               />
             )}
@@ -43,7 +43,7 @@ export default function LoadMess2() {
             </div>
             {index % 2 === 0 && (
               <img
-                src={"avatar.jpg"}
+                src={"/avatar.jpg"}
                 alt="profile"
                 style={{ width: 28, height: 28, borderRadius: "50%" }}
               />

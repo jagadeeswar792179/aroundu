@@ -359,7 +359,7 @@ export default function MessageModal({
 
         {/* mess-7 block (keeps classnames identical to your original) */}
         <div
-          className="mess-7"
+          className="mess-77"
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
           <div
@@ -367,7 +367,7 @@ export default function MessageModal({
             style={{ padding: 12, borderBottom: "1px solid #eee" }}
           >
             <div style={{ marginLeft: "auto" }}>
-              {/* <button
+              <button
                 style={{
                   background: "transparent",
                   border: "none",
@@ -377,7 +377,7 @@ export default function MessageModal({
                 onClick={() => onClose?.()}
               >
                 ✕
-              </button> */}
+              </button>
             </div>
             {active && (
               <div

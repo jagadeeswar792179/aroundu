@@ -137,14 +137,16 @@ const UserActivity = ({ userId }) => {
             {post.image_url && (
               <>
                 <img src={post.image_url} alt="Post" className="post-image" />
-                <button
-                  className="delete-btn"
-                  aria-label="Delete post"
-                  onClick={() => handleDelete(post.id)}
-                  title="Delete post"
-                >
-                  <MdDeleteOutline size={20} />
-                </button>
+                {userId == loggedinuser && (
+                  <button
+                    className="delete-btn"
+                    aria-label="Delete post"
+                    onClick={() => handleDelete(post.id)}
+                    title="Delete post"
+                  >
+                    <MdDeleteOutline size={20} />
+                  </button>
+                )}
               </>
             )}
           </div>

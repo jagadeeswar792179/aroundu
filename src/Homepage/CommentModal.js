@@ -182,7 +182,7 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
             </div>
           ))}
 
-          {loading && <ExploreLoading1 count={5} />}
+          {!loading && <ExploreLoading1 count={5} />}
         </div>
 
         <div className="comment-input-box">

@@ -47,3 +47,13 @@
   border-radius: 10px;
   outline: 1px solid #ccc;
 }
+@media (min-width: 0px) and (max-width: 465px) {
+  .load-1 {
+    display: flex !important;
+    flex-direction: column;
+  }
+}
+@media (min-width: 466px) and (max-width: 770px) {
+}
+@media (min-width: 771px) and (max-width: 1030px) {
+}

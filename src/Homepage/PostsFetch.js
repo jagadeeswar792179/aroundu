@@ -562,7 +562,7 @@ function PostFetch({ profile }) {
         </div>
 
         <Line
-          length={550}
+          length={330}
           size={1}
           color={"black"}
           center={true}
@@ -661,16 +661,7 @@ function PostFetch({ profile }) {
               </div>
 
               <div className="feed-container-2">
-                <img
-                  src={post.image_url}
-                  alt="post"
-                  className="feed-image"
-                  style={{
-                    width: "570px",
-                    height: "500px",
-                    objectFit: "cover",
-                  }}
-                />
+                <img src={post.image_url} alt="post" className="feed-image" />
               </div>
 
               <div className="feed-container-3-2">
@@ -725,7 +716,7 @@ function PostFetch({ profile }) {
               </div>
 
               <Line
-                length={550}
+                length={330}
                 size={1}
                 color={"black"}
                 center={true}
