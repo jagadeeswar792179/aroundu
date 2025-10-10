@@ -257,7 +257,13 @@
   display: flex;
   flex-direction: column;
 }
-
+/* small niceties */
+.conversation-item {
+  cursor: pointer;
+}
+.conversation-item.active {
+  background: rgba(0, 0, 0, 0.03);
+}
 /* ---------- mobile behavior ---------- */
 @media (max-width: 700px) {
   .left-panel {
@@ -352,13 +358,6 @@
   }
 }
 
-/* small niceties */
-.conversation-item {
-  cursor: pointer;
-}
-.conversation-item.active {
-  background: rgba(0, 0, 0, 0.03);
-}
 @media (min-width: 0px) and (max-width: 465px) {
   /* left becomes full width (stacked) */
   .left-panel {
