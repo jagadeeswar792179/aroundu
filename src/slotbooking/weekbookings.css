@@ -483,3 +483,8 @@ body.modal-open {
     width: 272px;
   }
 }
+@media (min-width: 466px) and (max-width: 770px) {
+  .wb-panel {
+    width: 300px;
+  }
+}

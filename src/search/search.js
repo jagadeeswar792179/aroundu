@@ -205,7 +205,8 @@ export default function SearchPage() {
 
                 {usersHasMore && (
                   <>
-                    <SearchLoadingPeople />
+                    {loadingUsers && <SearchLoadingPeople />}
+
                     <div style={{ textAlign: "center", marginTop: 12 }}>
                       <button
                         onClick={() => fetchUsers(usersPage, false)}

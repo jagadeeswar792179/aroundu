@@ -230,8 +230,6 @@
   color: #999;
 }
 
-@media (min-width: 771px) and (max-width: 1030px) {
-}
 /* base layout (keeps your existing rules) */
 .mess-2 {
   display: flex;
@@ -262,6 +260,12 @@
 
 /* ---------- mobile behavior ---------- */
 @media (max-width: 700px) {
+  .left-panel {
+    min-width: 400px;
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
   /* right is overlayed and starts off-screen to the right */
   .mess-7 {
     position: absolute;

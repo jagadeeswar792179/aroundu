@@ -302,6 +302,26 @@ h3 {
   }
 }
 @media (min-width: 466px) and (max-width: 770px) {
+  .wb-panel {
+    width: 272px;
+  }
+  .prof {
+    width: 400px;
+  }
+  .post-card {
+    height: 135px;
+  }
+  .modal-ins {
+    width: 85%;
+  }
+
+  .select-container {
+    display: block;
+    flex-direction: column;
+  }
+  .interests-dis {
+    min-width: 74px;
+  }
 }
 @media (min-width: 771px) and (max-width: 1030px) {
 }

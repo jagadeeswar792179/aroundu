@@ -40,18 +40,9 @@ export default function ProfileLoadFull() {
                   height: "120px",
                 }}
               >
-                <div
-                  className="load-4"
-                  style={{ width: "760px", height: "15px" }}
-                ></div>
-                <div
-                  className="load-4"
-                  style={{ width: "760px", height: "15px" }}
-                ></div>
-                <div
-                  className="load-4"
-                  style={{ width: "760px", height: "15px" }}
-                ></div>
+                <div className="load-4-1"></div>
+                <div className="load-4-1"></div>
+                <div className="load-4-1"></div>
               </div>
               <div
                 className="prof-2"
@@ -63,30 +54,9 @@ export default function ProfileLoadFull() {
                   alignItems: "center",
                 }}
               >
-                <div
-                  className="load-4"
-                  style={{
-                    width: "230px",
-                    height: "300px",
-                    backgroundColor: "#f1f1f1ff",
-                  }}
-                ></div>
-                <div
-                  className="load-4"
-                  style={{
-                    width: "230px",
-                    height: "300px",
-                    backgroundColor: "#f1f1f1ff",
-                  }}
-                ></div>
-                <div
-                  className="load-4"
-                  style={{
-                    width: "230px",
-                    height: "300px",
-                    backgroundColor: "#f1f1f1ff",
-                  }}
-                ></div>
+                <div className="load-4-2"></div>
+                <div className="load-4-2"></div>
+                <div className="load-4-2"></div>
               </div>
               <div
                 className="prof-2"

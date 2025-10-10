@@ -50,7 +50,7 @@
     height: 55px;
   }
   .feed-container {
-    width: 348px;
+    width: 310px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 1px solid black;
   }
@@ -104,7 +104,7 @@
     background-color: #ffffff;
   }
   .navbar {
-    width: 449px;
+    width: 400px;
     flex-direction: column;
     height: auto;
     padding: 20px;
@@ -133,7 +133,7 @@
     height: 55px;
   }
   .feed-container {
-    width: 482px;
+    width: 380px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 1px solid black;
   }
@@ -148,7 +148,7 @@
     display: none;
   }
   .feed-image {
-    width: 482px;
+    width: 440px;
     height: 592px;
   }
   .homecontainer-2 {
@@ -157,7 +157,7 @@
     align-items: center;
   }
   .postcontainer {
-    width: 466px;
+    width: 400px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   .searchbar {

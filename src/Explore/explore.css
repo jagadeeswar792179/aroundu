@@ -255,6 +255,16 @@
   }
 }
 @media (min-width: 466px) and (max-width: 770px) {
+  .explore-1 {
+    display: none;
+  }
+  .prof-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .explore-2-2,
+  .explore-2-1 {
+    width: 334px;
+  }
 }
 @media (min-width: 771px) and (max-width: 1030px) {
 }
