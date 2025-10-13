@@ -7,6 +7,11 @@ import OtpInput from "../utils/OtpInput";
 import { useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
+  const [checkmail, setcheckmail] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60); // 60 seconds countdown
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState("");
@@ -59,6 +64,8 @@ const RegisterForm = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   const universityOptions = [
+    "Western New England College",
+    "Spring Field College",
     "Harvard University",
     "Stanford University",
     "MIT",
@@ -173,7 +180,8 @@ const RegisterForm = () => {
     }
 
     // simple email regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.(edu|ac|college|university)$/i;
+    const emailRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
     if (!emailRegex.test(formData.email)) {
       errors.push("Please enter a valid email address.");
     }
@@ -214,6 +222,42 @@ const RegisterForm = () => {
       alert("Error: " + (err.response?.data?.msg || err.message));
     } finally {
       setLoading(false);
+    }
+  };
+  // 2) handleCheckEmail: set step on success
+  const handleCheckEmail = async () => {
+    setcheckmail(true);
+    const email = (formData.email || "").trim();
+    if (!email) {
+      alert("Please enter your email.");
+      setcheckmail(false);
+      return;
+    }
+
+    try {
+      console.log("Checking email:", server);
+      const { data, status } = await axios.post(
+        `${server}/api/auth/check-email`,
+        { email }
+      );
+      // axios will throw for non-2xx, so here status is 2xx and data should be parsed JSON
+      setcheckmail(false);
+      if (data.exists) {
+        alert("Email already exists.");
+      } else {
+        setStep(2);
+      }
+    } catch (err) {
+      // If server returned HTML or 404 you can inspect err.response.data
+      console.error(
+        "Error checking email:",
+        err.response?.status,
+        err.response?.data || err.message
+      );
+      alert(
+        "Something went wrong while checking email. See console for details."
+      );
+      setcheckmail(false);
     }
   };
 
@@ -426,10 +470,10 @@ const RegisterForm = () => {
               !(formData.other_gender || "").trim()
             )
               return alert("Please specify your gender.");
-            setStep(2);
+            handleCheckEmail();
           }}
         >
-          Next
+          {checkmail ? "Please Wait..." : "Next"}
         </button>
       </div>
     </div>
@@ -593,46 +637,120 @@ const RegisterForm = () => {
     </div>
   );
 
+  const sendOtp = async () => {
+    try {
+      await axios.post(`${server}/api/AuthOtp/send-otp`, {
+        email: formData.email,
+      });
+      setOtpSent(true);
+      setResendTimer(60);
+    } catch (err) {
+      alert("Error sending OTP: " + err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (step === 3 && !otpSent) sendOtp();
+  }, [step, otpSent]);
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const interval = setInterval(() => setResendTimer((t) => t - 1), 1000);
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  const handleVerifyOtp = async () => {
+    try {
+      const { data } = await axios.post(`${server}/api/AuthOtp/verify-otp`, {
+        email: formData.email,
+        otp: otpValue,
+      });
+      if (data.verified) {
+        setOtpVerified(true);
+      } else {
+        alert("Incorrect OTP. Try again.");
+      }
+    } catch (err) {
+      if (err.response?.data?.msg) {
+        alert(err.response.data.msg);
+      } else {
+        alert("Error verifying OTP: " + err.message);
+      }
+    }
+  };
+
   const renderStepThree = () => (
     <div className="form-step">
-      <div>
-        <OtpInput />
-      </div>
+      {!otpVerified ? (
+        <>
+          <h3>OTP Verification</h3>
+          <p>An OTP has been sent to {formData.email}</p>
+          <OtpInput
+            length={6}
+            value={otpValue}
+            onChange={setOtpValue}
+            verified={otpVerified}
+          />
 
-      <h2>Password Setup</h2>
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <button
+              className="form-button"
+              onClick={handleVerifyOtp}
+              disabled={otpValue.length < 6}
+            >
+              Verify OTP
+            </button>
 
-      <input
-        type="password"
-        value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        placeholder="Password"
-        className="input-register"
-      />
-
-      <PasswordInput
-        value={formData.confirmPassword}
-        onChange={(e) =>
-          setFormData({ ...formData, confirmPassword: e.target.value })
-        }
-        placeholder="Confirm Password"
-      />
-
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <button onClick={() => setStep(2)} className="form-button">
-          Back
-        </button>
-
-        <button
-          className="form-button"
-          onClick={handleFinish}
-          disabled={loading}
-        >
-          {loading ? "Finishing..." : "Finish"}
-        </button>
-      </div>
+            <button
+              className="form-button"
+              onClick={sendOtp}
+              disabled={resendTimer > 0}
+            >
+              {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Resend OTP"}
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <h3>Set Your Password</h3>
+          <input
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+            className="input-register"
+          />
+          <PasswordInput
+            value={formData.confirmPassword}
+            onChange={(e) =>
+              setFormData({ ...formData, confirmPassword: e.target.value })
+            }
+            placeholder="Confirm Password"
+          />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "10px",
+            }}
+          >
+            <button onClick={() => setStep(2)} className="form-button">
+              Back
+            </button>
+            <button
+              className="form-button"
+              onClick={handleFinish}
+              disabled={loading}
+            >
+              {loading ? "Finishing..." : "Finish Registration"}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
-
   return (
     <div
       style={{

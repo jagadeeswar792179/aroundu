@@ -18,15 +18,14 @@ const LoginPage = () => {
 
   const validateEmail = (value) => {
     setEmail(value);
-    // simple edu check (adjust regex to your needs)
-    // const eduRegex = /^[^\s@]+@[^\s@]+\.(edu|ac|college|university)$/i;
-    // if (!value) {
-    //   setEmailError("Email is required");
-    // } else if (!eduRegex.test(value)) {
-    //   setEmailError("Please enter a valid educational email");
-    // } else {
-    //   setEmailError("");
-    // }
+    const eduRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
+    if (!value) {
+      setEmailError("Email is required");
+    } else if (!eduRegex.test(value)) {
+      setEmailError("Please enter a valid educational email");
+    } else {
+      setEmailError("");
+    }
   };
 
   const validatePassword = (value) => {
@@ -165,7 +164,12 @@ const LoginPage = () => {
         </form>
 
         <div className="link-buttons">
-          <button className="text-button">Forgotten Password?</button>
+          <button
+            className="text-button"
+            onClick={() => navigate("/forgot-password")}
+          >
+            Forgotten Password?
+          </button>
         </div>
 
         <Line length={300} size={1} transparency={0.2} center="true" />

@@ -1,15 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import "./OtpInput.css";
 import { MdVerified } from "react-icons/md";
-/**
- * Props:
- *  - length (number) default 6
- *  - value (string) optional controlled value
- *  - onChange (string) called on any change with full value
- *  - onComplete (string) called when all digits filled
- *  - autoFocus (bool)
- *  - allowedChars (regex string) default "\\d" (digits only)
- */
+
 export default function OtpInput({
   length = 6,
   value: controlledValue,
@@ -17,13 +9,13 @@ export default function OtpInput({
   onComplete,
   autoFocus = true,
   allowedChars = "\\d",
+  verified = false, // new prop
 }) {
-  const [value, setValue] = useState(() =>
+  const [value, setValue] = useState(
     (controlledValue ?? "").slice(0, length).padEnd(length, "")
   );
   const inputsRef = useRef([]);
 
-  // keep controlled/uncontrolled in sync
   useEffect(() => {
     if (controlledValue !== undefined) {
       const v = (controlledValue ?? "").slice(0, length);
@@ -32,14 +24,12 @@ export default function OtpInput({
   }, [controlledValue, length]);
 
   useEffect(() => {
-    // optionally autofocus first empty
     if (autoFocus) {
       const firstEmpty = value.split("").findIndex((ch) => ch === "");
       const idx = firstEmpty === -1 ? length - 1 : firstEmpty;
       inputsRef.current[idx]?.focus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [autoFocus, value, length]);
 
   const emitChange = (newVal) => {
     setValue(newVal);
@@ -52,22 +42,20 @@ export default function OtpInput({
   const handleInput = (e, idx) => {
     const ch = e.target.value;
     const allowed = new RegExp(allowedChars);
-    if (ch === "") {
-      // user cleared the field
+    if (!ch) {
       const arr = value.split("");
       arr[idx] = "";
       emitChange(arr.join(""));
       return;
     }
-    // take last char typed (to support mobile keyboards)
+
     const last = ch.slice(-1);
-    if (!allowed.test(last)) return; // ignore invalid char
+    if (!allowed.test(last)) return;
 
     const arr = value.split("");
     arr[idx] = last;
     emitChange(arr.join(""));
 
-    // move focus to next
     const next = Math.min(length - 1, idx + 1);
     inputsRef.current[next]?.focus();
     inputsRef.current[next]?.select?.();
@@ -75,40 +63,28 @@ export default function OtpInput({
 
   const handleKeyDown = (e, idx) => {
     const key = e.key;
-
     if (key === "Backspace") {
       e.preventDefault();
       const arr = value.split("");
       if (arr[idx]) {
-        // clear current
         arr[idx] = "";
         emitChange(arr.join(""));
         inputsRef.current[idx]?.focus();
       } else {
-        // move to previous and clear
         const prev = Math.max(0, idx - 1);
         arr[prev] = "";
         emitChange(arr.join(""));
         inputsRef.current[prev]?.focus();
       }
-      return;
     }
-
     if (key === "ArrowLeft") {
       e.preventDefault();
-      const prev = Math.max(0, idx - 1);
-      inputsRef.current[prev]?.focus();
-      return;
+      inputsRef.current[Math.max(0, idx - 1)]?.focus();
     }
-
     if (key === "ArrowRight") {
       e.preventDefault();
-      const next = Math.min(length - 1, idx + 1);
-      inputsRef.current[next]?.focus();
-      return;
+      inputsRef.current[Math.min(length - 1, idx + 1)]?.focus();
     }
-
-    // allow digits via keypress — default behavior handled in onChange
   };
 
   const handlePaste = (e) => {
@@ -119,47 +95,39 @@ export default function OtpInput({
     if (filtered.length === 0) return;
     const merged = filtered.join("").padEnd(length, "");
     emitChange(merged);
-    // focus next empty or last filled
     const firstEmpty = merged.split("").findIndex((ch) => ch === "");
     const idx = firstEmpty === -1 ? length - 1 : firstEmpty;
     inputsRef.current[idx]?.focus();
   };
 
   return (
-    <>
-      <div className="otp-div">
-        <p>Enter otp</p>
-
-        <div
-          className="otp-root"
-          role="group"
-          aria-label={`${length}-digit OTP`}
-        >
-          {Array.from({ length }).map((_, i) => {
-            const ch = value[i] ?? "";
-            return (
-              <input
-                key={i}
-                ref={(el) => (inputsRef.current[i] = el)}
-                inputMode="numeric"
-                pattern={allowedChars}
-                maxLength={length}
-                value={ch}
-                onChange={(e) => handleInput(e, i)}
-                onKeyDown={(e) => handleKeyDown(e, i)}
-                onPaste={handlePaste}
-                className="otp-input"
-                aria-label={`OTP digit ${i + 1}`}
-                autoComplete="one-time-code"
-              />
-            );
-          })}
-        </div>
-        <div style={{ display: "flex", gap: "10px" }}>
+    <div className="otp-div">
+      <p>Enter OTP</p>
+      <div className="otp-root" role="group" aria-label={`${length}-digit OTP`}>
+        {Array.from({ length }).map((_, i) => (
+          <input
+            key={i}
+            ref={(el) => (inputsRef.current[i] = el)}
+            inputMode="numeric"
+            pattern={allowedChars}
+            maxLength={1}
+            value={value[i] ?? ""}
+            onChange={(e) => handleInput(e, i)}
+            onKeyDown={(e) => handleKeyDown(e, i)}
+            onPaste={handlePaste}
+            className="otp-input"
+            aria-label={`OTP digit ${i + 1}`}
+            autoComplete="one-time-code"
+            disabled={verified} // disable if already verified
+          />
+        ))}
+      </div>
+      {verified && (
+        <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
           <MdVerified style={{ color: "green", fontSize: "24px" }} />
           <p>Verified</p>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 }

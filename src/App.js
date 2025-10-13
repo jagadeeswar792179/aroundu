@@ -12,6 +12,7 @@ import SearchPage from "./search/search";
 import Profile from "./profile/profile";
 import "./App.css";
 import ProfileViewers from "./profileview/ProfileViewers";
+import ForgotPassword from "./login/ForgotPassword";
 const App = () => {
   return (
     <Router>
@@ -26,6 +27,7 @@ const App = () => {
         <Route path="/explore" element={<Explore />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profileview" element={<ProfileViewers />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </Router>
   );
