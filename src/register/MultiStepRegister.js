@@ -224,6 +224,17 @@ const RegisterForm = () => {
       setLoading(false);
     }
   };
+  const validateEmail = () => {
+    const value = formData.email;
+    const eduRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
+    if (!value) {
+      alert("Email is required");
+    } else if (!eduRegex.test(value)) {
+      alert("Please enter a valid educational email");
+    } else {
+      handleCheckEmail();
+    }
+  };
   // 2) handleCheckEmail: set step on success
   const handleCheckEmail = async () => {
     setcheckmail(true);
@@ -470,7 +481,7 @@ const RegisterForm = () => {
               !(formData.other_gender || "").trim()
             )
               return alert("Please specify your gender.");
-            handleCheckEmail();
+            validateEmail();
           }}
         >
           {checkmail ? "Please Wait..." : "Next"}
