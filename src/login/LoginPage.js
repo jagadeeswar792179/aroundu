@@ -19,14 +19,14 @@ const LoginPage = () => {
 
   const validateEmail = (value) => {
     setEmail(value);
-    // const eduRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
-    // if (!value) {
-    //   setEmailError("Email is required");
-    // } else if (!eduRegex.test(value)) {
-    //   setEmailError("Please enter a valid educational email");
-    // } else {
-    //   setEmailError("");
-    // }
+    const eduRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
+    if (!value) {
+      setEmailError("Email is required");
+    } else if (!eduRegex.test(value)) {
+      setEmailError("Please enter a valid educational email");
+    } else {
+      setEmailError("");
+    }
   };
 
   const validatePassword = (value) => {
