@@ -137,3 +137,15 @@
 .comment-input::-webkit-scrollbar-button {
   display: none; /* remove arrows */
 }
+@media (min-width: 0px) and (max-width: 466px) {
+  .modal {
+    width: 314px !important;
+    overflow: scroll;
+  }
+}
+@media (min-width: 466px) and (max-width: 770px) {
+  .modal {
+    width: 400px !important;
+    overflow: scroll;
+  }
+}

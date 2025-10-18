@@ -200,7 +200,6 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
                 </label>
                 <Select
                   className="post-select"
-                  classNamePrefix="post-select" // optional, useful if you want CSS hooks
                   isMulti
                   options={tagOptions}
                   value={selectedTags}
@@ -208,19 +207,39 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
                   placeholder="Select up to 7 tags"
                   isOptionDisabled={() => selectedTags.length >= 7}
                   controlShouldRenderValue={false}
-                  // ensures the menu is rendered on top (avoids parent overflow issues)
                   menuPortalTarget={
                     typeof document !== "undefined" ? document.body : null
                   }
-                  // styles override
                   styles={{
-                    menuPortal: (base) => ({ ...base, zIndex: 9999 }), // keep it on top
-                    menu: (base) => ({ ...base, marginTop: 4 }), // optional visual tweak
+                    container: (base) => ({
+                      ...base,
+                      width: 250, // fixed width
+                      minWidth: 250, // ensures it doesn't shrink below 250px
+                      maxWidth: 250, // ensures it doesn't grow beyond 250px
+                    }),
+                    control: (base) => ({
+                      ...base,
+                      width: "100%", // fill container width
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      width: 250, // match container width
+                      marginTop: 4,
+                    }),
+                    menuPortal: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                      width: 250, // match container width
+                    }),
+                    multiValue: (base) => ({
+                      ...base,
+                      maxWidth: "100%",
+                    }),
                     menuList: (base) => ({
                       ...base,
-                      maxHeight: "220px", // <- limit height here
-                      overflowY: "auto", // <- allow scrolling when long
-                      paddingRight: 6, // avoid horizontal scroll because of scrollbar
+                      maxHeight: "220px",
+                      overflowY: "auto",
+                      paddingRight: 6,
                     }),
                   }}
                 />

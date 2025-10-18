@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import OtpInput from "../utils/OtpInput"; // your existing OTP component
 import { useNavigate } from "react-router-dom";
+import { BeatLoader } from "react-spinners";
 
 const ForgotPassword = () => {
   const server = process.env.REACT_APP_SERVER;
@@ -127,7 +128,7 @@ const ForgotPassword = () => {
                 disabled={loading}
                 className="register-button"
               >
-                {loading ? "Sending..." : "Send OTP"}
+                {loading ? <BeatLoader size={10} /> : "Send OTP"}
               </button>
             </>
           ) : !otpVerified ? (

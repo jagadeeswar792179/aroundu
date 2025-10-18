@@ -123,3 +123,34 @@
   color: #888;
   margin: 0;
 }
+
+@media (min-width: 0px) and (max-width: 466px) {
+  .profup-2 {
+    width: 303px;
+    justify-content: flex-start;
+  }
+  .profup-3 {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .post-box {
+    padding: 7px;
+  }
+}
+@media (min-width: 466px) and (max-width: 770px) {
+  .profup-2 {
+    width: 400px;
+    justify-content: flex-start;
+  }
+  .profup-3 {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .post-box {
+    padding: 7px;
+  }
+}

@@ -2,7 +2,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./weekbookings.css";
 import MessageModal from "../messgaes/MessageModal";
-
+import { BeatLoader } from "react-spinners";
+import { MoonLoader } from "react-spinners";
+import { MdDelete } from "react-icons/md";
 /**
  Props:
   - profileOwnerId (string | null) : id of profile being viewed (if null, component will try to use logged-in user id)
@@ -30,7 +32,11 @@ function addDays(d, n) {
   return x;
 }
 function formatDateISO(d) {
-  return d.toISOString().split("T")[0];
+  const dt = new Date(d);
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, "0");
+  const day = String(dt.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 function dayLabel(d) {
   return d.toLocaleDateString(undefined, {
@@ -220,9 +226,18 @@ export default function WeekBookings({ profileOwnerId = null }) {
     if (!v.ok) return alert(v.msg);
     setSaving(true);
     try {
+      // ... inside onConfirmAdd:
       const date = selectedDayIso;
-      const start_ts = new Date(`${date}T${slot.start}:00`).toISOString();
-      const end_ts = new Date(`${date}T${slot.end}:00`).toISOString();
+      const [yy, mm, dd] = date.split("-").map(Number);
+      const [sh, sm] = slot.start.split(":").map(Number);
+      const [eh, em] = slot.end.split(":").map(Number);
+
+      const startLocal = new Date(yy, mm - 1, dd, sh, sm, 0);
+      const endLocal = new Date(yy, mm - 1, dd, eh, em, 0);
+
+      const start_ts = startLocal.toISOString();
+      const end_ts = endLocal.toISOString();
+
       const res = await fetch(`${server}/api/slot-instances/batch`, {
         method: "POST",
         headers: authHeaders(),
@@ -521,13 +536,17 @@ export default function WeekBookings({ profileOwnerId = null }) {
 
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                   {selectedDayIso >= todayIso ? (
-                    <button
-                      className="wb-btn wb-btn-ghost"
+                    <MdDelete
+                      className="wb-btn-ghost"
                       onClick={() => removeInstance(si.id)}
-                    >
-                      Delete
-                    </button>
+                    />
                   ) : (
+                    // <button
+                    //   className="wb-btn-ghost"
+                    //   onClick={() => removeInstance(si.id)}
+                    // >
+                    //   Delete
+                    // </button>
                     <div className="wb-prev-note">previous slot</div>
                   )}
 
@@ -591,7 +610,7 @@ export default function WeekBookings({ profileOwnerId = null }) {
                   type="submit"
                   disabled={saving}
                 >
-                  Confirm
+                  {!saving ? "confirm" : <BeatLoader size={10} />}
                 </button>
                 <button
                   className="wb-btn"

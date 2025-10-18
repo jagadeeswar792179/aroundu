@@ -5,6 +5,7 @@ import "./MultiStepRegister.css";
 import PasswordInput from "../utils/PasswordInput";
 import OtpInput from "../utils/OtpInput";
 import { useNavigate } from "react-router-dom";
+import { BeatLoader } from "react-spinners";
 
 const RegisterForm = () => {
   const [otpSent, setOtpSent] = useState(false);
@@ -484,7 +485,7 @@ const RegisterForm = () => {
             validateEmail();
           }}
         >
-          {checkmail ? "Please Wait..." : "Next"}
+          {checkmail ? <BeatLoader size={10} color="#FFFFFF" /> : "Next"}
         </button>
       </div>
     </div>
@@ -755,7 +756,11 @@ const RegisterForm = () => {
               onClick={handleFinish}
               disabled={loading}
             >
-              {loading ? "Finishing..." : "Finish Registration"}
+              {loading ? (
+                <BeatLoader size={10} color="#ffffff" />
+              ) : (
+                "Finish Registration"
+              )}
             </button>
           </div>
         </>

@@ -1,6 +1,8 @@
 .navbar {
   display: flex;
   height: 50px;
+  justify-content: center;
+  align-items: center;
 }
 .container-1 {
   width: 100%;
@@ -18,7 +20,7 @@
 .navbar {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
-  padding: 10px 10px;
+  padding: 10px 10px 10px 30px;
   border-radius: 30px;
   width: 1200px;
   background-color: #ffffff;

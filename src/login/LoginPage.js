@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Server } from "lucide-react";
 import "./LoginPage.css";
 import Line from "../utils/line";
+import { BeatLoader } from "react-spinners";
 
 const LoginPage = () => {
   const navigate = useNavigate(); // Hook to navigate pages
@@ -18,14 +19,14 @@ const LoginPage = () => {
 
   const validateEmail = (value) => {
     setEmail(value);
-    const eduRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
-    if (!value) {
-      setEmailError("Email is required");
-    } else if (!eduRegex.test(value)) {
-      setEmailError("Please enter a valid educational email");
-    } else {
-      setEmailError("");
-    }
+    // const eduRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
+    // if (!value) {
+    //   setEmailError("Email is required");
+    // } else if (!eduRegex.test(value)) {
+    //   setEmailError("Please enter a valid educational email");
+    // } else {
+    //   setEmailError("");
+    // }
   };
 
   const validatePassword = (value) => {
@@ -159,7 +160,7 @@ const LoginPage = () => {
             disabled={loading}
             style={{ opacity: loading ? 0.6 : 1 }}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? <BeatLoader size={10} /> : "Login"}
           </button>
         </form>
 
