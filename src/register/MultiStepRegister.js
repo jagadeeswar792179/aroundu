@@ -64,8 +64,8 @@ const RegisterForm = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   const universityOptions = [
-    "Western New England College",
-    "Spring Field College",
+    "Western New England University",
+    "SpringField University",
     "Harvard University",
     "Stanford University",
     "MIT",

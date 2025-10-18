@@ -56,3 +56,21 @@
   margin: 0;
   padding: 0;
 }
+
+/* ---------- Mobile (0px–465px) ---------- */
+@media (min-width: 0px) and (max-width: 465px) {
+  .otp-div {
+    width: 263px;
+  }
+  .otp-input {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+/* ---------- Tablet (466px–770px) ---------- */
+@media (min-width: 466px) and (max-width: 770px) {
+}
+
+@media (min-width: 771px) and (max-width: 1030px) {
+}
