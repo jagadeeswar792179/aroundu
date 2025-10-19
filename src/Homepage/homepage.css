@@ -192,6 +192,7 @@
 }
 .feed-container-4-1 {
   margin: 10px 0;
+  word-break: break-word;
 }
 .feed-container-3-2 {
   padding: 10px;
@@ -237,7 +238,7 @@
   border-radius: 50%;
 }
 .feed-container-4 {
-  padding: 0 0 15px 15px;
+  padding: 0 15px 15px 15px;
 }
 .homecontainer-1-1 p:nth-of-type(2) {
   font-size: 10px;

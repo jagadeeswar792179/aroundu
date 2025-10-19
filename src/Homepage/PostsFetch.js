@@ -13,7 +13,8 @@ import { MdImage } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import PostUploadModal from "./PostUploadModal";
 import PostLoad from "../Loading/postload";
-
+import DiscussionUploadModal from "./DiscussionUploadModal";
+// ...
 function PostFetch({ profile }) {
   const server = process.env.REACT_APP_SERVER;
 
@@ -22,6 +23,7 @@ function PostFetch({ profile }) {
   // try localStorage user first (login stores it), else fallback to profile prop
   const storedUser = JSON.parse(localStorage.getItem("user")) || {};
   const loggedInUserId = storedUser?.id || profile?.id || null;
+  const [discussionModalOpen, setDiscussionModalOpen] = useState(false);
 
   const [activeLikesPostId, setActiveLikesPostId] = useState(null);
   const [savedPosts, setSavedPosts] = useState({});
@@ -379,6 +381,125 @@ function PostFetch({ profile }) {
     }
   };
 
+  const handleCreateDiscussion = async (
+    content,
+    visibility = "public",
+    tags = []
+  ) => {
+    try {
+      // Basic validation client-side
+      if (
+        !content ||
+        typeof content !== "string" ||
+        content.trim().length === 0
+      ) {
+        throw new Error("Content is required");
+      }
+
+      // ensure tags is an array of strings and max 7
+      const cleanTags = Array.isArray(tags)
+        ? tags
+            .map((t) => String(t).trim())
+            .filter(Boolean)
+            .slice(0, 7)
+        : [];
+
+      const token = localStorage.getItem("token"); // adapt if you use a different store
+      const res = await fetch(`${server}/api/posts/discussion`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          content: content.trim(),
+          visibility,
+          tags: cleanTags,
+        }),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = errBody.error || `Server returned ${res.status}`;
+        throw new Error(errMsg);
+      }
+
+      const resJson = await res.json();
+      const newPost = resJson.post || resJson; // be defensive: server returns {post: {...}} or post directly
+
+      // === Decide if the newly created post should be visible in current feed/tab ===
+      // (match your client-side filters; adjust logic to match your implementation)
+      const matchesUniversity =
+        !selectedUniversity ||
+        newPost.user?.university === selectedUniversity ||
+        tab !== "university";
+      const matchesCourse =
+        !selectedCourse ||
+        newPost.user?.course === selectedCourse ||
+        tab !== "course";
+
+      if (matchesUniversity && matchesCourse) {
+        // Prepend to visible posts
+        setPosts((prev) => {
+          // avoid duplicate if it somehow exists
+          const already = prev.some((p) => p.id === newPost.id);
+          return already ? prev : [newPost, ...prev];
+        });
+      }
+
+      // === Update cache object (if you maintain a per-tab cache like earlier) ===
+      // Example cache shape assumed: cache = { [tabName]: { posts: [...] , ... } , ... }
+      setCache((prevCache) => {
+        try {
+          const curBucket = prevCache[tab] || { posts: [] };
+          const exists = (curBucket.posts || []).some(
+            (p) => p.id === newPost.id
+          );
+          if (exists) return prevCache;
+
+          return {
+            ...prevCache,
+            [tab]: {
+              ...curBucket,
+              posts: [newPost, ...(curBucket.posts || [])],
+            },
+          };
+        } catch (e) {
+          // if cache shape unexpected, return prev
+          console.warn("cache update skipped:", e);
+          return prevCache;
+        }
+      });
+
+      // === Initialize engagement maps for this post (likes/saves/follows) ===
+      // Ensure these setter names match your component state
+      setLikedPosts((prev) => ({ ...prev, [newPost.id]: false }));
+      setLikeCounts((prev) => ({
+        ...prev,
+        [newPost.id]: newPost.like_count ?? 0,
+      }));
+      setSavedPosts((prev) => ({
+        ...prev,
+        [newPost.id]: !!newPost.saved_by_me,
+      }));
+      if (newPost.follow_status) {
+        setFollowStatuses((s) => ({
+          ...s,
+          [newPost.user_id]: newPost.follow_status,
+        }));
+      }
+
+      // (Optional) If you maintain a "total posts count" or pagination cursor, update it here.
+
+      // Return the created post for any caller needs
+      return newPost;
+    } catch (err) {
+      console.error("handleCreateDiscussion error:", err);
+      // surface a user-friendly message or rethrow for the caller to handle
+      throw err;
+    }
+  };
+
   // render the simple follow-status div
   const renderFollowStatusDiv = (authorId) => {
     if (!authorId || authorId === loggedInUserId) return null;
@@ -518,6 +639,45 @@ function PostFetch({ profile }) {
   //     course: { posts: [], page: 1, hasMore: true },
   //   }));
   // };
+  const contentdivform = (post) => {
+    return (
+      <div className="feed-container-4">
+        <div className="feed-container-4-1">
+          {/* <b
+            className={`username ${
+              post.user_id !== loggedInUserId ? "clickable" : ""
+            }`}
+            onClick={() => {
+              if (post.user_id !== loggedInUserId)
+                navigate(`/profile/${post.user_id}`);
+            }}
+          >
+            {`${post.user?.first_name || ""} ${
+              post.user?.last_name || ""
+            }`.trim() || "Unknown User"}
+          </b> */}
+          {post.caption}
+        </div>
+
+        <div className="feed-container-4-2">
+          {post.tags &&
+            post.tags.map((tag, i) => (
+              <p
+                key={i}
+                className="tags-tab"
+                onClick={() => navigate(`/tag/${tag}`)}
+              >
+                #{tag}
+              </p>
+            ))}
+        </div>
+
+        <div className="post-meta">
+          <TimeAgo timestamp={post.created_at} />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -533,7 +693,16 @@ function PostFetch({ profile }) {
               className="postwrite-input"
               type="text"
               placeholder="Write something"
+              readOnly
+              onClick={() => setDiscussionModalOpen(true)}
             />
+            {discussionModalOpen && (
+              <DiscussionUploadModal
+                isOpen={discussionModalOpen}
+                onClose={() => setDiscussionModalOpen(false)}
+                onCreate={handleCreateDiscussion}
+              />
+            )}
           </div>
 
           <div className="postcontainer-2">
@@ -628,28 +797,8 @@ function PostFetch({ profile }) {
                         }`.trim() || "Unknown User"}
                       </b>
 
-                      <p
-                      // style={{
-                      //   cursor: post.user?.course ? "pointer" : "default",
-                      //   textDecoration: post.user?.course
-                      //     ? "underline"
-                      //     : "none",
-                      // }}
-                      // onClick={() => onClickPostCourse(post.user?.course)}
-                      >
-                        {post.user?.course}
-                      </p>
-                      <p
-                      // style={{
-                      //   cursor: post.user?.university ? "pointer" : "default",
-                      //   textDecoration: post.user?.university
-                      //     ? "underline"
-                      //     : "none",
-                      // }}
-                      // onClick={() =>
-                      //   onClickPostUniversity(post.user?.university)
-                      // }
-                      >
+                      <p>{post.user?.course}</p>
+                      <p>
                         {post.user?.role} at {post.user?.university}
                       </p>
                     </div>
@@ -659,10 +808,24 @@ function PostFetch({ profile }) {
                   {renderFollowStatusDiv(post.user_id)}
                 </div>
               </div>
+              {post.post_type === "photo" && (
+                <div className="feed-container-2">
+                  <img src={post.image_url} alt="post" className="feed-image" />
+                </div>
+              )}
 
-              <div className="feed-container-2">
-                <img src={post.image_url} alt="post" className="feed-image" />
-              </div>
+              {post.post_type === "discussion" && (
+                <>
+                  {contentdivform(post)}
+                  <Line
+                    length={330}
+                    size={1}
+                    color={"black"}
+                    center={true}
+                    transparency={0.3}
+                  />
+                </>
+              )}
 
               <div className="feed-container-3-2">
                 <div className="feed-container-3-2-1">
@@ -715,49 +878,18 @@ function PostFetch({ profile }) {
                 </div>
               </div>
 
-              <Line
-                length={330}
-                size={1}
-                color={"black"}
-                center={true}
-                transparency={0.3}
-              />
-
-              <div className="feed-container-4">
-                <div className="feed-container-4-1">
-                  <b
-                    className={`username ${
-                      post.user_id !== loggedInUserId ? "clickable" : ""
-                    }`}
-                    onClick={() => {
-                      if (post.user_id !== loggedInUserId)
-                        navigate(`/profile/${post.user_id}`);
-                    }}
-                  >
-                    {`${post.user?.first_name || ""} ${
-                      post.user?.last_name || ""
-                    }`.trim() || "Unknown User"}
-                  </b>
-                  {post.caption}
-                </div>
-
-                <div className="feed-container-4-2">
-                  {post.tags &&
-                    post.tags.map((tag, i) => (
-                      <p
-                        key={i}
-                        className="tags-tab"
-                        onClick={() => navigate(`/tag/${tag}`)}
-                      >
-                        #{tag}
-                      </p>
-                    ))}
-                </div>
-
-                <div className="post-meta">
-                  <TimeAgo timestamp={post.created_at} />
-                </div>
-              </div>
+              {post.post_type === "photo" && (
+                <>
+                  <Line
+                    length={330}
+                    size={1}
+                    color={"black"}
+                    center={true}
+                    transparency={0.3}
+                  />
+                  {contentdivform(post)}
+                </>
+              )}
             </div>
           ))}
 
