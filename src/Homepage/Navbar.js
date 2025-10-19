@@ -32,6 +32,16 @@ export default function Navbar({ setNumber, profile }) {
   return (
     <div className="navbar">
       <div className="searchbar">
+        <img
+          src="logo.png"
+          alt="Logo"
+          style={{
+            width: "50px",
+            height: "50px",
+            borderRadius: "50%",
+          }}
+        />
+
         <input
           type="text"
           placeholder="Search"
@@ -39,13 +49,6 @@ export default function Navbar({ setNumber, profile }) {
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={handleSearch}
           className="search-input"
-        />
-
-        <FaSearch
-          title="search"
-          size={20}
-          className="icon-search"
-          onClick={handleSearch}
         />
       </div>
 

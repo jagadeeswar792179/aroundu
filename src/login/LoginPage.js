@@ -95,6 +95,7 @@ const LoginPage = () => {
   return (
     <div className="login-container">
       <div className="logo-login">
+        <img className="logo-png" src="logo.png" />
         <p>
           Around
           <span>U</span>

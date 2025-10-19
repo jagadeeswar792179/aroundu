@@ -122,7 +122,11 @@
 .error-text {
   color: red;
 }
-
+.logo-png {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+}
 @media (min-width: 0px) and (max-width: 465px) {
   .login-container {
     flex-direction: column;
@@ -136,6 +140,10 @@
   }
   .logo-login p:nth-of-type(2) {
     font-size: 18px;
+  }
+  .logo-png {
+    width: 150px;
+    height: 150px;
   }
 }
 @media (min-width: 466px) and (max-width: 770px) {
