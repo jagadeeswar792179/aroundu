@@ -364,7 +364,7 @@ function ProfessorsSection({
               </button>
             </div>
 
-            <div className="prof-footer">{renderFollowStatusDiv(p.id)}</div>
+            {/* <div className="prof-footer">{renderFollowStatusDiv(p.id)}</div> */}
           </div>
         ))}
       </div>

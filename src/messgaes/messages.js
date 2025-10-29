@@ -573,6 +573,7 @@ import LoadMessage from "../Loading/LoadMessages";
 import { FaBookmark, FaChevronDown } from "react-icons/fa";
 import LoadMess2 from "../Loading/LoadMess2";
 import Navbar from "../Homepage/Navbar";
+import LostFound from "../LostFound/LostFound";
 
 const API_BASE = process.env.REACT_APP_SERVER;
 function Messages() {
@@ -1089,26 +1090,7 @@ function Messages() {
             </div>
           </div>
         </div>
-
-        <div className="homecontainer-3">
-          <div className="homecontainer-3-1">
-            <h3>AroundU News</h3>
-            <h4>Top-stories</h4>
-            {newsArray.map((item, index) => {
-              const [title, details] = item.split(";");
-              return (
-                <div key={index} className="news-item">
-                  <h5>{title.trim()}</h5>
-                  <p>{details.trim()}</p>
-                </div>
-              );
-            })}
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <FaChevronDown title="search" size={14} className="icon" />
-              Show more
-            </div>
-          </div>
-        </div>
+        <LostFound />
       </div>
     </>
   );

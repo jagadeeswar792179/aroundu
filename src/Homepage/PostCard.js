@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import TimeAgo from "../utils/TimeAgo";
 import Line from "../utils/line";
-
+import { useNavigate } from "react-router-dom";
 export default function PostCard({
   post,
   loggedInUserId,
@@ -23,6 +23,32 @@ export default function PostCard({
   onNavigateProfile,
   onTagClick, // NEW: callback when tag clicked
 }) {
+  const navigate = useNavigate();
+  const contentdivform = (post) => {
+    return (
+      <div className="feed-container-4">
+        <div className="feed-container-4-1">{post.caption}</div>
+
+        <div className="feed-container-4-2">
+          {post.tags &&
+            post.tags.map((tag, i) => (
+              <p
+                key={i}
+                className="tags-tab"
+                onClick={() => navigate(`/tag/${tag}`)}
+              >
+                #{tag}
+              </p>
+            ))}
+        </div>
+
+        <div className="post-meta">
+          <TimeAgo timestamp={post.created_at} />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       className="feed-container"
@@ -62,10 +88,23 @@ export default function PostCard({
         </div>
       </div>
 
-      <div className="feed-container-2">
-        <img src={post.image_url} alt="post" className="feed-image-1" />
-      </div>
-
+      {post.post_type === "photo" && (
+        <div className="feed-container-2">
+          <img src={post.image_url} alt="post" className="feed-image" />
+        </div>
+      )}
+      {post.post_type === "discussion" && (
+        <>
+          {contentdivform(post)}
+          <Line
+            length={550}
+            size={1}
+            color={"black"}
+            center={true}
+            transparency={0.3}
+          />
+        </>
+      )}
       <div className="feed-container-3-2">
         <div
           className="feed-container-3-2-1"
@@ -103,54 +142,18 @@ export default function PostCard({
         </div>
       </div>
 
-      <Line
-        length={550}
-        size={1}
-        color={"black"}
-        center={true}
-        transparency={0.3}
-      />
-
-      <div className="feed-container-4">
-        <div className="feed-container-4-1">
-          <b
-            style={{
-              cursor: post.user_id !== loggedInUserId ? "pointer" : "default",
-            }}
-            onClick={() => {
-              if (post.user_id !== loggedInUserId && onNavigateProfile)
-                onNavigateProfile(post.user_id);
-            }}
-          >
-            {`${post.user?.first_name || ""} ${
-              post.user?.last_name || ""
-            }`.trim() || "Unknown User"}
-          </b>
-          {post.caption}
-        </div>
-
-        <div className="feed-container-4-2">
-          {post.tags &&
-            post.tags.map((tag, i) => (
-              <p
-                key={i}
-                className="tags-tab"
-                style={{
-                  cursor: "pointer",
-                  display: "inline-block",
-                  marginRight: 8,
-                }}
-                onClick={() => onTagClick?.(tag)}
-              >
-                #{tag}
-              </p>
-            ))}
-        </div>
-
-        <div className="post-meta">
-          <TimeAgo timestamp={post.created_at} />
-        </div>
-      </div>
+      {post.post_type === "photo" && (
+        <>
+          <Line
+            length={550}
+            size={1}
+            color={"black"}
+            center={true}
+            transparency={0.3}
+          />
+          {contentdivform(post)}
+        </>
+      )}
     </div>
   );
 }

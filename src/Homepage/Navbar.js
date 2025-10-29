@@ -1,8 +1,7 @@
-import { CiLogout } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
-import { FiLogOut } from "react-icons/fi";
-import { HiOutlineLogout } from "react-icons/hi";
 import { IoLogOut } from "react-icons/io5";
+import { useUser } from "../UserContext/UserContext";
+
 import {
   FaHome,
   FaEnvelope,
@@ -12,8 +11,10 @@ import {
 } from "react-icons/fa";
 import { useState } from "react";
 import "./navbar.css";
-export default function Navbar({ setNumber, profile }) {
+export default function Navbar() {
   const navigate = useNavigate();
+  const { profile } = useUser();
+
   const [searchInput, setSearchInput] = useState("");
 
   const handleLogout = () => {
@@ -33,7 +34,7 @@ export default function Navbar({ setNumber, profile }) {
     <div className="navbar">
       <div className="searchbar">
         <img
-          src="logo.png"
+          src="/logo.png"
           alt="Logo"
           style={{
             width: "50px",

@@ -15,7 +15,6 @@ export default function Uprofile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileUrl, setProfileUrl] = useState(null);
-  const { location, status } = useLocation();
   const token = localStorage.getItem("token");
   const server = process.env.REACT_APP_SERVER;
 
@@ -133,6 +132,9 @@ export default function Uprofile() {
 
   return (
     <>
+      <div className="container-1">
+        <Navbar />
+      </div>
       {selectedPeer && (
         <MessageModal
           isOpen={!!selectedPeer}
@@ -140,9 +142,6 @@ export default function Uprofile() {
           peer={selectedPeer}
         />
       )}
-      <div className="container-1">
-        <Navbar />
-      </div>
       <div className="container-2">
         <div className="prof">
           <div className="prof-1">

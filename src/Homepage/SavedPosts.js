@@ -144,7 +144,6 @@ function SavedPosts() {
             dataLength={savedPosts.length} // required
             next={fetchSavedPosts}
             hasMore={hasMore}
-            loader={<h4>Loading...</h4>}
             endMessage={
               <p className="no-posts">You have seen all saved posts</p>
             }

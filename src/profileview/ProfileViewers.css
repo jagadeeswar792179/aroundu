@@ -4,6 +4,7 @@
   grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
   gap: 18px;
   margin-top: 16px;
+  max-height: 500px;
 }
 
 /* Card */
@@ -16,7 +17,7 @@
   align-items: center;
   box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
   transition: transform 180ms ease, box-shadow 180ms ease;
-  min-height: 190px;
+  min-height: 210px;
 }
 
 .pv-card:hover {

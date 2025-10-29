@@ -8,6 +8,7 @@ import "./search.css";
 import { FaBookmark, FaChevronDown } from "react-icons/fa";
 import SearchLoadingPeople from "../Loading/search-loading-people";
 import MessageModal from "../messgaes/MessageModal";
+import LostFound from "../LostFound/LostFound";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -221,30 +222,7 @@ export default function SearchPage() {
             )}
           </div>
         </div>
-        <div className="homecontainer-3">
-          <div className="homecontainer-3-1">
-            <h3>AroundU News</h3>
-            <h4>Top-stories</h4>
-            {newsArray.map((item, index) => {
-              const [title, details] = item.split(";");
-              return (
-                <div key={index} className="news-item">
-                  <h5>{title.trim()}</h5>
-                  <p>{details.trim()}</p>
-                </div>
-              );
-            })}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <FaChevronDown title="search" size={14} className="icon" />
-              Show more
-            </div>
-          </div>
-        </div>
+        <LostFound />
       </div>
     </>
   );

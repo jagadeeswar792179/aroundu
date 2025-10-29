@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Feed from "./feed";
 import Navbar from "./Navbar";
 import { FaBookmark, FaChevronDown } from "react-icons/fa";
+import LostFound from "../LostFound/LostFound";
 
 export default function TagFeed() {
   const { tag } = useParams();
@@ -49,31 +50,7 @@ export default function TagFeed() {
             autoFetchOnMount={true}
           />
         </div>
-
-        <div className="homecontainer-3">
-          <div className="homecontainer-3-1">
-            <h3>AroundU News</h3>
-            <h4>Top-stories</h4>
-            {newsArray.map((item, index) => {
-              const [title, details] = item.split(";");
-              return (
-                <div key={index} className="news-item">
-                  <h5>{title.trim()}</h5>
-                  <p>{details?.trim()}</p>
-                </div>
-              );
-            })}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <FaChevronDown title="search" size={14} className="icon" />
-              Show more
-            </div>
-          </div>
-        </div>
+        <LostFound />
       </div>
     </>
   );

@@ -19,7 +19,7 @@ export default function PostLoad() {
           <div className="feed-container-2">
             <div
               style={{
-                width: "558px",
+                width: "498px",
                 height: "500px",
                 backgroundColor: "#e8e8e8ff",
               }}
