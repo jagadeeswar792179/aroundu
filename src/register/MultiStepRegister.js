@@ -63,7 +63,91 @@ const RegisterForm = () => {
     { value: "other", label: "Other" },
   ];
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const courseOptions = [
+    // Pharma
+    "Pharmacy (PharmD)",
+    "Pharmacogenomics",
+    "Pharmaceutical Sciences",
+    "Pharmacy Clinical Research Certificate",
+    "Biopharmaceutical Technology",
 
+    // Law
+    "Juris Doctor (JD)",
+    "LLM in Elder Law and Estate Planning",
+    "Law and Society",
+    "JD/MBA",
+    "JD/MSW",
+    "JD/MS in Accounting & Finance",
+    "JD/MS in Engineering Management",
+    "JD/MS in Organizational Leadership",
+    "JD/MRP (Master of Regional Planning)",
+
+    // Engineering
+    "Civil Engineering",
+    "Mechanical Engineering",
+    "Electrical Engineering",
+    "Industrial Engineering",
+    "Biomedical Engineering",
+    "Construction Management",
+    "Engineering Management",
+
+    // CS
+    "Computer Science",
+    "Computer Engineering",
+    "Information Technology",
+    "Business Analytics and Information Management",
+    "Cybersecurity",
+    "Data Science and Statistics",
+    "Computer Forensics",
+    "Enterprise Resource Planning with SAP",
+
+    // Business
+    "Finance",
+    "Accounting",
+    "Marketing",
+    "Business Analytics",
+    "Management and Leadership",
+    "Actuarial Science",
+    "Human Resource Management",
+    "Entrepreneurship",
+    "Sport Management",
+
+    // Science
+    "Biology",
+    "Chemistry",
+    "Neuroscience",
+    "Health Sciences",
+    "Health Studies",
+    "Forensic Biology",
+    "Forensic Chemistry",
+    "Mathematical Sciences",
+    "Statistics",
+    "Environmental Science",
+
+    // Arts / Humanities
+    "Psychology",
+    "English",
+    "History",
+    "Political Science",
+    "International Studies",
+    "Creative Writing",
+    "Communication",
+    "Music",
+    "Art",
+    "Spanish",
+    "Philosophy",
+    "Gender and Sexuality Studies",
+    "Theatre",
+    "Film Studies",
+    "African American Studies",
+    "Latin American Studies",
+    "Legal Studies",
+
+    // Education
+    "Elementary Education",
+    "Secondary Education",
+    "Education",
+  ].map((c) => ({ value: c, label: c }));
   const universityOptions = [
     "Western New England University",
     "SpringField University",
@@ -521,20 +605,7 @@ const RegisterForm = () => {
         <>
           <label>Course:</label>
           <Select
-            options={[
-              { value: "Computer Science", label: "Computer Science" },
-              {
-                value: "Mechanical Engineering",
-                label: "Mechanical Engineering",
-              },
-              {
-                value: "Business Administration",
-                label: "Business Administration",
-              },
-              { value: "Economics", label: "Economics" },
-              { value: "Psychology", label: "Psychology" },
-              { value: "Other", label: "Other" },
-            ]}
+            options={courseOptions}
             value={
               formData.course
                 ? { value: formData.course, label: formData.course }
