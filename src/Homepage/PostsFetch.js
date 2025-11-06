@@ -731,7 +731,7 @@ function PostFetch({ profile }) {
         </div>
 
         <Line
-          length={330}
+          length={200}
           size={1}
           color={"black"}
           center={true}
@@ -805,7 +805,7 @@ function PostFetch({ profile }) {
                   </div>
 
                   {/* Follow status DIV */}
-                  {renderFollowStatusDiv(post.user_id)}
+                  {/* {renderFollowStatusDiv(post.user_id)} */}
                 </div>
               </div>
               {post.post_type === "photo" && (
@@ -818,7 +818,7 @@ function PostFetch({ profile }) {
                 <>
                   {contentdivform(post)}
                   <Line
-                    length={330}
+                    length={200}
                     size={1}
                     color={"black"}
                     center={true}

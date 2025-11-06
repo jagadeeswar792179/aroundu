@@ -30,12 +30,15 @@
 .search-input-wrapper {
   position: relative;
 }
+.feed-container-2 {
+  overflow: hidden;
+}
 @media (min-width: 0px) and (max-width: 466px) {
   .searchbar {
     gap: 10px;
   }
   .navbar {
-    width: 260px;
+    width: 300px;
     flex-direction: column;
     height: auto;
     padding: 20px;
@@ -54,7 +57,6 @@
     gap: 35px;
   }
   .search-input {
-    height: 30px;
     width: 178px;
     border-radius: 25px;
   }
@@ -67,7 +69,7 @@
     height: 55px;
   }
   .feed-container {
-    width: 310px;
+    width: 300px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 1px solid black;
   }
@@ -82,11 +84,13 @@
     display: none;
   }
   .feed-image {
-    width: 348px;
+    width: 300px;
+    height: 422px;
   }
 
   .postcontainer {
-    width: 330px;
+    width: 300px;
+    border-radius: 30px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   .searchbar {
@@ -100,6 +104,7 @@
   }
 
   .switch-container {
+    width: 300px;
     flex-wrap: wrap;
   }
   .modal {

@@ -1,3 +1,18 @@
+:root {
+  --font-main: "Nunito", sans-serif;
+}
+
+html,
+body {
+  font-family: "Nunito", sans-serif;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
 .App {
   text-align: center;
 }
@@ -35,7 +50,4 @@
   to {
     transform: rotate(360deg);
   }
-}
-body {
-  font-family: "Source Sans Pro", sans-serif;
 }
