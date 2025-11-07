@@ -716,53 +716,46 @@ function Messages() {
     profile,
     university
   ) => {
-    setActive({
-      conversation_id,
-      peer_id,
-      peer_name,
-      profile,
-      university,
-    });
+    // 1) set active and open right away (instant UI)
+    setActive({ conversation_id, peer_id, peer_name, profile, university });
 
-    // If there's cached messages, use them
+    // open mobile slide immediately on narrow screens
+    if (typeof window !== "undefined" && window.innerWidth <= 700) {
+      setMobileOpen(true); // <-- move up here
+    }
+
+    // 2) serve from cache if available
     if (msgsCache[conversation_id]) {
       setMsgs(msgsCache[conversation_id]);
-    } else {
-      setMsgs([]);
-      setLoadingMsgs(true);
-      try {
-        const r = await authFetch(
-          `${API_BASE}/api/messages/${conversation_id}`
-        );
-        const data = await r.json();
-        setMsgs([...data].reverse());
-        setMsgsCache((prev) => ({
-          ...prev,
-          [conversation_id]: [...data].reverse(),
-        }));
-      } catch (err) {
-        console.error(err);
-        setMsgs([{ id: "err", body: "Failed to load messages", failed: true }]);
-      } finally {
-        setLoadingMsgs(false);
-        scrollDown();
-      }
+      // optionally mark seen without waiting
+      authFetch(`${API_BASE}/api/messages/${conversation_id}/seen`, {
+        method: "POST",
+      }).catch(() => {});
+      return;
+    }
+
+    // 3) otherwise show skeleton + fetch
+    setMsgs([]);
+    setLoadingMsgs(true);
+    try {
+      const r = await authFetch(`${API_BASE}/api/messages/${conversation_id}`);
+      const data = await r.json();
+      const ordered = [...data].reverse();
+
+      setMsgs(ordered);
+      setMsgsCache((prev) => ({ ...prev, [conversation_id]: ordered }));
 
       authFetch(`${API_BASE}/api/messages/${conversation_id}/seen`, {
         method: "POST",
       }).catch(() => {});
-    }
-
-    // Open mobile slide only on narrow screens
-    try {
-      if (typeof window !== "undefined" && window.innerWidth <= 700) {
-        setMobileOpen(true);
-      }
     } catch (err) {
-      // ignore
+      console.error(err);
+      setMsgs([{ id: "err", body: "Failed to load messages", failed: true }]);
+    } finally {
+      setLoadingMsgs(false);
+      scrollDown();
     }
   };
-
   const startChatWith = async (user) => {
     const convo = await authFetch(`${API_BASE}/api/messages/conversation`, {
       method: "POST",

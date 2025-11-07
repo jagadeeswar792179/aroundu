@@ -1,6 +1,7 @@
 .mess-0 {
-  width: 850px;
-  height: 700px;
+  width: 100%;
+  max-width: 850px; /* keeps your desktop look */
+  height: 700px; /* keep if you want the fixed height on desktop */
   margin: 20px;
   background-color: #ffffff;
   border-radius: 20px;
@@ -265,24 +266,39 @@
   background: rgba(0, 0, 0, 0.03);
 }
 /* ---------- mobile behavior ---------- */
+
+/* Mobile layout */
 @media (max-width: 700px) {
-  .left-panel {
-    min-width: 400px;
-    position: relative;
-    z-index: 1;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+  .mess-0 {
+    /* let it breathe full width/height on phones */
+    max-width: none;
+    width: 100%;
+    height: 100vh; /* fill screen */
+    margin: 0; /* avoid side cut from margins */
+    border-radius: 0; /* optional: edge-to-edge */
   }
-  /* right is overlayed and starts off-screen to the right */
+
+  .mess-2 {
+    position: relative; /* key */
+    overflow: hidden; /* keeps off-screen part hidden */
+  }
+
+  /* left list uses full parent width */
+  .left-panel {
+    width: 100%;
+    min-width: 0; /* prevent overflow on small screens */
+    max-width: 100%;
+  }
+
+  /* conversation pane matches PARENT, not viewport */
   .mess-7 {
-    position: absolute;
-    top: 0;
-    right: 0;
+    position: absolute; /* key: inside .mess-2 */
+    inset: 0; /* top/right/bottom/left = 0 → fill parent */
     width: 100%;
     height: 100%;
-    transform: translateX(100%); /* off-screen */
-    box-shadow: -12px 0 28px rgba(0, 0, 0, 0.12);
-    z-index: 4;
+    transform: translateX(100%); /* start off to the right */
     background: #fff;
+    z-index: 2;
     transition: transform 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
     display: flex;
     flex-direction: column;
@@ -291,54 +307,31 @@
     backface-visibility: hidden;
   }
 
-  /* when open, slide in (right -> left) */
+  /* slide in when opened */
   .mess-2.mobile-open .mess-7 {
     transform: translateX(0);
   }
 
-  /* optional slight peeking effect (left moves a bit left) */
-  .mess-2.mobile-open .left-panel {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(-6%);
-  }
-
-  /* overlay behind the right panel to dim and capture outside taps */
-  .mess-2 .mobile-overlay {
-    display: none;
-  }
-  .mess-2.mobile-open .mobile-overlay {
-    display: block;
+  /* optional dim overlay INSIDE the parent too */
+  .mess-2.mobile-open::after {
+    content: "";
     position: absolute;
-    inset: 0; /* top:0; right:0; bottom:0; left:0 */
+    inset: 0;
     background: rgba(0, 0, 0, 0.25);
-    z-index: 3; /* sits between left (z=1) and right (z=4) */
-    transition: opacity 0.25s ease;
-    opacity: 1;
-    -webkit-tap-highlight-color: transparent;
+    z-index: 1;
   }
-
-  /* back button visible on mobile */
-  .mobile-back-btn {
-    display: inline-block;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-    padding: 8px 10px;
-    cursor: pointer;
+  /* make the header/input areas fit */
+  .mess-8 {
+    padding: 0 16px;
   }
-
   .mess-9 {
     flex: 1;
     overflow-y: auto;
   }
   .mess-10 {
-    border-top: 1px solid #eee;
-    padding: 8px;
-    background: #fff;
+    padding: 8px 12px;
   }
 }
-
 /* Desktop tweaks */
 @media (min-width: 701px) {
   .mess-7 {
