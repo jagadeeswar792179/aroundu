@@ -50,19 +50,19 @@ export default function PostCard({
   };
 
   return (
-    <div
-      className="feed-container"
-      key={post.id}
-      style={{ border: "1px solid black", boxSizing: "border-box" }}
-    >
+    <div className="feed-container" key={post.id}>
       <div className="feed-container-sep">
         <div className="feed-container-1">
-          <div style={{ display: "flex" }}>
-            <img
-              src={post.user?.avatar_url || "/avatar.jpg"}
-              className="icon"
-              alt="profile"
-            />
+          <div style={{ display: "flex", gap: "10px" }}>
+            {post.user?.avatar_url ? (
+              <img src={post.user.avatar_url} className="icon" alt="profile" />
+            ) : (
+              <div className="avatar-fallback">
+                {`${post.user?.first_name?.[0] || ""}${
+                  post.user?.last_name?.[0] || ""
+                }`.toUpperCase()}
+              </div>
+            )}
             <div className="feed-container-1-2">
               <b
                 // style={{
@@ -93,18 +93,7 @@ export default function PostCard({
           <img src={post.image_url} alt="post" className="feed-image" />
         </div>
       )}
-      {post.post_type === "discussion" && (
-        <>
-          {contentdivform(post)}
-          <Line
-            length={550}
-            size={1}
-            color={"black"}
-            center={true}
-            transparency={0.3}
-          />
-        </>
-      )}
+      {post.post_type === "discussion" && <>{contentdivform(post)}</>}
       <div className="feed-container-3-2">
         <div
           className="feed-container-3-2-1"
@@ -121,11 +110,21 @@ export default function PostCard({
         </div>
 
         <div className="feed-container-3-2-1">
-          <FaRegCommentDots
-            title="Comments"
-            size={24}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="25"
+            height="25"
+            viewBox="0 0 24 24"
+            fill="none"
+            color="#747474ff"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
             onClick={() => onOpenComments(post.id)}
-          />
+          >
+            <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path>
+          </svg>
           <span>{post.comment_count ?? 0}</span>
         </div>
 
@@ -138,22 +137,41 @@ export default function PostCard({
           onClick={() => onToggleSave(post.id)}
           style={{ cursor: "pointer" }}
         >
-          <FaBookmark size={24} color={saved ? "black" : "gray"} />
+          {saved ? (
+            <svg
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+              fill="#205b99"
+              color="#205b99"
+            >
+              <path
+                d="M6 3.5h12a1.5 1.5 0 0 1 1.5 1.5v15.5L12 17l-7.5 3.5V5A1.5 1.5 0 0 1 6 3.5Z"
+                stroke="currentColor"
+                strokeWidth={1.8}
+                strokeLinejoin="round"
+              />
+            </svg>
+          ) : (
+            <svg
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+              fill="none"
+              color="#205b99"
+            >
+              <path
+                d="M6 3.5h12a1.5 1.5 0 0 1 1.5 1.5v15.5L12 17l-7.5 3.5V5A1.5 1.5 0 0 1 6 3.5Z"
+                stroke="currentColor"
+                strokeWidth={1.8}
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
         </div>
       </div>
 
-      {post.post_type === "photo" && (
-        <>
-          <Line
-            length={550}
-            size={1}
-            color={"black"}
-            center={true}
-            transparency={0.3}
-          />
-          {contentdivform(post)}
-        </>
-      )}
+      {post.post_type === "photo" && <>{contentdivform(post)}</>}
     </div>
   );
 }

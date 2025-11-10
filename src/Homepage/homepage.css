@@ -8,21 +8,21 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  background-color: #efeeee;
+  background-color: var(--bcgcolor);
 }
 
 .container-2 {
-  background-color: #efeeee;
+  background-color: var(--bcgcolor);
   width: 100%;
   display: flex;
   justify-content: center;
 }
 .navbar {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-  padding: 10px 10px 10px 30px;
+  box-shadow: 0 4px 12px rgba(210, 210, 210, 0.15);
+  padding: 35px 20px;
+  margin-top: 20px;
   border-radius: 30px;
-  width: 1200px;
+  width: 1060px;
   background-color: #ffffff;
 }
 
@@ -56,7 +56,7 @@
 }
 /* Make the outer container responsive & centered */
 .homecontainer {
-  width: 100%;
+  width: 1100px;
   max-width: 1200px; /* allow the container to shrink on small screens */
   display: flex;
   justify-content: center; /* center children horizontally inside it */
@@ -71,25 +71,31 @@
 }
 
 .icon:hover {
-  color: #007bff; /* Blue on hover */
-  /* transform: scale(1.2); Slight zoom on hover */
+  color: var(--namehead);
 }
 .homecontainer-1 {
   margin: 10px;
-  width: 280px;
+  width: 100%;
+  min-width: 180px;
+  max-width: 220px;
   border-radius: 10px;
 }
 
 .homecontainer-2 {
   margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   min-height: 100vh;
   border-radius: 10px;
   padding: 10px;
 }
 .postcontainer {
-  border-radius: 10px;
+  border-radius: 25px;
   background-color: #ffffff;
+  box-shadow: 0 8px 25px -10px rgba(32, 91, 153, 0.1);
+  width: 100%;
   padding: 10px;
 }
 .postwrite {
@@ -128,8 +134,9 @@
   width: 498px;
   height: auto;
   margin: 10px auto;
-  border-radius: 10px;
+  border-radius: 25px;
   background-color: #ffffff;
+  box-shadow: 0 8px 25px -10px rgba(32, 91, 153, 0.1);
 }
 .feed-image {
   width: 498px;
@@ -137,8 +144,8 @@
   object-fit: cover;
 }
 .feed-container-1 img {
-  width: 44px;
-  height: 44px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
 }
 .feed-container-1 {
@@ -172,7 +179,7 @@
   background-color: #efeeee;
   border-radius: 10px;
   padding: 3px 7px;
-  color: rgb(108, 169, 218);
+  color: #205b99;
 }
 .tags-tab {
   cursor: pointer;
@@ -210,7 +217,7 @@
 .homecontainer-1-2,
 .homecontainer-1-3 {
   background-color: #ffffff;
-  border-radius: 10px;
+  border-radius: 25px;
   padding: 20px;
   margin: 10px;
 }
@@ -227,6 +234,7 @@
 }
 .homecontainer-1-1 h3 {
   margin: 0;
+  color: #205b99;
 }
 .homecontainer-1-1 img {
   width: 100px;
@@ -236,9 +244,11 @@
 .feed-container-4 {
   padding: 0 15px 15px 15px;
 }
-.homecontainer-1-1 p:nth-of-type(2) {
-  font-size: 10px;
-  opacity: 0.5;
+.homecontainer-1-1 p {
+  font-size: 13px;
+}
+.homecontainer-1-1 p:nth-of-type(3) {
+  color: rgb(107 114 128 / var(--tw-text-opacity, 1));
 }
 .homecontainer-1-2 div {
   display: flex;
@@ -259,6 +269,38 @@ a {
 }
 .homecontainer-1-3 div .icon {
   color: black;
+}
+.profile-img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-fallback {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: #e5e7eb; /* Light neutral */
+  color: var(--namehead); /* Dark text */
+  display: flex;
+  border: 4px solid var(--namehead);
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  font-weight: 600;
+  text-transform: uppercase;
+  user-select: none;
+}
+.avatar-fallback {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
 }
 
 .like-user {
@@ -304,7 +346,8 @@ a {
   font-size: 14px;
   font-weight: 500;
   border: 1px solid #ccc;
-  border-radius: 15px;
+  color: var(--namehead);
+  border-radius: 25px;
   background: #f9f9f9;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -315,8 +358,8 @@ a {
 }
 
 .switch-btn.active {
-  background: #d5d5d5;
-  font-weight: 600;
+  background: var(--namehead);
+  color: #ffffff;
 }
 .feed-container-1 .follow-btn {
   margin-left: auto;
@@ -400,18 +443,11 @@ a {
 }
 
 .username.clickable {
-  color: black; /* default */
+  color: #205b99; /* default */
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .username.clickable:hover {
-  color: rgb(74, 116, 255); /* highlight on hover */
-}
-.likes-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  height: 500px;
-  padding: 20px;
+  color: #0d5097;
 }

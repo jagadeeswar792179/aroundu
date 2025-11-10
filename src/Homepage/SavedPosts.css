@@ -37,10 +37,10 @@
 }
 
 .grid-item img {
+  border-radius: 30px;
   width: 100%;
   height: 350px;
   object-fit: cover;
-  border-radius: 6px;
   transition: opacity 0.2s ease-in-out;
 }
 

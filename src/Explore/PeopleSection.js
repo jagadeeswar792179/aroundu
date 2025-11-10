@@ -290,7 +290,7 @@ function PeopleSection({
             />
             <span className="slider" />
           </div>
-          Same University
+          University
         </label>
       </div>
 
@@ -308,11 +308,19 @@ function PeopleSection({
                 aria-label={`person-${p.first_name}-${p.last_name}`}
               >
                 <div className="prof-card-left">
-                  <img
-                    src={profileImage(p.avatar_url)}
-                    alt={`${p.first_name} ${p.last_name}`}
-                    className="prof-avatar"
-                  />
+                  {p.avatar_url ? (
+                    <img
+                      src={profileImage(p.avatar_url)}
+                      alt={`${p.first_name} ${p.last_name}`}
+                      className="prof-avatar"
+                    />
+                  ) : (
+                    <div className="explore-fallback flex-r">
+                      {`${p.first_name?.[0] || ""}${
+                        p.last_name?.[0] || ""
+                      }`.toUpperCase()}
+                    </div>
+                  )}
                 </div>
 
                 <div className="prof-card-body">
@@ -358,14 +366,14 @@ function PeopleSection({
         </div>
       </div>
       {loading && <ExploreLoading1 count={4} />}
-      <div style={{ textAlign: "center", marginTop: 8 }}>
+      <div className="showmore-btn-container flex-c">
         {!loading && hasMore && (
           <button
             onClick={handleShowMore}
             className="show-more-btn"
             disabled={loading}
           >
-            {loading ? "Loading..." : "Show More"}
+            {loading ? "Loading..." : "<< Show more"}
           </button>
         )}
         {/* {!loading && !hasMore && people.length > 0 && (

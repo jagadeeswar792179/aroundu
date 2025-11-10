@@ -6,11 +6,18 @@
   margin-top: 16px;
   max-height: 500px;
 }
-
+.pv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.infinte-scroll-component {
+  scrollbar-width: none;
+}
 /* Card */
 .pv-card {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 30px;
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -32,7 +39,17 @@
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 10px;
+}
+.profile-view-fallback {
+  width: 72px;
+  border-radius: 50%;
   border: 2px solid rgba(0, 0, 0, 0.06);
+
+  height: 72px;
+  background: rgb(237, 244, 255);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Meta */
@@ -45,20 +62,21 @@
 
 .pv-name {
   font-size: 15px;
-  color: #111827;
+  color: var(--namehead);
   margin-bottom: 4px;
+  font-weight: 700;
 }
 
 .pv-university,
 .pv-course {
-  font-size: 13px;
+  font-size: 11px;
   color: #6b7280; /* muted */
-  margin: 2px 0;
 }
 
 .pv-time {
-  font-size: 12px;
-  color: #9ca3af;
+  color: rgb(107 114 128 / var(--tw-text-opacity, 1));
+
+  font-size: 10px;
   margin-top: 8px;
 }
 
@@ -72,11 +90,11 @@
 
 .pv-link {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 10px 12px;
+  border-radius: 20px;
   text-decoration: none;
   font-size: 13px;
-  background: linear-gradient(180deg, #0073b1, #005582);
+  background: var(--namehead);
   color: white;
   box-shadow: 0 6px 12px rgba(0, 115, 177, 0.12);
   transition: transform 120ms ease, box-shadow 120ms ease;

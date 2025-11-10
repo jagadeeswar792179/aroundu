@@ -305,7 +305,7 @@ function ProfessorsSection({
             />
             <span className="slider" />
           </div>
-          Same University
+          University
         </label>
       </div>
 
@@ -321,11 +321,19 @@ function ProfessorsSection({
             aria-label={`professor-${p.first_name}-${p.last_name}`}
           >
             <div className="prof-card-left">
-              <img
-                src={profileImage(p.avatar_url)}
-                alt={`${p.first_name} ${p.last_name}`}
-                className="prof-avatar"
-              />
+              {p.avatar_url ? (
+                <img
+                  src={profileImage(p.avatar_url)}
+                  alt={`${p.first_name} ${p.last_name}`}
+                  className="prof-avatar"
+                />
+              ) : (
+                <div className="explore-fallback flex-r">
+                  {`${p.first_name?.[0] || ""}${
+                    p.last_name?.[0] || ""
+                  }`.toUpperCase()}
+                </div>
+              )}
             </div>
 
             <div className="prof-card-body">
@@ -371,14 +379,14 @@ function ProfessorsSection({
 
       {loading && <ExploreLoading1 count={4} />}
 
-      <div style={{ textAlign: "center", marginTop: 10 }}>
+      <div className="showmore-btn-container flex-c">
         {!loading && hasMore && (
           <button
             onClick={handleShowMore}
             disabled={loading}
             className="show-more-btn"
           >
-            <span style={{ transition: "0.3s" }}>Show more</span>
+            <span style={{ transition: "0.3s" }}>{`<< Show more`}</span>
           </button>
         )}
 

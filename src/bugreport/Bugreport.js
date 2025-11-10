@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import "./Bugreport.css";
+import CustomSelect from "../utils/CustomSelect";
 
-export default function Bugreport() {
+export default function Bugreport({ onClose }) {
   const [form, setForm] = useState({
     title: "",
     type: "other",
@@ -60,11 +61,14 @@ export default function Bugreport() {
 
   return (
     <div className="bugreport-container">
-      <h2>Submit Bug Report</h2>
-
+      <div className="bugreport-container-1">
+        <h2>Submit Bug Report</h2>
+        <button className="modal-closeBtn" onClick={onClose}>
+          ✕
+        </button>
+      </div>
       <form className="bugreport-form" onSubmit={handleSubmit}>
         <label>
-          Title
           <input
             name="title"
             value={form.title}
@@ -76,18 +80,22 @@ export default function Bugreport() {
         </label>
 
         <label>
-          Type
-          <select name="type" value={form.type} onChange={handleChange}>
+          <select
+            name="type"
+            value={form.type}
+            onChange={handleChange}
+            className="select-style"
+          >
             <option value="ui">UI</option>
             <option value="crash">Crash</option>
             <option value="performance">Performance</option>
             <option value="security">Security</option>
             <option value="other">Other</option>
           </select>
+          {/* <CustomSelect onChange={handleChange} /> */}
         </label>
 
         <label>
-          Description
           <textarea
             name="description"
             rows={5}

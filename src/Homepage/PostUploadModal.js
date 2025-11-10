@@ -4,6 +4,7 @@ import Cropper from "react-easy-crop";
 import getCroppedImg from "./cropUtils";
 import Select from "react-select";
 import "./PostUploadModal.css";
+import MultiSelect from "../utils/MultiSelectTags";
 
 const PostUploadModal = ({ isOpen, onClose, onPost }) => {
   const [imageSrc, setImageSrc] = useState(null);
@@ -103,14 +104,14 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal" style={{ width: "700px" }}>
+      <div className="modal" style={{ width: "400px" }}>
         <div className="profup-1">
           <h3>Create a Post</h3>
           <span onClick={onClose}>✕</span>
         </div>
         <div className="profup-2">
           {!imageSrc && (
-            <div className="file-upload">
+            <div>
               <input
                 type="file"
                 accept="image/*"
@@ -127,11 +128,8 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
           {imageSrc && !finalBlob && (
             <>
               <div
-                style={{
-                  position: "relative",
-                  width: "300px",
-                  height: "300px",
-                }}
+                className="final-cropper-1
+              "
               >
                 <Cropper
                   image={imageSrc}
@@ -151,7 +149,14 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
 
           {finalBlob && (
             <div className="profup-3">
-              <div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
                 <img
                   src={URL.createObjectURL(finalBlob)}
                   alt="Preview"
@@ -159,7 +164,7 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
                     width: "300px",
                     height: "350px",
                     objectFit: "cover",
-                    borderRadius: "10px",
+                    borderRadius: "30px",
                   }}
                 />
                 <button
@@ -180,85 +185,45 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
                 />
 
                 {/* Visibility option */}
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    margin: "8px 0",
-                  }}
-                  title="If checked, this post will only be visible to students of your university"
-                >
-                  <input
-                    type="checkbox"
-                    checked={visibility === "university"}
-                    onChange={(e) =>
-                      setVisibility(e.target.checked ? "university" : "public")
-                    }
-                  />
-                  <span>Only share with my university</span>
-                </label>
-                <Select
-                  className="post-select"
-                  isMulti
+
+                <MultiSelect
                   options={tagOptions}
                   value={selectedTags}
                   onChange={setSelectedTags}
                   placeholder="Select up to 7 tags"
-                  isOptionDisabled={() => selectedTags.length >= 7}
-                  controlShouldRenderValue={false}
-                  menuPortalTarget={
-                    typeof document !== "undefined" ? document.body : null
-                  }
-                  styles={{
-                    container: (base) => ({
-                      ...base,
-                      width: 250, // fixed width
-                      minWidth: 250, // ensures it doesn't shrink below 250px
-                      maxWidth: 250, // ensures it doesn't grow beyond 250px
-                    }),
-                    control: (base) => ({
-                      ...base,
-                      width: "100%", // fill container width
-                    }),
-                    menu: (base) => ({
-                      ...base,
-                      width: 250, // match container width
-                      marginTop: 4,
-                    }),
-                    menuPortal: (base) => ({
-                      ...base,
-                      zIndex: 9999,
-                      width: 250, // match container width
-                    }),
-                    multiValue: (base) => ({
-                      ...base,
-                      maxWidth: "100%",
-                    }),
-                    menuList: (base) => ({
-                      ...base,
-                      maxHeight: "220px",
-                      overflowY: "auto",
-                      paddingRight: 6,
-                    }),
-                  }}
+                  maxSelected={7}
                 />
-                {/* Display selected tags as chips above */}
-                <div className="selected-tags">
-                  {selectedTags.length > 0 ? (
-                    selectedTags.map((tag) => (
-                      <span key={tag.value} className="tag-chip">
-                        {tag.label}
-                      </span>
-                    ))
-                  ) : (
-                    <p className="no-tags">No tags selected</p>
-                  )}
-                </div>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      margin: "8px 0",
+                    }}
+                    title="If checked, this post will only be visible to students of your university"
+                  >
+                    <span className="uni-1">University</span>
 
-                <button className="post-button" onClick={handlePostClick}>
-                  Post
-                </button>
+                    <div className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={visibility === "university"}
+                        onChange={(e) =>
+                          setVisibility(
+                            e.target.checked ? "university" : "public"
+                          )
+                        }
+                      />
+                      <span className="slider" />
+                    </div>
+                  </label>
+                  <button className="post-button" onClick={handlePostClick}>
+                    Post
+                  </button>
+                </div>
               </div>
             </div>
           )}

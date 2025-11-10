@@ -4,7 +4,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import "./ProfileViewers.css";
 import ProfViewLoad from "../Loading/profviewload";
 
-export default function ProfileViewers() {
+export default function ProfileViewers({ onClose }) {
   const [viewers, setViewers] = useState([]);
   const [page, setPage] = useState(1);
   const [limit] = useState(12);
@@ -59,8 +59,13 @@ export default function ProfileViewers() {
     // Give the scroll container a stable id for the library to hook onto
     <div id="pv-scroll" className="pv-wrapper pv-scroll-container">
       <div className="pv-header">
-        <h3>Profile viewers</h3>
-        <span className="pv-count">{totalUnique} unique</span>
+        <div>
+          <h3>Profile viewers</h3>
+          <span className="pv-count">{totalUnique} unique</span>
+        </div>
+        <button className="modal-closeBtn" onClick={onClose}>
+          ✕
+        </button>
       </div>
 
       {/* When there are no items at all */}
@@ -79,18 +84,24 @@ export default function ProfileViewers() {
           <div className="pv-grid">
             {viewers.map((v) => (
               <div className="pv-card" key={v.id}>
-                <img
-                  src={v.profile_url || "/avatar.jpg"}
-                  alt={`${v.first_name} ${v.last_name}`}
-                  className="pv-avatar"
-                  loading="lazy"
-                  onError={(e) => (e.currentTarget.src = "/avatar.jpg")}
-                />
+                {v.profile_url ? (
+                  <img
+                    src={v.profile_url || "/avatar.jpg"}
+                    alt={`${v.first_name} ${v.last_name}`}
+                    className="pv-avatar"
+                    loading="lazy"
+                    onError={(e) => (e.currentTarget.src = "/avatar.jpg")}
+                  />
+                ) : (
+                  <div className="profile-view-fallback">
+                    {`${v.first_name?.[0] || ""}${
+                      v.last_name?.[0] || ""
+                    }`.toUpperCase()}
+                  </div>
+                )}
                 <div className="pv-meta">
                   <div className="pv-name">
-                    <strong>
-                      {v.first_name} {v.last_name}
-                    </strong>
+                    {v.first_name} {v.last_name}
                   </div>
                   {v.university && (
                     <div className="pv-university">{v.university}</div>

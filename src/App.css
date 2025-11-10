@@ -1,5 +1,17 @@
 :root {
   --font-main: "Nunito", sans-serif;
+  --bcgcolor: #f8faff;
+  --namehead: #205b99;
+  --boxshadowmain: 0 8px 25px -10px rgba(32, 91, 153, 0.1);
+  --color-green: #74c47b;
+  --color-aqua: #33aac2;
+  --color-off-white: #f8faff;
+  --color-light-gray: #f0f4f8;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-border-opacity: 1;
+  --tw-text-opacity: 1;
+  --tw-shadow: 0 0 #0000;
 }
 
 html,
@@ -12,7 +24,13 @@ body {
   box-sizing: border-box;
   font-family: inherit;
 }
+* {
+  -webkit-tap-highlight-color: transparent; /* removes mobile blue overlay */
+}
 
+:focus {
+  outline: none; /* removes blue outline on desktop */
+}
 .App {
   text-align: center;
 }
@@ -28,6 +46,36 @@ body {
   }
 }
 
+.flex-r {
+  display: flex;
+  flex-direction: row;
+}
+.flex-c {
+  display: flex;
+  flex-direction: column;
+}
+.infinite-scroll-component {
+  scrollbar-width: none;
+}
+.jspacebtw {
+  justify-content: space-between;
+}
+.center-r {
+  justify-content: center;
+}
+.center-c {
+  align-items: center;
+}
+.center {
+  justify-content: center;
+  align-items: center;
+}
+.gap10 {
+  gap: 10px;
+}
+.gap20 {
+  gap: 20px;
+}
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

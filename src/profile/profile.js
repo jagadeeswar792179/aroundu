@@ -11,6 +11,7 @@ import UserActivity from "./UserActivity";
 import Navbar from "../Homepage/Navbar";
 import ProfileLoadFull from "../Loading/profileLoadfull";
 import WeekBooking from "../slotbooking/weekbookings";
+import MultiSelectTags from "../utils/MultiSelectTags";
 export default function Profile() {
   const server = process.env.REACT_APP_SERVER;
   const token = localStorage.getItem("token");
@@ -495,8 +496,9 @@ export default function Profile() {
           <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
             {modalType === "about" && (
               <>
-                <h2>About</h2>
+                <h3>About</h3>
                 <textarea
+                  className="post-textarea"
                   value={about}
                   onChange={(e) => {
                     if (e.target.value.length <= 150) {
@@ -537,50 +539,55 @@ export default function Profile() {
             )}
             {modalType === "experience" && (
               <>
-                <h2>Add Experience</h2>
-                <label>
+                <h3>Add Experience</h3>
+                <label className="input-register-label">
                   Title
                   <input
                     name="title"
+                    className="input-register"
                     placeholder="Title"
                     value={experienceForm.title}
                     onChange={handleChange}
                   />
                 </label>
-                <label>
+                <label className="input-register-label">
                   Company Name
                   <input
                     name="company_name"
                     placeholder="Company Name"
+                    className="input-register"
                     value={experienceForm.company_name}
                     onChange={handleChange}
                   />
                 </label>
 
                 <div style={{ display: "flex", gap: "10px" }}>
-                  <label htmlFor="start_date">
+                  <label htmlFor="start_date" className="input-register-label">
                     Start Date
                     <input
                       type="date"
                       name="start_date"
+                      className="input-register"
                       value={experienceForm.start_date}
                       onChange={handleChange}
                     />
                   </label>
-                  <label htmlFor="end_Date">
+                  <label htmlFor="end_Date" className="input-register-label">
                     End date
                     <input
                       type="date"
                       name="end_date"
+                      className="input-register"
                       value={experienceForm.end_date}
                       onChange={handleChange}
                     />
                   </label>
                 </div>
-                <label>
-                  description
+                <label className="input-register-label ">
+                  Description
                   <textarea
                     name="description"
+                    className="post-textarea"
                     placeholder="Role description"
                     value={experienceForm.description}
                     onChange={handleChange}
@@ -593,9 +600,12 @@ export default function Profile() {
             )}
             {modalType === "education" && (
               <>
-                <label>
+                <h3>Education</h3>
+
+                <label className="input-register-label">
                   School Name
                   <input
+                    className="input-register"
                     name="university_name"
                     placeholder="School name"
                     value={educationForm.university_name}
@@ -604,18 +614,20 @@ export default function Profile() {
                 </label>
 
                 <div style={{ display: "flex", gap: "10px" }}>
-                  <label>
+                  <label className="input-register-label">
                     Start Date
                     <input
+                      className="input-register"
                       type="date"
                       name="start_date"
                       value={educationForm.start_date}
                       onChange={handleChange}
                     />
                   </label>
-                  <label>
+                  <label className="input-register-label">
                     End Date
                     <input
+                      className="input-register"
                       type="date"
                       name="end_date"
                       value={educationForm.end_date}
@@ -623,10 +635,11 @@ export default function Profile() {
                     />
                   </label>
                 </div>
-                <label>
+                <label className="input-register-label">
                   Course
                   <textarea
                     name="course_name"
+                    className="post-textarea"
                     placeholder="Course"
                     value={educationForm.course_name}
                     onChange={handleChange}
@@ -640,19 +653,22 @@ export default function Profile() {
             )}
             {modalType === "projects" && (
               <>
-                <label>
+                <h3>Projects</h3>
+                <label className="input-register-label">
                   Project Name
                   <input
                     name="project_name"
+                    className="input-register"
                     placeholder="Project name"
                     value={projectForm.project_name}
                     onChange={handleChange}
                   />
                 </label>
                 <div style={{ display: "flex", gap: "10px" }}>
-                  <label>
+                  <label className="input-register-label">
                     Start Date
                     <input
+                      className="input-register"
                       type="date"
                       name="start_date"
                       value={projectForm.start_date}
@@ -660,10 +676,11 @@ export default function Profile() {
                     />
                   </label>
 
-                  <label>
+                  <label className="input-register-label">
                     End Date
                     <input
                       type="date"
+                      className="input-register"
                       name="end_date"
                       value={projectForm.end_date}
                       onChange={handleChange}
@@ -671,9 +688,10 @@ export default function Profile() {
                   </label>
                 </div>
 
-                <label>
+                <label className="input-register-label">
                   Description
-                  <input
+                  <textarea
+                    className="post-textarea"
                     name="description"
                     placeholder="Description"
                     value={projectForm.description}
@@ -688,15 +706,9 @@ export default function Profile() {
             )}
             {modalType === "skills" && (
               <>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "30px",
-                  }}
-                >
-                  <h2>Skills</h2>
-                  <div className="skills-dis">
+                <div className="flex-c gap10">
+                  <h3>Skills</h3>
+                  <div className="skills-dis flex-r gap10">
                     {skillsTemp.length > 0 &&
                       skillsTemp.map((skill, i) => (
                         <div key={i} className="prof-8-1-1">
@@ -717,39 +729,54 @@ export default function Profile() {
 
                   {skillsTemp.length < 15 && (
                     <div className="select-container">
-                      <div>
+                      <div className="flex-r gap20">
                         <Select
                           className="skill-select"
-                          options={filteredSkillOptions} // only show skills not already selected
+                          options={filteredSkillOptions}
                           value={selectedSkill}
                           onChange={setSelectedSkill}
                           isClearable
                           isSearchable
                           placeholder="Select a skill"
-                          menuPortalTarget={null} // keep it inside the modal
-                          menuPosition="absolute" // ensures it positions properly inside modal
+                          menuPortalTarget={null}
+                          menuPosition="absolute"
                           styles={{
-                            menuList: (provided) => ({
-                              ...provided,
-                              maxHeight: 150, // fixed height in px
-                              overflowY: "auto", // makes it scrollable if too many options
+                            /** outer wrapper */
+                            container: (base) => ({
+                              ...base,
+                              width: 300,
+                              flex: "0 0 auto",
+                            }),
+                            /** the visible input/control */
+                            control: (base) => ({
+                              ...base,
+                              minHeight: 36,
+                              width: "100%",
+                            }),
+                            /** dropdown panel */
+                            menu: (base) => ({ ...base, width: "100%" }),
+                            /** list inside the dropdown */
+                            menuList: (base) => ({
+                              ...base,
+                              maxHeight: 150,
+                              overflowY: "auto",
                             }),
                           }}
                         />
-                      </div>
-                      <button
-                        onClick={() => {
-                          if (!selectedSkill?.value) return;
-                          const next = selectedSkill.value;
+                        <button
+                          onClick={() => {
+                            if (!selectedSkill?.value) return;
+                            const next = selectedSkill.value;
 
-                          if (skillsTemp.length >= 15) return; // enforce cap
-                          setSkillsTemp([...skillsTemp, next]); // preview list only
-                          setSelectedSkill(null);
-                        }}
-                        className="add-btn"
-                      >
-                        Add
-                      </button>
+                            if (skillsTemp.length >= 15) return; // enforce cap
+                            setSkillsTemp([...skillsTemp, next]); // preview list only
+                            setSelectedSkill(null);
+                          }}
+                          className="add-btn"
+                        >
+                          Add
+                        </button>
+                      </div>
                     </div>
                   )}
                   <button onClick={saveField} className="prof-btn">
@@ -760,14 +787,8 @@ export default function Profile() {
             )}
             {modalType === "interests" && (
               <>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "30px",
-                  }}
-                >
-                  <h2>Interests</h2>
+                <div className="flex-c gap10">
+                  <h3>Interests</h3>
                   <div className="skills-dis">
                     {interestsTemp.length > 0 &&
                       interestsTemp.map((interest, i) => (
@@ -801,10 +822,25 @@ export default function Profile() {
                           menuPortalTarget={null} // keep it inside the modal
                           menuPosition="absolute" // ensures it positions properly inside modal
                           styles={{
-                            menuList: (provided) => ({
-                              ...provided,
-                              maxHeight: 150, // fixed height in px
-                              overflowY: "auto", // makes it scrollable if too many options
+                            /** outer wrapper */
+                            container: (base) => ({
+                              ...base,
+                              width: 300,
+                              flex: "0 0 auto",
+                            }),
+                            /** the visible input/control */
+                            control: (base) => ({
+                              ...base,
+                              minHeight: 36,
+                              width: "100%",
+                            }),
+                            /** dropdown panel */
+                            menu: (base) => ({ ...base, width: "100%" }),
+                            /** list inside the dropdown */
+                            menuList: (base) => ({
+                              ...base,
+                              maxHeight: 150,
+                              overflowY: "auto",
                             }),
                           }}
                         />
@@ -833,26 +869,27 @@ export default function Profile() {
           </Modal>
           <div className="prof-1">
             <div className="prof-11">
-              <img
-                src={profileUrl || "/avatar.jpg"}
-                alt="Profile"
-                style={{
-                  width: 150,
-                  height: 150,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                }}
-              />
+              {profileUrl ? (
+                <img src={profileUrl} alt="Profile" className="profile-img" />
+              ) : (
+                <div className="profile-fallback">
+                  {`${profile.first_name?.[0] || ""}${
+                    profile.last_name?.[0] || ""
+                  }`.toUpperCase()}
+                </div>
+              )}
+
               <MdEdit onClick={() => editinfo("profile", null)} size={20} />
             </div>
+
             <div className="prof-12">
-              <div>
-                <b>
-                  {profile.first_name} {profile.last_name}
-                </b>
-              </div>
+              <p className="name-prof">
+                {profile.first_name} {profile.last_name}
+              </p>
+
               {profile.course && <p>{profile.course}</p>}
               {profile.university && <p>{profile.university}</p>}
+
               {status ? (
                 <div>{status}</div>
               ) : (
@@ -860,9 +897,9 @@ export default function Profile() {
                   {location.city}, {location.state}, {location.country}
                 </div>
               )}
-              {/* <div>37 connections</div> */}
             </div>
           </div>
+
           <div className="prof-1">
             <h1>Have free time! Help students And earn Money</h1>
 
@@ -888,7 +925,7 @@ export default function Profile() {
             <div>{profile.about}</div>
           </div>
           <div className="prof-4">
-            Activity
+            <p>Activity</p>
             <UserActivity userId={loggedInUserId} />
           </div>
           <div className="prof-5">
@@ -1096,7 +1133,7 @@ export default function Profile() {
             <div className="prof-8-1">
               {profile.interests.length > 0 ? (
                 profile.interests.map((interest, i) => (
-                  <div key={i} className="prof-9-1-1">
+                  <div key={i} className="prof-9-1-1 interests-dis">
                     {interest}
                   </div>
                 ))

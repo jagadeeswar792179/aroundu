@@ -1,13 +1,15 @@
 .search-input {
   width: 150px;
-  padding: 10px 40px 10px 10px;
-  border: 1px solid #ccc;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #eaeaea;
   border-radius: 20px;
   transition: width 0.3s ease;
 
   /* anchor to the right */
   position: relative;
   right: 0;
+  font-size: 15px;
+  font-weight: 600;
   transform-origin: left center;
 }
 .searchbar {
@@ -38,7 +40,6 @@
     gap: 10px;
   }
   .navbar {
-    width: 300px;
     flex-direction: column;
     height: auto;
     padding: 20px;
@@ -46,10 +47,7 @@
     border-radius: 30px;
     margin: 10px;
   }
-  .container-1,
-  .container-2 {
-    background-color: #ffffff;
-  }
+
   .navbar-1 {
     width: 100%;
     align-items: center;
@@ -70,8 +68,6 @@
   }
   .feed-container {
     width: 300px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border: 1px solid black;
   }
   .feed-container-1 {
     width: 90%;
@@ -91,7 +87,6 @@
   .postcontainer {
     width: 300px;
     border-radius: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   .searchbar {
     display: flex;

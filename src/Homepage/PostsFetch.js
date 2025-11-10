@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import PostUploadModal from "./PostUploadModal";
 import PostLoad from "../Loading/postload";
 import DiscussionUploadModal from "./DiscussionUploadModal";
+import { CommentOutlineMinimal } from "../utils/CommentOutline";
 // ...
 function PostFetch({ profile }) {
   const server = process.env.REACT_APP_SERVER;
@@ -684,11 +685,19 @@ function PostFetch({ profile }) {
       <div className="homecontainer-2">
         <div className="postcontainer">
           <div className="postwrite-container">
-            <img
-              src={profile?.profile || "/avatar.jpg"}
-              alt="profile"
-              className="postwrite-avatar"
-            />
+            {profile?.profile ? (
+              <img
+                src={profile?.profile || "/avatar.jpg"}
+                alt="profile"
+                className="postwrite-avatar"
+              />
+            ) : (
+              <div className="avatar-fallback">
+                {/* {`${profile.first_name?.[0] || ""}${
+                  profile.last_name?.[0] || ""
+                }`.toUpperCase()} */}
+              </div>
+            )}
             <input
               className="postwrite-input"
               type="text"
@@ -707,17 +716,53 @@ function PostFetch({ profile }) {
 
           <div className="postcontainer-2">
             <div className="postcontainer-2-1">
-              <RiVideoFill className="icon icon1" title="Video" size={24} />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                className="icon icon3"
+              >
+                <path d="m16 13 5.3 3.3a1 1 0 0 0 1.7-.7V8.4a1 1 0 0 0-1.7-.7L16 11" />
+                <path d="M2 3a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2z" />
+              </svg>
+
+              {/* <RiVideoFill  title="Video" size={24} /> */}
               <p>Video</p>
             </div>
             <div className="postcontainer-2-1">
-              <MdImage
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-image"
+                className="icon icon1"
+                title="Photo"
+                onClick={() => setModalOpen(true)}
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="m21 15-3.08-4.11a2 2 0 0 0-3.14-.14L11 15" />
+              </svg>
+
+              {/* <MdImage
                 className="icon icon2"
                 title="Photo"
                 size={24}
                 onClick={() => setModalOpen(true)}
                 style={{ cursor: "pointer" }}
-              />
+              /> */}
               {modalOpen && (
                 <PostUploadModal
                   isOpen={modalOpen}
@@ -729,15 +774,6 @@ function PostFetch({ profile }) {
             </div>
           </div>
         </div>
-
-        <Line
-          length={200}
-          size={1}
-          color={"black"}
-          center={true}
-          padding={10}
-          transparency={0.3}
-        />
 
         <div className="switch-container">
           <button
@@ -776,12 +812,21 @@ function PostFetch({ profile }) {
             <div className="feed-container" key={post.id}>
               <div className="feed-container-sep">
                 <div className="feed-container-1">
-                  <div style={{ display: "flex" }}>
-                    <img
-                      src={post.user?.avatar_url || "/avatar.jpg"}
-                      className="icon"
-                      alt="profile"
-                    />
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    {post.user?.avatar_url ? (
+                      <img
+                        src={post.user.avatar_url}
+                        className="avatar-img"
+                        alt="profile"
+                      />
+                    ) : (
+                      <div className="avatar-fallback">
+                        {`${post.user?.first_name?.[0] || ""}${
+                          post.user?.last_name?.[0] || ""
+                        }`.toUpperCase()}
+                      </div>
+                    )}
+
                     <div className="feed-container-1-2">
                       <b
                         className={`username ${
@@ -803,9 +848,6 @@ function PostFetch({ profile }) {
                       </p>
                     </div>
                   </div>
-
-                  {/* Follow status DIV */}
-                  {/* {renderFollowStatusDiv(post.user_id)} */}
                 </div>
               </div>
               {post.post_type === "photo" && (
@@ -814,18 +856,7 @@ function PostFetch({ profile }) {
                 </div>
               )}
 
-              {post.post_type === "discussion" && (
-                <>
-                  {contentdivform(post)}
-                  <Line
-                    length={200}
-                    size={1}
-                    color={"black"}
-                    center={true}
-                    transparency={0.3}
-                  />
-                </>
-              )}
+              {post.post_type === "discussion" && <>{contentdivform(post)}</>}
 
               <div className="feed-container-3-2">
                 <div className="feed-container-3-2-1">
@@ -836,7 +867,7 @@ function PostFetch({ profile }) {
                     {likedPosts[post.id] ? (
                       <FaHeart size={24} color="red" />
                     ) : (
-                      <FaRegHeart size={24} color="black" />
+                      <FaRegHeart size={24} color="#747474ff" />
                     )}
                   </div>
                   <span
@@ -854,11 +885,21 @@ function PostFetch({ profile }) {
                 </div>
 
                 <div className="feed-container-3-2-1">
-                  <FaRegCommentDots
-                    title="Comments"
-                    size={24}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="25"
+                    height="25"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    color="#747474ff"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                     onClick={() => setActivePostId(post.id)}
-                  />
+                  >
+                    <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path>
+                  </svg>
                   <span>{post.comment_count}</span>
                 </div>
 
@@ -871,25 +912,40 @@ function PostFetch({ profile }) {
                   style={{ cursor: "pointer" }}
                 >
                   {savedPosts[post.id] ? (
-                    <FaBookmark size={24} color="black" />
+                    <svg
+                      width={24}
+                      height={24}
+                      viewBox="0 0 24 24"
+                      fill="#205b99"
+                      color="#205b99"
+                    >
+                      <path
+                        d="M6 3.5h12a1.5 1.5 0 0 1 1.5 1.5v15.5L12 17l-7.5 3.5V5A1.5 1.5 0 0 1 6 3.5Z"
+                        stroke="currentColor"
+                        strokeWidth={1.8}
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   ) : (
-                    <FaBookmark size={24} color="gray" />
+                    <svg
+                      width={24}
+                      height={24}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      color="#205b99"
+                    >
+                      <path
+                        d="M6 3.5h12a1.5 1.5 0 0 1 1.5 1.5v15.5L12 17l-7.5 3.5V5A1.5 1.5 0 0 1 6 3.5Z"
+                        stroke="currentColor"
+                        strokeWidth={1.8}
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   )}
                 </div>
               </div>
 
-              {post.post_type === "photo" && (
-                <>
-                  <Line
-                    length={330}
-                    size={1}
-                    color={"black"}
-                    center={true}
-                    transparency={0.3}
-                  />
-                  {contentdivform(post)}
-                </>
-              )}
+              {post.post_type === "photo" && <>{contentdivform(post)}</>}
             </div>
           ))}
 

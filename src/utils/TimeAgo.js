@@ -36,7 +36,7 @@ const TimeAgo = ({ timestamp }) => {
     result = `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
   }
 
-  return <small>{result}</small>;
+  return <p>{result}</p>;
 };
 
 export default TimeAgo;

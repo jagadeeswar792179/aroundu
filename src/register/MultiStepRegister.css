@@ -308,21 +308,19 @@ select {
 /* General button styling */
 .form-button {
   display: inline-block;
-  padding: 10px 8px;
+  padding: 10px 10px;
   font-size: 13px;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg, #4a90e2, #357abd);
+  background: var(--namehead);
   border: none;
-  border-radius: 8px;
+  border-radius: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
 }
 
 /* Hover effect */
 .form-button:hover {
-  background: linear-gradient(135deg, #357abd, #2c5f9e);
   box-shadow: 0 6px 14px rgba(74, 144, 226, 0.4);
   transform: translateY(-2px);
 }

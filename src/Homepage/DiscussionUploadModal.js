@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Select from "react-select";
 import "./PostUploadModal.css";
 import { BeatLoader } from "react-spinners";
+import MultiSelectTags from "../utils/MultiSelectTags";
 
 const DiscussionUploadModal = ({ isOpen, onClose, onCreate }) => {
   const [content, setContent] = useState("");
@@ -72,7 +73,7 @@ const DiscussionUploadModal = ({ isOpen, onClose, onCreate }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal" style={{ width: 500 }}>
+      <div className="modal">
         <div className="profup-1">
           <h3>Start a Discussion</h3>
           <span onClick={onClose}>✕</span>
@@ -85,7 +86,7 @@ const DiscussionUploadModal = ({ isOpen, onClose, onCreate }) => {
             onChange={(e) => setContent(e.target.value)}
             placeholder="Share your thought..."
             style={{
-              width: "90%",
+              width: "100%",
               minHeight: "150px",
               //   resize: "vertical",
               padding: "12px",
@@ -95,7 +96,7 @@ const DiscussionUploadModal = ({ isOpen, onClose, onCreate }) => {
           />
 
           <div style={{ marginTop: "12px" }}>
-            <div className="selected-tags">
+            {/* <div className="selected-tags">
               {tags.length > 0 ? (
                 tags.map((tag) => (
                   <span key={tag.value} className="tag-chip">
@@ -105,9 +106,9 @@ const DiscussionUploadModal = ({ isOpen, onClose, onCreate }) => {
               ) : (
                 <p className="no-tags">No tags selected</p>
               )}
-            </div>
+            </div> */}
             {/* <label style={{ fontWeight: 500 }}>Tags (up to 7)</label> */}
-            <Select
+            {/* <Select
               isMulti
               options={tagOptions}
               value={tags}
@@ -151,39 +152,57 @@ const DiscussionUploadModal = ({ isOpen, onClose, onCreate }) => {
                   paddingRight: 6,
                 }),
               }}
+            /> */}
+            <MultiSelectTags
+              value={tags}
+              options={tagOptions}
+              onChange={setTags}
+              placeholder="Select up to 7 tags"
             />
           </div>
-
-          <label
+          <div
             style={{
+              width: "100%",
               display: "flex",
-              alignItems: "center",
-              gap: 8,
-              marginTop: 12,
+              justifyContent: "space-between",
             }}
           >
-            <input
-              type="checkbox"
-              checked={visibility === "university"}
-              onChange={(e) =>
-                setVisibility(e.target.checked ? "university" : "public")
-              }
-            />
-            <span>Only share with my university</span>
-          </label>
-
-          <div style={{ marginTop: "12px", display: "flex", gap: 8 }}>
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="post-button"
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                margin: "8px 0",
+              }}
+              title="If checked, this post will only be visible to students of your university"
             >
-              {loading ? (
-                <BeatLoader size={10} color="#ffffff" />
-              ) : (
-                "Post Discussion"
-              )}
-            </button>
+              <span className="uni-1">University</span>
+
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={visibility === "university"}
+                  onChange={(e) =>
+                    setVisibility(e.target.checked ? "university" : "public")
+                  }
+                />
+                <span className="slider" />
+              </div>
+            </label>
+
+            <div style={{ marginTop: "12px", display: "flex", gap: 8 }}>
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="post-button"
+              >
+                {loading ? (
+                  <BeatLoader size={10} color="#ffffff" />
+                ) : (
+                  "Post Discussion"
+                )}
+              </button>
+            </div>
             {/* <button
               onClick={onClose}
               disabled={loading}

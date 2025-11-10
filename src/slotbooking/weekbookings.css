@@ -43,8 +43,8 @@
 
 .wb-day {
   border: 1px solid #e5e7eb;
-  padding: 12px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 30px;
   cursor: pointer;
   background: #ffffff;
   transition: transform 120ms ease, box-shadow 120ms ease;
@@ -52,13 +52,14 @@
   flex-direction: column;
   gap: 8px;
 }
+
 .wb-day:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
 }
 .wb-day-selected {
-  border: 2px solid #2563eb;
-  background: linear-gradient(180deg, rgba(37, 99, 235, 0.03), #fff);
+  color: white;
+  background: var(--namehead);
 }
 .wb-day-past {
   opacity: 0.85;
@@ -67,11 +68,10 @@
 /* Day tile text */
 .wb-day-title {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 11px;
 }
 .wb-day-date {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 11px;
 }
 .wb-day-count {
   margin-top: 6px;
@@ -83,7 +83,7 @@
 .wb-panel {
   width: 420px;
   border: 1px solid #eef2f7;
-  border-radius: 10px;
+  border-radius: 30px;
   padding: 12px;
   background: #fff;
   display: flex;
@@ -106,6 +106,7 @@
 
 /* Panel body */
 .wb-panel-body {
+  gap: 10px;
   margin-top: 12px;
   overflow: auto;
 }
@@ -113,17 +114,26 @@
 .wb-empty {
   color: #6b7280;
 }
-
+.wb-slot-time div {
+  background-color: #3d6b9c;
+  border-radius: 20px;
+  padding: 10px;
+  color: white;
+}
 /* Slot row */
 .wb-slot-row {
   display: flex;
   align-items: center;
+  background-color: var(--bcgcolor);
   justify-content: space-between;
-  padding: 10px 6px;
+  border-radius: 20px;
+  /* box-shadow: var(--boxshadowmain); */
+  padding: 10px;
   border-bottom: 1px dashed #f3f4f6;
 }
 .wb-slot-time {
-  font-weight: 600;
+  font-weight: 700;
+  gap: 10px;
   font-size: 14px;
 }
 .wb-prev-note {
@@ -132,29 +142,11 @@
 }
 
 /* Buttons */
-.wb-btn {
-  border: 1px solid #e6e7ea;
-  background: #fff;
-  color: #111827;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-.wb-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-.wb-btn-primary {
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.14);
-}
+
 .wb-btn-ghost {
-  color: #ef4444;
-  width: 40px;
-  height: 40px;
+  color: var(--namehead);
+  width: 20px;
+  height: 20px;
 }
 
 /* Modal */
@@ -415,13 +407,13 @@ body.modal-open {
 /* ---- Buttons ---- */
 /* Base button */
 .wb-btn {
-  border: 1px solid transparent;
+  border: 1px solid rgb(238, 238, 238);
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 20px;
   font-size: 14px;
+  background-color: white;
+  box-shadow: var(--boxshadowmain);
   cursor: pointer;
-  background: #f3f4f6;
-  color: #111827;
   transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.06s;
 }
 .wb-btn:hover {
@@ -431,9 +423,10 @@ body.modal-open {
 
 /* Primary */
 .wb-btn-primary {
-  background: rgba(73, 113, 233, 1);
+  border-radius: 20px;
+  background: var(--color-green);
+
   color: #fff;
-  border-color: rgba(63, 108, 234, 0.95);
 }
 .wb-btn-primary:hover {
   filter: brightness(0.98);
@@ -481,6 +474,10 @@ body.modal-open {
 @media (min-width: 0px) and (max-width: 465px) {
   .wb-panel {
     width: 272px;
+  }
+  .wb-slot-time {
+    font-size: 10px;
+    gap: 0;
   }
 }
 @media (min-width: 466px) and (max-width: 770px) {

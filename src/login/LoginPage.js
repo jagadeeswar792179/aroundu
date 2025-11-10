@@ -4,6 +4,7 @@ import { Eye, EyeOff, Server } from "lucide-react";
 import "./LoginPage.css";
 import Line from "../utils/line";
 import { BeatLoader } from "react-spinners";
+import BrandLogo from "../utils/BrandLogo";
 
 const LoginPage = () => {
   const navigate = useNavigate(); // Hook to navigate pages
@@ -95,6 +96,7 @@ const LoginPage = () => {
   return (
     <div className="login-container">
       <div className="logo-login">
+        {/* <BrandLogo /> */}
         <img className="logo-png" src="logo.png" />
         <p>
           Around

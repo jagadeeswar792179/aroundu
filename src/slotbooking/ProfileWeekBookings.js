@@ -339,63 +339,75 @@ export default function ProfileWeekBookings({ profileOwnerId }) {
           );
         })}
       </div>
-
-      <div className="wb-panel">
-        <div className="wb-panel-header">
-          <h3 className="wb-panel-title">Free times for {selectedDayIso}</h3>
-          <div className="wb-past-note-small">
-            {selectedDayIso < todayIso ? "Past day — read-only" : ""}
+      <div className="flex-c center-c">
+        <div className="wb-panel">
+          <div className="wb-panel-header">
+            <h3 className="wb-panel-title">
+              Slots available for {selectedDayIso}
+            </h3>
+            <div className="wb-past-note-small">
+              {selectedDayIso < todayIso ? "Past day — read-only" : ""}
+            </div>
           </div>
-        </div>
 
-        <div className="wb-panel-body">
-          {loadingDay ? (
-            <div className="wb-loading">Loading...</div>
-          ) : (instances[selectedDayIso] || []).length === 0 ? (
-            <div className="wb-empty">No free slots yet.</div>
-          ) : (
-            (instances[selectedDayIso] || []).map((si) => (
-              <div key={si.id} className="wb-slot-row">
-                <div>
-                  <div className="wb-slot-time">
-                    {new Date(si.start_ts).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}{" "}
-                    —{" "}
-                    {new Date(si.end_ts).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                  {si.notes && <div className="wb-slot-notes">{si.notes}</div>}
-                  <div style={{ fontSize: 12, color: "#6b7280" }}>
-                    {si.pending_count
-                      ? `${si.pending_count} request${
-                          si.pending_count > 1 ? "s" : ""
-                        } pending`
-                      : ""}
-                  </div>
-                </div>
+          <div className="wb-panel-body">
+            {loadingDay ? (
+              <div className="wb-loading">Loading...</div>
+            ) : (instances[selectedDayIso] || []).length === 0 ? (
+              <div className="wb-empty">No free slots yet.</div>
+            ) : (
+              (instances[selectedDayIso] || []).map((si) => (
+                <div key={si.id} className="wb-slot-row">
+                  <div>
+                    <div className="wb-slot-time flex-r center">
+                      <div>
+                        {new Date(si.start_ts).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                      —{" "}
+                      <div>
+                        {new Date(si.end_ts).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </div>
 
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <button
-                    className={`wb-btn ${
-                      si.pending_count > 0
-                        ? "wb-btn-disabled"
-                        : "wb-btn-primary"
-                    }`}
-                    disabled={si.pending_count > 0}
-                    onClick={() => openRequestModal(si)}
+                    {si.notes && (
+                      <div className="wb-slot-notes">{si.notes}</div>
+                    )}
+                    <div style={{ fontSize: 12, color: "#6b7280" }}>
+                      {si.pending_count
+                        ? `${si.pending_count} request${
+                            si.pending_count > 1 ? "s" : ""
+                          } pending`
+                        : ""}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{ display: "flex", gap: 8, alignItems: "center" }}
                   >
-                    {si.pending_count > 0 ? "requested" : "request"}
-                  </button>
+                    <button
+                      className={`wb-btn ${
+                        si.pending_count > 0
+                          ? "wb-btn-disabled"
+                          : "wb-btn-primary"
+                      }`}
+                      disabled={si.pending_count > 0}
+                      onClick={() => openRequestModal(si)}
+                    >
+                      {si.pending_count > 0 ? "Requested" : "Request"}
+                    </button>
 
-                  {/* {renderRequestButton(si)} */}
+                    {/* {renderRequestButton(si)} */}
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
 

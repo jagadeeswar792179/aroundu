@@ -5,7 +5,6 @@
   margin: 20px;
   background-color: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 🌟 Added soft shadow */
   overflow: hidden; /* keeps rounded edges clean */
 }
 
@@ -15,11 +14,14 @@
   padding: 0 0 0 20px;
   align-items: center;
   border-bottom: 1px solid #e0e0e0; /* softer border */
-  background: #f9f9f9; /* 🌟 subtle background for header */
   font-weight: 600;
   font-size: 18px; /* slightly bigger */
 }
-
+.mess-1 h2,
+.mess-head {
+  color: var(--namehead);
+  font-weight: 700;
+}
 .mess-2 {
   display: flex;
   height: calc(100% - 60px); /* 🌟 keeps full height layout */
@@ -76,21 +78,26 @@
   gap: 4px;
   padding: 0 20px;
   border-bottom: 1px solid #eee;
-  background: #fafafa;
+  background-color: white;
   font-size: 15px;
 }
-
+.convo-name-active {
+  font-weight: 700;
+  color: var(--namehead);
+}
 .mess-9 {
+  background-color: white;
+
   flex: 1; /* 🌟 takes full space */
   overflow-y: auto;
+  scrollbar-width: none;
   padding: 10px 15px; /* better spacing */
-  background: #fdfdfd;
 }
 
 .mess-10 {
   padding: 12px;
   border-top: 1px solid #eee;
-  background: #fafafa;
+  background-color: white;
 }
 
 .active {
@@ -103,7 +110,7 @@
   align-items: flex-end;
   background: #fff;
   border-radius: 25px;
-  border: 1px solid #ccc;
+  border: 1px solid #f3f3f3;
   padding: 6px 12px;
   transition: border-color 0.2s;
 }
@@ -129,7 +136,7 @@
   right: 10px;
   bottom: 50%;
   transform: translateY(50%);
-  background: #007bff;
+  background-color: var(--namehead);
   color: #fff;
   border: none;
   border-radius: 50%;
@@ -143,7 +150,8 @@
 }
 
 .send-btn:hover {
-  background: #0056b3;
+  background-color: var(--color-green);
+
   transform: translateY(50%) scale(1.05); /* 🌟 slight pop effect */
 }
 
@@ -189,8 +197,8 @@
   background-color: #fff;
 
   /* subtle shadow */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border-radius: 8px; /* optional: smooth corners */
+  box-shadow: var(--boxshadowmain);
+  border-radius: 25px; /* optional: smooth corners */
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -286,6 +294,7 @@
   /* left list uses full parent width */
   .left-panel {
     width: 100%;
+
     min-width: 0; /* prevent overflow on small screens */
     max-width: 100%;
   }
@@ -354,9 +363,15 @@
 @media (min-width: 0px) and (max-width: 465px) {
   /* left becomes full width (stacked) */
   .left-panel {
-    min-width: 330px;
+    min-width: 300px;
     position: relative;
     z-index: 1;
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
+}
+.mobile-back-btn {
+  background-color: var(--namehead);
+  border-radius: 30px;
+  padding: 10px;
+  color: white;
 }

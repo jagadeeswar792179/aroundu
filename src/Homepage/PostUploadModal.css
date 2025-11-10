@@ -2,6 +2,10 @@
   display: flex;
   justify-content: space-between;
 }
+.reactEasyCrop_Container,
+.reactEasyCrop_CropArea {
+  border-radius: 30px;
+}
 .profup-1-btn {
   position: "absolute";
   top: "8px";
@@ -11,33 +15,52 @@
   font-size: "18px";
   cursor: "pointer";
 }
+.file-upload {
+}
 .profup-2 {
+  margin-top: 20px;
   display: flex;
   gap: 20px;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  height: 500px;
-  width: 700px;
+  max-height: 500px;
+  height: auto;
+  width: 100%;
 }
 .upload-btn {
   padding: 10px 20px;
-  border: 2px dashed #888;
-  border-radius: 8px;
+  border: 2px dashed var(--namehead);
+  border-radius: 20px;
   cursor: pointer;
+  color: var(--namehead);
   background: #f9f9f9;
   font-size: 14px;
   transition: 0.2s;
 }
-
+.final-cropper-1 {
+  position: relative;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 300px;
+  border-radius: 30px;
+}
+.final-cropper-2 {
+}
 .upload-btn:hover {
   background: #eee;
   border-color: #555;
 }
 .profup-3 {
-  width: 700px;
+  width: 100%;
   display: flex;
-  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  flex-direction: column;
 }
 /* Container */
 .post-box {
@@ -46,29 +69,24 @@
   justify-content: space-between;
   width: 100%;
   max-width: 350px;
+  gap: 20px;
   margin: 0 auto;
   padding: 16px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 30px;
+  background: white;
 }
 
 /* Textarea */
 .post-textarea {
   resize: none;
   min-height: 100px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 15px 10px 10px 15px;
+  border-radius: 30px;
+  border: 1px solid rgb(229 231 235 / var(--tw-border-opacity, 1));
   font-size: 14px;
   font-family: inherit;
   outline: none;
   transition: border 0.2s;
-}
-
-.post-textarea:focus {
-  border-color: #666;
 }
 
 /* React Select overrides */
@@ -90,16 +108,19 @@
 .post-button {
   padding: 10px 20px;
   border: none;
-  border-radius: 8px;
-  background: #333;
+  width: fit-content;
+  border-radius: 20px;
+  background: var(--namehead);
   color: #fff;
   font-size: 14px;
   cursor: pointer;
   transition: background 0.2s;
 }
-
+.uni-1 {
+  color: rgb(107 114 128 / var(--tw-text-opacity, 1));
+}
 .post-button:hover {
-  background: #000;
+  background: rgb(10, 45, 117);
 }
 .selected-tags {
   display: flex;

@@ -1,5 +1,5 @@
 // src/components/MessageModal.jsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { FiSend } from "react-icons/fi";
 import io from "socket.io-client";
 import LoadMess2 from "../Loading/LoadMess2";
@@ -308,7 +308,7 @@ export default function MessageModal({
       setSending(false);
     }
   };
-
+  const profileImage = useCallback((url) => url || "/avatar.jpg", []);
   const onKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -348,7 +348,7 @@ export default function MessageModal({
           maxWidth: "100%",
           height: "90vh",
           background: "#fff",
-          borderRadius: 10,
+          borderRadius: 30,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -366,40 +366,57 @@ export default function MessageModal({
             className="mess-8"
             style={{ padding: 12, borderBottom: "1px solid #eee" }}
           >
-            <div style={{ marginLeft: "auto" }}>
-              <button
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  fontSize: 18,
-                  cursor: "pointer",
-                }}
-                onClick={() => onClose?.()}
-              >
-                ✕
-              </button>
-            </div>
+            <div style={{ marginLeft: "auto" }}></div>
             {active && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <img
-                  src={active.profile || "/avatar.jpg"}
-                  alt={active.peer_name}
-                  style={{ width: 40, height: 40, borderRadius: "50%" }}
-                />
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: "16px" }}>
-                    {displayName}
-                  </div>
-                  <div style={{ fontSize: "13px", color: "#666" }}>
-                    {active.university || "University info not available"}
+              <div className="flex-r jspacebtw">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  {active.profile ? (
+                    <img
+                      src={profileImage(active.profile) || "/avatar.jpg"}
+                      alt={active.peer_name}
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                      }}
+                    />
+                  ) : (
+                    <div className="avatar-fallback">
+                      {(() => {
+                        const full = `${displayName || ""}`.trim();
+                        const parts = full.split(" ").filter(Boolean);
+
+                        const first = parts[0]?.[0] || "";
+                        const second = parts[1]?.[0] || "";
+
+                        return (first + second).toUpperCase();
+                      })()}
+                    </div>
+                  )}
+                  <div>
+                    <div className="convo-name-active">{displayName}</div>
+                    <div style={{ fontSize: "13px", color: "#666" }}>
+                      {active.university || "University info not available"}
+                    </div>
                   </div>
                 </div>
+                <button
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    fontSize: 18,
+                    cursor: "pointer",
+                  }}
+                  onClick={() => onClose?.()}
+                >
+                  ✕
+                </button>
               </div>
             )}
           </div>

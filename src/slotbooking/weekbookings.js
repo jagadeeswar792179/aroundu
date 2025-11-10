@@ -468,7 +468,7 @@ export default function WeekBookings({ profileOwnerId = null }) {
 
   /* ---------- UI ---------- */
   return (
-    <div className="wb-root">
+    <div className="wb-root flex-c center">
       {/* DAYS */}
       {selectedPeer && (
         <MessageModal
@@ -498,7 +498,9 @@ export default function WeekBookings({ profileOwnerId = null }) {
       {/* RIGHT PANEL */}
       <div className="wb-panel">
         <div className="wb-panel-header">
-          <h3 className="wb-panel-title">Free times for {selectedDayIso}</h3>
+          <h3 className="wb-panel-title">
+            Slots Available on {selectedDayIso}
+          </h3>
 
           {selectedDayIso >= todayIso ? (
             <button
@@ -512,7 +514,7 @@ export default function WeekBookings({ profileOwnerId = null }) {
           )}
         </div>
 
-        <div className="wb-panel-body">
+        <div className="wb-panel-body flex-c">
           {loadingDay ? (
             <div className="wb-loading">Loading...</div>
           ) : (instances[selectedDayIso] || []).length === 0 ? (
@@ -521,16 +523,20 @@ export default function WeekBookings({ profileOwnerId = null }) {
             (instances[selectedDayIso] || []).map((si) => (
               <div key={si.id} className="wb-slot-row">
                 <div>
-                  <div className="wb-slot-time">
-                    {new Date(si.start_ts).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}{" "}
+                  <div className="wb-slot-time flex-r center">
+                    <div>
+                      {new Date(si.start_ts).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                     —{" "}
-                    {new Date(si.end_ts).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    <div>
+                      {new Date(si.end_ts).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </div>
                 </div>
 
@@ -554,7 +560,7 @@ export default function WeekBookings({ profileOwnerId = null }) {
                     className="wb-btn"
                     onClick={() => openRequestsModal(si.id)}
                   >
-                    view all Requests ({si.pending_count || 0})
+                    Requests ({si.pending_count || 0})
                   </button>
                 </div>
               </div>

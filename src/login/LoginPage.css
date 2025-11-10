@@ -2,15 +2,15 @@
   display: flex;
   justify-content: space-evenly;
   align-items: center;
+  background-color: var(--bcgcolor);
   height: 100vh;
 }
 
 .login-box {
   background-color: white;
-  padding: 15px 15px 30px 15px;
-  border-radius: 10px;
+  padding: 30px;
+  border-radius: 30px;
   width: 391px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .login-title {
@@ -32,11 +32,13 @@
 .form-group input {
   width: 100%;
   box-sizing: border-box;
+  background-color: var(--color-light-grey);
   padding: 10px;
   height: 50px;
-  padding-right: 40px;
+  padding: 0px 40px 0px 15px;
+
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 15px;
 }
 .form-group input:focus {
   border-color: blue;
@@ -47,17 +49,23 @@
   position: relative;
 }
 .logo-login p:nth-of-type(1) {
-  color: #0066cc;
+  color: var(--namehead);
   font-size: 60px;
   margin: 0px;
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
-  font-weight: bolder;
+  font-weight: 800;
+}
+.logo-login span:nth-of-type(1) {
+  color: var(--color-green);
+  font-size: 70px;
+  margin: 0px;
+  font-weight: 800;
 }
 .logo-login p:nth-of-type(2) {
-  font-size: 30px;
+  font-size: 25px;
   margin: 0px;
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
-  flex-wrap: wrap;
+  font-weight: 500;
+  font-family: var(--font-main);
+  opacity: 0.6;
 }
 .eye-button {
   position: absolute;
@@ -68,25 +76,36 @@
   cursor: pointer;
   color: #666;
 }
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  font-family: var(--font-main) !important;
+  -webkit-text-fill-color: #000 !important;
+  transition: background-color 9999s ease-in-out 0s; /* removes yellow bg */
+}
 
+/* If you want to remove the highlight completely */
+input:-webkit-autofill {
+  box-shadow: 0 0 0px 1000px rgb(245, 245, 245) inset !important;
+}
 .login-button {
   width: 100%;
   padding: 10px;
-  background-color: #0066cc;
+  background-color: #205b99;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   margin-top: 10px;
   font-size: 16px;
   cursor: pointer;
 }
 .register-button {
-  width: 50%;
+  width: 100%;
   padding: 10px;
-  background-color: #20760f;
+  background-color: #74c47b;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   margin: 30px 0 0 0;
   font-size: 16px;
   cursor: pointer;
@@ -111,7 +130,7 @@
 .text-button {
   background: none;
   border: none;
-  color: #0066cc;
+  color: #205b99;
   cursor: pointer;
   font-size: 14px;
 }

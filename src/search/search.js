@@ -112,30 +112,26 @@ export default function SearchPage() {
 
       <div className="search-cont-2">
         <div className="search-page">
-          <p className="search-heading">Search results for "{q}"</p>
+          <p className="search-heading">
+            Search results for <span>"{q}"</span>
+          </p>
 
           <div className="search-tabs">
             <button
               onClick={() => switchType("students")}
-              className={`search-btn-category ${
-                type === "students" ? "clicked-active" : ""
-              }`}
+              className={`switch-btn ${type === "students" ? "active" : ""}`}
             >
               Students
             </button>
             <button
               onClick={() => switchType("professors")}
-              className={`search-btn-category ${
-                type === "professors" ? "clicked-active" : ""
-              }`}
+              className={`switch-btn  ${type === "professors" ? "active" : ""}`}
             >
               Professors
             </button>
             <button
               onClick={() => switchType("posts")}
-              className={`search-btn-category ${
-                type === "posts" ? "clicked-active" : ""
-              }`}
+              className={`switch-btn  ${type === "posts" ? "active" : ""}`}
             >
               Posts
             </button>
@@ -160,16 +156,19 @@ export default function SearchPage() {
                 <div className="search-res-people">
                   {users.map((u) => (
                     <div key={u.id} className="result-card">
-                      <img
-                        src={u.avatar_url || "/avatar.jpg"}
-                        alt="profile"
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                        }}
-                      />
+                      {u.avatar_url ? (
+                        <img
+                          src={u.avatar_url}
+                          className="search-img"
+                          alt="profile"
+                        />
+                      ) : (
+                        <div className="avatar-fallback">
+                          {`${u?.first_name?.[0] || ""}${
+                            u?.last_name?.[0] || ""
+                          }`.toUpperCase()}
+                        </div>
+                      )}
                       <div className="result-card-body">
                         <div
                           style={{ fontWeight: 700, cursor: "pointer" }}

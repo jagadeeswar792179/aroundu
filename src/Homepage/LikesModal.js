@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ExploreLoading1 from "../Loading/explore-loading-1";
 import { AiOutlineClose } from "react-icons/ai";
-
+import "./LikesModal.css";
 const LikesModal = ({ postId, onClose }) => {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
@@ -52,13 +52,27 @@ const LikesModal = ({ postId, onClose }) => {
         </div>
         <div className="likes-list" onScroll={handleScroll}>
           {users.map((u) => (
-            <div key={u.id} className="prof-card">
-              <img
-                src={u.avatar_url || "/avatar.jpg"}
-                alt="avatar"
-                style={{ width: "70px", height: "70px", borderRadius: "50%" }}
-              />
-              <div>
+            <div key={u.id} className="like-card">
+              {u.avatar_url ? (
+                <img
+                  src={u.avatar_url || "/avatar.jpg"}
+                  alt="avatar"
+                  style={{ width: "35px", height: "35px", borderRadius: "50%" }}
+                />
+              ) : (
+                <div className="likes-avatar-fallback flex-r">
+                  {(() => {
+                    const full = `${u?.name || ""}`.trim();
+                    const parts = full.split(" ").filter(Boolean);
+
+                    const first = parts[0]?.[0] || "";
+                    const second = parts[1]?.[0] || "";
+
+                    return (first + second).toUpperCase();
+                  })()}
+                </div>
+              )}
+              <div className="like-names">
                 <div>{u.name}</div>
                 <div>{u.course}</div>
                 <div>{u.university}</div>

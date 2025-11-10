@@ -5,6 +5,7 @@ import "./LostFound.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaCheckCircle } from "react-icons/fa";
 import { BeatLoader, ClipLoader } from "react-spinners";
+import LFload from "../Loading/lostfoundload";
 
 const PAGE_SIZE = 10; // match backend or pass &limit
 const TABS = ["lost", "found", "my"];
@@ -463,7 +464,7 @@ export default function LostFound() {
             );
           })}
 
-          {uiLoading && <div className="loading">Loading...</div>}
+          {uiLoading && <LFload />}
         </div>
 
         {showModal && (

@@ -30,12 +30,19 @@
   padding: 12px;
   flex-direction: column;
   gap: 5px;
-  width: 800px;
+  width: 700px;
   min-height: 400px;
   border-radius: 20px;
   background-color: rgb(255, 255, 255);
 }
-
+.explore-fallback {
+  width: 70px;
+  height: 70px;
+  justify-content: center;
+  align-items: center;
+  background-color: #ecf6ff;
+  border-radius: 50%;
+}
 /* ===== ADDED: trending prof card styles (append these) ===== */
 
 /* Container grid for professors (keeps two cards per row) */
@@ -53,9 +60,9 @@
   gap: 12px;
   width: 300px;
   padding: 14px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 30px;
   background: #fff !important;
+  box-shadow: var(--boxshadowmain);
   border: 1px solid rgba(20, 40, 80, 0.04);
   align-items: center;
   justify-content: space-evenly;
@@ -99,10 +106,13 @@
   align-items: center;
   gap: 8px; /* reduced gap since no badge in top row */
 }
+.showmore-btn-container {
+  align-items: flex-end;
+}
 .prof-name {
   font-weight: 700;
   font-size: 16px;
-  color: #12233a; /* dark navy */
+  color: var(--namehead); /* dark navy */
 }
 
 /* Meta lines */
@@ -195,7 +205,7 @@
   border-radius: 50%;
 }
 .toggle-switch input:checked + .slider {
-  background-color: #2196f3;
+  background-color: var(--namehead);
 }
 .toggle-switch input:checked + .slider:before {
   transform: translateX(22px);
@@ -211,25 +221,29 @@
 }
 
 .show-more-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 10px;
+  border-radius: 15px;
   border: none;
-  background-color: #75c0eb;
-  color: #fff;
-  font-weight: 500;
-  font-size: 16px;
+  /* background-color: var(--namehead); */
+  color: var(--namehead);
+  font-weight: 800;
+  text-decoration: underline;
+  font-size: 10px;
+  background-color: white;
+
+  margin: 10px 20px 0 0;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: var(--boxshadowmain);
   position: relative;
   overflow: hidden;
 }
 
 .show-more-btn:hover {
-  background-color: #528cdd;
+  background-color: var(--namehead);
+  color: white;
 }
 
 /* Arrow container */
@@ -251,7 +265,7 @@
   }
   .explore-2-2,
   .explore-2-1 {
-    width: 334px;
+    width: 300px;
   }
 }
 @media (min-width: 466px) and (max-width: 770px) {

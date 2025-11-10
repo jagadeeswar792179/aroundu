@@ -150,14 +150,29 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
 
           {comments.map((comment) => (
             <div className="comment" key={comment.id}>
-              <img
-                src={comment.user.avatar_url || "/avatar.jpg"}
-                alt="avatar"
-                className="comment-avatar"
-              />
+              {comment.user?.avatar_url ? (
+                <img
+                  src={comment.user.avatar_url || "/avatar.jpg"}
+                  alt="avatar"
+                  className="comment-avatar"
+                />
+              ) : (
+                <div className="comment-avatar-fallback flex-r">
+                  {(() => {
+                    const full = `${comment.user?.name || ""}`.trim();
+                    const parts = full.split(" ").filter(Boolean);
+
+                    const first = parts[0]?.[0] || "";
+                    const second = parts[1]?.[0] || "";
+
+                    return (first + second).toUpperCase();
+                  })()}
+                </div>
+              )}
+
               <div className="comment-1">
                 <div className="comment-1-1">
-                  <strong>{comment.user.name}</strong>
+                  <p>{comment.user.name}</p>
                   <p>{comment.content}</p>
                   <TimeAgo timestamp={comment.created_at} />
                 </div>

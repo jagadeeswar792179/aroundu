@@ -146,32 +146,27 @@ export default function Uprofile() {
         <div className="prof">
           <div className="prof-1">
             <div className="prof-11">
-              <img
-                src={profileUrl || "/avatar.jpg"}
-                alt="Profile"
-                style={{
-                  width: 150,
-                  height: 150,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                }}
-              />
+              {profileUrl ? (
+                <img src={profileUrl} alt="Profile" className="profile-img" />
+              ) : (
+                <div className="profile-fallback">
+                  {`${profile.first_name?.[0] || ""}${
+                    profile.last_name?.[0] || ""
+                  }`.toUpperCase()}
+                </div>
+              )}
             </div>
+
             <div className="prof-12">
               <div>
                 <b>
                   {profile.first_name} {profile.last_name}
                 </b>
               </div>
+
               {profile.course && <p>{profile.course}</p>}
               {profile.university && <p>{profile.university}</p>}
-              {/* {status ? (
-                <div>{status}</div>
-              ) : (
-                <div>
-                  {location?.city}, {location?.state}, {location?.country}
-                </div>
-              )} */}
+
               <button
                 onClick={() => setSelectedPeer(profile)}
                 className="form-button"
@@ -187,7 +182,7 @@ export default function Uprofile() {
             <div>{profile.about || "No bio available"}</div>
           </div>
           <div className="prof-3">
-            <h2>tutoring help</h2>
+            <h2>Tutoring help</h2>
             <ProfileWeekBookings profileOwnerId={userId} />
           </div>
 
@@ -308,7 +303,7 @@ export default function Uprofile() {
             <div className="prof-8-1">
               {profile.interests.length > 0 ? (
                 profile.interests.map((interest, i) => (
-                  <div key={i} className="prof-9-1-1">
+                  <div key={i} className="prof-9-1-1 interests-dis">
                     {interest}
                   </div>
                 ))

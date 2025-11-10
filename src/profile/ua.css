@@ -1,5 +1,5 @@
 .activity-container {
-  margin-top: 20px;
+  /* margin-top: 20px; */
 }
 
 .activity-title {
@@ -29,6 +29,7 @@
 .post-image {
   width: 100%;
   height: 100%;
+  border-radius: 30px;
   object-fit: cover;
   display: block;
 }
@@ -58,7 +59,6 @@
 }
 
 .show-more-btn {
-  background-color: #007bff;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -73,10 +73,9 @@
 }
 .post-card {
   position: relative;
-  border-radius: 8px;
+  border-radius: 30px;
   overflow: hidden;
   height: 220px; /* ensure card has height so absolute button overlays image */
-  background: #eee; /* fallback while image loads */
 }
 
 /* image fills card */
