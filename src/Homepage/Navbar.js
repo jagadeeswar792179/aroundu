@@ -32,22 +32,31 @@ export default function Navbar() {
     setModalType(num);
     setModalOpen(true);
   };
-  // Close on outside click
   useEffect(() => {
     function onDocClick(e) {
       if (!kebabOpen) return;
       if (drawerRef.current && !drawerRef.current.contains(e.target)) {
         setKebabOpen(false);
+        document.body.style.overflow = ""; // ✅ restore scroll here
       }
     }
     function onEsc(e) {
-      if (e.key === "Escape") setKebabOpen(false);
+      if (e.key === "Escape") {
+        setKebabOpen(false);
+        document.body.style.overflow = ""; // ✅ and here
+      }
     }
     document.addEventListener("mousedown", onDocClick);
     document.addEventListener("keydown", onEsc);
     return () => {
       document.removeEventListener("mousedown", onDocClick);
       document.removeEventListener("keydown", onEsc);
+    };
+  }, [kebabOpen]);
+  useEffect(() => {
+    document.body.style.overflow = kebabOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
     };
   }, [kebabOpen]);
 

@@ -253,8 +253,7 @@
   }
   .feed-container {
     width: 380px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border: 1px solid black;
+    box-shadow: var(--boxshadowmain);
   }
   .feed-container-1 {
     width: 90%;
