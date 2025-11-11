@@ -19,8 +19,21 @@
 }
 .likes-list {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 fraction columns */
-  gap: 12px 12px; /* row-gap & column-gap */
-  height: 500px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   padding: 10px 0;
+  width: 100%;
+  align-content: start; /* ✅ prevents empty vertical space */
+  grid-auto-rows: auto; /* ✅ makes row height natural */
+}
+
+@media (max-width: 466px) {
+  .likes-list {
+    grid-template-columns: 1fr; /* ✅ collapses cleanly */
+  }
+}
+
+/* Remove bottom margins from items */
+.likes-list > * {
+  margin: 0 !important;
 }

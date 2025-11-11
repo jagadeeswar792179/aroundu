@@ -198,12 +198,6 @@
   .modal {
     width: 314px;
   }
-  .load-1 {
-    width: 333px;
-  }
-  .likes-list {
-    width: 300px;
-  }
 }
 @media (min-width: 466px) and (max-width: 770px) {
   .container-1,

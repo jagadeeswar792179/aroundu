@@ -221,7 +221,9 @@ export default function SearchPage() {
             )}
           </div>
         </div>
-        <LostFound />
+        <div className="hider-small">
+          <LostFound />
+        </div>
       </div>
     </>
   );

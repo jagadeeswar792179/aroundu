@@ -58,7 +58,7 @@
 .prof-card {
   display: flex;
   gap: 12px;
-  width: 300px;
+  width: 280px;
   padding: 14px;
   border-radius: 30px;
   background: #fff !important;

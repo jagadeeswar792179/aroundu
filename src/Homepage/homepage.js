@@ -136,7 +136,9 @@ function Homepage() {
           </div>
 
           <PostFetch profile={profile} />
-          <LostFound />
+          <div className="hider-small">
+            <LostFound />
+          </div>
         </div>
       </div>
     </>

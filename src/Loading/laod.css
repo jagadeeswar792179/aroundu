@@ -66,10 +66,12 @@
   border-radius: 10px;
   outline: 1px solid #ccc;
 }
+
 @media (min-width: 0px) and (max-width: 465px) {
   .load-1 {
     display: flex !important;
     flex-direction: column;
+    width: 280px;
   }
   .sload-1 {
     width: 130px;
