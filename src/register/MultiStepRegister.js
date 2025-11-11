@@ -6,10 +6,14 @@ import PasswordInput from "../utils/PasswordInput";
 import OtpInput from "../utils/OtpInput";
 import { useNavigate } from "react-router-dom";
 import { BeatLoader } from "react-spinners";
+import CustomSelect from "../utils/CustomSelect";
+import MultiSelectTags from "../utils/MultiSelectTags";
+import { VerifiedIcon } from "lucide-react";
 
 const RegisterForm = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [Otpload, setOtpload] = useState(false);
   const [otpValue, setOtpValue] = useState("");
   const [checkmail, setcheckmail] = useState(false);
   const [resendTimer, setResendTimer] = useState(60); // 60 seconds countdown
@@ -153,12 +157,38 @@ const RegisterForm = () => {
     "SpringField University",
     "Harvard University",
     "Stanford University",
-    "MIT",
     "University of Oxford",
     "University of Cambridge",
     "Other",
   ].map((u) => ({ value: u, label: u }));
+  const universityEmailDomains = {
+    "Western New England University": "wne.edu",
+    "SpringField University": "springfield.edu",
+    "Harvard University": "harvard.edu",
+    "Stanford University": "stanford.edu",
+    "University of Oxford": "oxford.edu",
+    others: "gmail.com", // <-- match the option label
+    "University of Cambridge": "cambridge.edu",
+  };
+  const getDomainForUniversity = (uni) =>
+    universityEmailDomains[uni] || "wne.edu"; // default domain if unknown
 
+  // sanitize local part a bit (optional)
+  const sanitizeLocal = (s) => s.replace(/\s+/g, "").replace(/@.*/, "");
+
+  const enforceEmailDomain = (rawValue, uni) => {
+    const local = sanitizeLocal(rawValue || "");
+    if (!local) return ""; // if empty, don't append anything
+    return `${local}@${getDomainForUniversity(uni)}`;
+  };
+  useEffect(() => {
+    if (!formData.university) {
+      setFormData((f) => ({
+        ...f,
+        university: "Western New England University",
+      }));
+    }
+  }, []);
   useEffect(() => {
     if (formData.birthMonth && formData.birthYear) {
       const monthIndex = months.indexOf(formData.birthMonth);
@@ -265,8 +295,15 @@ const RegisterForm = () => {
     }
 
     // simple email regex
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.(edu|ac|college|university)$/i;
-    const emailRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
+
+    const allowedDomains = Object.values(universityEmailDomains);
+    const emailRegex = new RegExp(
+      `^[^\\s@]+@(${allowedDomains
+        .map((d) => d.replace(".", "\\."))
+        .join("|")})$`,
+      "i"
+    );
+
     if (!emailRegex.test(formData.email)) {
       errors.push("Please enter a valid email address.");
     }
@@ -311,15 +348,21 @@ const RegisterForm = () => {
   };
   const validateEmail = () => {
     const value = formData.email;
-    const eduRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
-    if (!value) {
-      alert("Email is required");
-    } else if (!eduRegex.test(value)) {
-      alert("Please enter a valid educational email");
-    } else {
-      handleCheckEmail();
+    const selectedUni = formData.university;
+    const requiredDomain = universityEmailDomains[selectedUni];
+
+    if (!value) return alert("Email is required");
+
+    if (requiredDomain) {
+      const regex = new RegExp(`^[^\\s@]+@${requiredDomain}$`, "i");
+      if (!regex.test(value)) {
+        return alert(`Please enter a valid ${requiredDomain} email address`);
+      }
     }
+
+    handleCheckEmail();
   };
+
   // 2) handleCheckEmail: set step on success
   const handleCheckEmail = async () => {
     setcheckmail(true);
@@ -359,7 +402,7 @@ const RegisterForm = () => {
 
   const renderStepOne = () => (
     <div className="form-step">
-      <div style={{ display: "flex", gap: "10px" }}>
+      <div className="register-1">
         <label className="label-register">
           FirstName
           <input
@@ -383,17 +426,167 @@ const RegisterForm = () => {
           />
         </label>
       </div>
+      <label className="label-register">
+        University:
+        <CustomSelect
+          options={universityOptions}
+          value={findOrCreateOption(universityOptions, formData.university)}
+          onChange={(selected) => {
+            const newUni = selected?.value || "";
+            setFormData((f) => {
+              const local = sanitizeLocal(f.email || "");
+              const updatedEmail = local
+                ? `${local}@${getDomainForUniversity(newUni)}`
+                : "";
+              return { ...f, university: newUni, email: updatedEmail };
+            });
+          }}
+        />
+      </label>
+      {formData.university === "Other" && (
+        <div style={{ marginTop: 8 }}>
+          <input
+            placeholder="Email"
+            value={formData.email}
+            onChange={(e) => {
+              let value = e.target.value;
+              const selectedUni = formData.university;
+              const requiredDomain = universityEmailDomains[selectedUni];
 
+              if (requiredDomain) {
+                // If user typed only username (no @)
+                if (!value.includes("@")) {
+                  value = value + "@" + requiredDomain;
+                } else {
+                  // If already contains an @, enforce correct domain
+                  const [user, domain] = value.split("@");
+                  if (user && domain && domain !== requiredDomain) {
+                    value = user + "@" + requiredDomain;
+                  }
+                }
+              }
+
+              setFormData({ ...formData, email: value });
+            }}
+            className="input-register"
+          />
+        </div>
+      )}
       <label className="label-register">
         Email
         <input
           placeholder="Email"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={(e) =>
+            setFormData((f) => ({
+              ...f,
+              email: enforceEmailDomain(
+                e.target.value,
+                f.university || "Western New England University"
+              ),
+            }))
+          }
+          onBlur={(e) =>
+            setFormData((f) => ({
+              ...f,
+              email: enforceEmailDomain(
+                e.target.value,
+                f.university || "Western New England University"
+              ),
+            }))
+          }
           className="input-register"
         />
       </label>
 
+      <div className="dob-container">
+        <label className="label-register">
+          Date of Birth:
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "5px",
+            }}
+          >
+            <select
+              value={formData.birthYear}
+              onChange={(e) =>
+                setFormData({ ...formData, birthYear: e.target.value })
+              }
+              className="select-register"
+            >
+              <option value="">Year</option>
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+            <select
+              value={formData.birthMonth}
+              onChange={(e) =>
+                setFormData({ ...formData, birthMonth: e.target.value })
+              }
+              className="select-register"
+            >
+              <option value="">Month</option>
+              {months.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+            <select
+              value={formData.birthDay}
+              onChange={(e) =>
+                setFormData({ ...formData, birthDay: e.target.value })
+              }
+              className="select-register"
+            >
+              <option value="">Day</option>
+              {days.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </div>
+        </label>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div />
+        <button
+          className="form-button"
+          onClick={() => {
+            const required = [
+              formData.firstName,
+              formData.lastName,
+              formData.email,
+              formData.university,
+              formData.birthDay,
+              formData.birthMonth,
+              formData.birthYear,
+            ];
+            if (required.some((r) => !r))
+              return alert("Please fill all required fields");
+            if (
+              formData.gender === "other" &&
+              !(formData.other_gender || "").trim()
+            )
+              return alert("Please specify your gender.");
+            validateEmail();
+          }}
+        >
+          {checkmail ? <BeatLoader size={10} color="#FFFFFF" /> : "Next"}
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderStepTwo = () => (
+    <div className="form-step">
       <div className="role-gender-container">
         <div>
           <label htmlFor="role" className="label-register">
@@ -467,18 +660,18 @@ const RegisterForm = () => {
             <div style={{ marginTop: 8 }}>
               <input
                 type="text"
-                placeholder="Specify"
+                placeholder="Specify your Gender"
                 value={formData.other_gender || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, other_gender: e.target.value })
                 }
                 style={{
-                  width: formData.gender === "other" ? "160px" : "0px",
+                  width: formData.gender === "other" ? "100%" : "0px",
                   opacity: formData.gender === "other" ? 1 : 0,
                   padding: formData.gender === "other" ? "6px 8px" : "0px",
                   border:
                     formData.gender === "other" ? "1px solid #ccc" : "none",
-                  borderRadius: "6px",
+                  borderRadius: "20px",
                   transition: "all 0.3s ease",
                   overflow: "hidden",
                 }}
@@ -488,123 +681,11 @@ const RegisterForm = () => {
         </div>
       </div>
 
-      <div className="dob-container">
-        <label className="label-register">
-          Date of Birth:
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "5px",
-            }}
-          >
-            <select
-              value={formData.birthYear}
-              onChange={(e) =>
-                setFormData({ ...formData, birthYear: e.target.value })
-              }
-              className="select-register"
-            >
-              <option value="">Year</option>
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-            <select
-              value={formData.birthMonth}
-              onChange={(e) =>
-                setFormData({ ...formData, birthMonth: e.target.value })
-              }
-              className="select-register"
-            >
-              <option value="">Month</option>
-              {months.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <select
-              value={formData.birthDay}
-              onChange={(e) =>
-                setFormData({ ...formData, birthDay: e.target.value })
-              }
-              className="select-register"
-            >
-              <option value="">Day</option>
-              {days.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-        </label>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div />
-        <button
-          className="form-button"
-          onClick={() => {
-            const required = [
-              formData.firstName,
-              formData.lastName,
-              formData.email,
-              userType,
-              formData.gender,
-              formData.birthDay,
-              formData.birthMonth,
-              formData.birthYear,
-            ];
-            if (required.some((r) => !r))
-              return alert("Please fill all required fields");
-            if (
-              formData.gender === "other" &&
-              !(formData.other_gender || "").trim()
-            )
-              return alert("Please specify your gender.");
-            validateEmail();
-          }}
-        >
-          {checkmail ? <BeatLoader size={10} color="#FFFFFF" /> : "Next"}
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderStepTwo = () => (
-    <div className="form-step">
-      <label>University:</label>
-      <Select
-        options={universityOptions}
-        value={findOrCreateOption(universityOptions, formData.university)}
-        onChange={(selected) =>
-          setFormData({ ...formData, university: selected?.value || "" })
-        }
-        isClearable
-      />
-
-      {formData.university === "Other" && (
-        <div style={{ marginTop: 8 }}>
-          <input
-            type="text"
-            placeholder="Please specify your university"
-            value={formData.universityOther}
-            onChange={(e) =>
-              setFormData({ ...formData, universityOther: e.target.value })
-            }
-            className="input-register"
-          />
-        </div>
-      )}
-
       {userType === "student" && (
         <>
           <label>Course:</label>
-          <Select
+
+          <CustomSelect
             options={courseOptions}
             value={
               formData.course
@@ -618,13 +699,7 @@ const RegisterForm = () => {
             placeholder="Select or search course"
           />
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "20px",
-            }}
-          >
+          <div className="register-2">
             <label className="label-register">
               Duration:
               <select
@@ -646,9 +721,9 @@ const RegisterForm = () => {
               </select>
             </label>
 
-            <label className="label-register">
+            <label className="label-register ">
               Expected Graduation Date
-              <input type="month" className="input-register" />
+              <input type="month" className="input-register graduate-date" />
             </label>
           </div>
         </>
@@ -695,14 +770,13 @@ const RegisterForm = () => {
         </>
       )}
 
-      <label>Interests (Max 4):</label>
-      <Select
+      <label>Interests:</label>
+      <MultiSelectTags
         options={interestOptions}
         classNamePrefix="my-select"
-        isMulti
-        closeMenuOnSelect={false}
         value={selectedOptions}
         onChange={handleChange}
+        placeholder="Please Select Upto 4"
         isOptionDisabled={(option) =>
           (selectedOptions || []).length >= 4 &&
           !(selectedOptions || []).find((s) => s.value === option.value)
@@ -713,7 +787,12 @@ const RegisterForm = () => {
         <button onClick={() => setStep(1)} className="form-button">
           Back
         </button>
-        <button onClick={() => setStep(3)} className="form-button">
+        <button
+          onClick={() => {
+            setStep(2);
+          }}
+          className="form-button"
+        >
           Next
         </button>
       </div>
@@ -744,12 +823,14 @@ const RegisterForm = () => {
 
   const handleVerifyOtp = async () => {
     try {
+      setOtpload(true);
       const { data } = await axios.post(`${server}/api/AuthOtp/verify-otp`, {
         email: formData.email,
         otp: otpValue,
       });
       if (data.verified) {
         setOtpVerified(true);
+        setOtpload(false);
       } else {
         alert("Incorrect OTP. Try again.");
       }
@@ -759,6 +840,8 @@ const RegisterForm = () => {
       } else {
         alert("Error verifying OTP: " + err.message);
       }
+    } finally {
+      setOtpload(false);
     }
   };
 
@@ -781,7 +864,7 @@ const RegisterForm = () => {
               onClick={handleVerifyOtp}
               disabled={otpValue.length < 6}
             >
-              Verify OTP
+              {Otpload ? <BeatLoader size={10} color="white" /> : "Verify OTP"}
             </button>
 
             <button
@@ -839,14 +922,7 @@ const RegisterForm = () => {
     </div>
   );
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="register-container">
       <div className="register-form">
         <h2>Create New Account</h2>
         {step === 1 && renderStepOne()}

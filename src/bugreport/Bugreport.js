@@ -58,6 +58,13 @@ export default function Bugreport({ onClose }) {
       setLoading(false);
     }
   };
+  const TYPE_OPTIONS = [
+    { value: "ui", label: "UI" },
+    { value: "crash", label: "Crash" },
+    { value: "performance", label: "Performance" },
+    { value: "security", label: "Security" },
+    { value: "other", label: "Other" },
+  ];
 
   return (
     <div className="bugreport-container">
@@ -79,21 +86,19 @@ export default function Bugreport({ onClose }) {
           />
         </label>
 
-        <label>
-          <select
-            name="type"
-            value={form.type}
-            onChange={handleChange}
-            className="select-style"
-          >
-            <option value="ui">UI</option>
-            <option value="crash">Crash</option>
-            <option value="performance">Performance</option>
-            <option value="security">Security</option>
-            <option value="other">Other</option>
-          </select>
-          {/* <CustomSelect onChange={handleChange} /> */}
-        </label>
+        <CustomSelect
+          name="type"
+          options={TYPE_OPTIONS}
+          // The component expects {value,label} or null
+          value={TYPE_OPTIONS.find((o) => o.value === form.type) || null}
+          onChange={(opt) => {
+            // keep your existing handleChange API
+            handleChange({ target: { name: "type", value: opt.value } });
+          }}
+          placeholder="Select type"
+          disabled={false}
+          direction="down"
+        />
 
         <label>
           <textarea

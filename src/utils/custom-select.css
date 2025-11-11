@@ -1,123 +1,155 @@
-/* Wrapper */
-.cs-wrapper {
+/* Wrapper (sets positioning context) */
+.custom-select {
   position: relative;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   width: 100%;
-  max-width: 420px; /* adjust as needed */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-/* Control (input + caret) */
+/* Control (input-like button) */
 .cs-control {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  width: 100%;
+  min-height: 44px; /* mobile-friendly tap target */
+  padding: 10px 40px 10px 12px;
   border: 1px solid #d0d5dd;
-  border-radius: 10px;
-  padding: 8px 10px;
+  border-radius: 20px;
   background: #fff;
-  box-shadow: 0 1px 0 rgba(16, 24, 40, 0.03);
-}
 
-.cs-wrapper[data-disabled="true"] .cs-control {
-  background: #f9fafb;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
+  /* Your caret icon */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 fill=%27%23666%27 viewBox=%270 0 24 24%27><path d=%27M7 10l5 5 5-5z%27/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
 
-.cs-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  background: transparent;
-}
-
-/* Caret button (simple, no icon lib) */
-.cs-caret {
-  flex: 0 0 auto;
-  border: none;
-  background: transparent;
+  text-align: left;
   cursor: pointer;
-  font-size: 10px;
-  line-height: 1;
-  transform: translateY(-1px);
-}
-.cs-wrapper[data-disabled="true"] .cs-caret {
-  cursor: default;
+  transition: border-color 160ms ease, box-shadow 160ms ease,
+    transform 120ms ease;
 }
 
-/* Menu (portal) */
-.cs-menu {
-  background: #fff;
-  border: 1px solid #d0d5dd;
-  border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(16, 24, 40, 0.08),
-    0 2px 4px rgba(16, 24, 40, 0.06);
-  max-height: min(260px, 50vh);
-  overflow: hidden; /* rounded corners keep */
-  /* Animations */
-  opacity: 0;
-  transform: translateY(-6px) scale(0.98);
-  transition: opacity 160ms ease, transform 160ms ease;
+.cs-control:is(:hover, :focus-visible) {
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-.cs-menu-open {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+.cs-control:active {
+  transform: scale(0.998);
 }
 
-/* List */
-.cs-options {
-  margin: 0;
-  padding: 6px;
-  list-style: none;
-  max-height: min(260px, 50vh);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch; /* mobile smooth scroll */
+.cs-control.is-open {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
-/* Option items (no checkbox) */
-.cs-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  user-select: none;
+/* Value text */
+.cs-value {
+  display: inline-block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: background 120ms ease, transform 120ms ease;
+}
+.cs-value.is-placeholder {
+  color: #9aa3af;
+}
+.cs-value.has-value {
+  color: #0f172a;
+}
+
+/* Menu overlay */
+.cs-menu {
+  position: absolute;
+  left: 0;
+  right: 0; /* matches control width */
+  z-index: 9999;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.08), 0 2px 6px rgba(2, 6, 23, 0.06);
+
+  /* Start hidden & non-interactive; JS toggles pointer-events */
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  transition: opacity 140ms ease, transform 140ms ease;
+  will-change: opacity, transform;
+  overflow: hidden;
+}
+
+/* Positioning (uses data-direction on wrapper) */
+.custom-select[data-direction="down"] .cs-menu {
+  top: calc(100% + 8px);
+}
+.custom-select[data-direction="up"] .cs-menu {
+  bottom: calc(100% + 8px);
+}
+
+/* Open / close transitions */
+.menu-enter {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  pointer-events: auto !important;
+}
+.menu-exit {
+  opacity: 0 !important;
+  transform: translateY(-6px) scale(0.98) !important;
+  pointer-events: none !important;
+}
+
+/* Search row inside menu */
+.cs-search-row {
+  padding: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.cs-search-input {
+  width: 100%;
+  height: 36px;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.cs-search-input:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* Options list (scrollable) */
+.cs-options {
+  height: 150px;
+  /* max-height: 240px; */
+  overflow: auto; /* internal scrolling doesn’t close the menu */
+  -webkit-overflow-scrolling: touch;
+}
+
+.cs-option {
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 120ms ease;
 }
 .cs-option:hover,
-.cs-option-hover {
-  background: #f2f4f7;
+.cs-option:focus-visible {
+  background: #f8fafc;
+  outline: none;
 }
-.cs-option:active {
-  transform: scale(0.99);
+.cs-option.is-selected {
+  background: #eef2ff;
 }
-
 .cs-option-label {
   font-size: 14px;
-  color: #111827;
+  line-height: 1.2;
+  color: #0f172a;
 }
 
-/* Empty state */
+/* Empty */
 .cs-empty {
   padding: 12px;
-  text-align: center;
   color: #6b7280;
-  font-size: 13px;
+  font-size: 14px;
 }
 
-/* Mobile niceties */
-@media (hover: none) {
-  .cs-option:hover {
-    background: transparent;
-  }
-  .cs-option.cs-option-hover {
-    background: #f2f4f7;
-  }
+/* Disabled */
+.custom-select.is-disabled .cs-control {
+  background: #f8fafc;
+  color: #9aa3af;
+  cursor: not-allowed;
 }

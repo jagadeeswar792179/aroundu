@@ -15,6 +15,7 @@ import ProfileViewers from "./profileview/ProfileViewers";
 import ForgotPassword from "./login/ForgotPassword";
 import { UserProvider } from "./UserContext/UserContext";
 import SavedPosts from "./Homepage/SavedPosts";
+import LostFoundPage from "./LostFound/LostFoundPage";
 const App = () => {
   return (
     <UserProvider>
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/saved-items" element={<SavedPosts />} />
           <Route path="/profileview" element={<ProfileViewers />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/lost-found" element={<LostFoundPage />} />
         </Routes>
       </Router>
     </UserProvider>

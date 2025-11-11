@@ -1,272 +1,208 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { createPortal } from "react-dom";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import "./custom-select.css";
 
-/**
- * Props:
- * - options: Array<{ value: string|number, label: string }>
- * - value: { value, label } | null
- * - onChange: (option|null) => void
- * - placeholder?: string
- * - disabled?: boolean
- * - hideSelectedInMenu?: boolean (default true)
- * - className?: string (extra class on wrapper)
- */
 export default function CustomSelect({
   options = [],
-  value = null,
-  onChange,
-  placeholder = "Select…",
+  value = null, // { value, label } or null
+  onChange = () => {},
+  placeholder = "Select...",
   disabled = false,
-  hideSelectedInMenu = true,
-  className = "",
+  direction = "down", // "up" | "down"
+  name, // optional for forms
+  className = "", // extra classes for wrapper
 }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
   const menuRef = useRef(null);
 
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
-  const [menuHeight, setMenuHeight] = useState(0);
-  const [hoverIndex, setHoverIndex] = useState(-1);
+  // Filter options by query (case-insensitive)
+  const filtered = query
+    ? options.filter((o) =>
+        o.label.toLowerCase().includes(query.trim().toLowerCase())
+      )
+    : options;
 
-  // Filter options by search and (optionally) hide selected
-  const visibleOptions = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filtered = options.filter(
-      (o) =>
-        o.label.toLowerCase().includes(q) ||
-        String(o.value).toLowerCase().includes(q)
-    );
-    return hideSelectedInMenu && value
-      ? filtered.filter((o) => o.value !== value.value)
-      : filtered;
-  }, [options, query, value, hideSelectedInMenu]);
+  // Open/close handlers
+  const openMenu = useCallback(() => {
+    if (!disabled) setOpen(true);
+  }, [disabled]);
 
-  // Position the menu above the input, matching its width
-  const updateCoords = () => {
-    const el = wrapperRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    setCoords({ top: rect.top, left: rect.left, width: rect.width });
+  const closeMenu = useCallback(() => {
+    setOpen(false);
+    setQuery(""); // reset search on close
+  }, []);
+
+  // Select an option
+  const handleSelect = (opt) => {
+    onChange(opt);
+    // keep menu open behavior? For single-select we usually close:
+    requestAnimationFrame(() => closeMenu());
+    // focus back to the "input"
+    inputRef.current?.focus();
   };
 
-  // Measure menu height after it renders so we can place it above the input
-  useLayoutEffect(() => {
-    if (open && menuRef.current) {
-      const h = menuRef.current.getBoundingClientRect().height;
-      setMenuHeight(h);
-    }
-  }, [open, visibleOptions.length]);
-
-  // Recalc on open and on resize
-  useEffect(() => {
-    if (open) updateCoords();
-  }, [open]);
-
-  useEffect(() => {
-    const onResize = () => open && updateCoords();
-    window.addEventListener("resize", onResize, { passive: true });
-    return () => window.removeEventListener("resize", onResize);
-  }, [open]);
+  // Toggle on control click
+  const handleControlClick = () => {
+    if (open) closeMenu();
+    else openMenu();
+  };
 
   // Close on outside click/touch
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => {
-      const w = wrapperRef.current;
-      const m = menuRef.current;
-      if (!w || !m) return;
-      const target = e.target;
-      if (!w.contains(target) && !m.contains(target)) {
-        setOpen(false);
+
+    const onPointerDown = (e) => {
+      const wr = wrapperRef.current;
+      if (wr && !wr.contains(e.target)) {
+        closeMenu();
       }
     };
-    document.addEventListener("mousedown", handler, true);
-    document.addEventListener("touchstart", handler, {
+
+    document.addEventListener("mousedown", onPointerDown, true);
+    document.addEventListener("touchstart", onPointerDown, true);
+
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown, true);
+      document.removeEventListener("touchstart", onPointerDown, true);
+    };
+  }, [open, closeMenu]);
+
+  // Close on OUTSIDE scroll (not when the menu itself scrolls)
+  useEffect(() => {
+    if (!open) return;
+
+    const onWheel = (e) => {
+      if (menuRef.current?.contains(e.target)) return; // ignore internal menu scroll
+      closeMenu();
+    };
+    const onTouchMove = (e) => {
+      if (menuRef.current?.contains(e.target)) return; // ignore internal touch scroll
+      closeMenu();
+    };
+    const onWindowScroll = () => {
+      // Window/body scroll closes the menu
+      closeMenu();
+    };
+
+    // Wheel/touchmove capture “outside” scrolling
+    document.addEventListener("wheel", onWheel, {
       passive: true,
       capture: true,
     });
-    return () => {
-      document.removeEventListener("mousedown", handler, true);
-      document.removeEventListener("touchstart", handler, true);
-    };
-  }, [open]);
-
-  // Close on scroll OUTSIDE; keep open when scrolling inside menu
-  useEffect(() => {
-    if (!open) return;
-
-    const closeOnScroll = () => setOpen(false);
-
-    // We’ll close on window/page scroll…
-    window.addEventListener("scroll", closeOnScroll, { passive: true });
-
-    // …and on wheel/touchmove that happens *outside* the menu (we stop propagation inside)
-    const wheelClose = (e) => {
-      if (menuRef.current && menuRef.current.contains(e.target)) return; // ignore inside
-      setOpen(false);
-    };
-    const touchMoveClose = (e) => {
-      if (menuRef.current && menuRef.current.contains(e.target)) return; // ignore inside
-      setOpen(false);
-    };
-
-    document.addEventListener("wheel", wheelClose, { passive: true });
-    document.addEventListener("touchmove", touchMoveClose, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", closeOnScroll);
-      document.removeEventListener("wheel", wheelClose);
-      document.removeEventListener("touchmove", touchMoveClose);
-    };
-  }, [open]);
-
-  // Prevent wheel/touchmove from bubbling when inside menu (so outside scroll handler won't fire)
-  const stopInsideScroll = (e) => {
-    e.stopPropagation();
-  };
-
-  // Toggle open and focus input
-  const openMenu = () => {
-    if (disabled) return;
-    setOpen(true);
-    setHoverIndex(-1);
-    // Make sure coords are fresh before focusing
-    requestAnimationFrame(() => {
-      inputRef.current?.focus();
+    document.addEventListener("touchmove", onTouchMove, {
+      passive: true,
+      capture: true,
     });
-  };
+    // Window scroll
+    window.addEventListener("scroll", onWindowScroll, { passive: true });
 
-  const closeMenu = () => setOpen(false);
+    return () => {
+      document.removeEventListener("wheel", onWheel, { capture: true });
+      document.removeEventListener("touchmove", onTouchMove, { capture: true });
+      window.removeEventListener("scroll", onWindowScroll);
+    };
+  }, [open, closeMenu]);
 
-  // Handle selection
-  const selectOption = (opt) => {
-    onChange?.(opt);
-    setQuery(opt?.label ?? "");
-    closeMenu();
-  };
-
-  // Keep input text synced with selected value when cleared manually
-  useEffect(() => {
-    if (!open) {
-      // When menu is closed, show selected label in input (or empty)
-      setQuery(value?.label ?? "");
-    }
-  }, [value, open]);
-
-  // Keyboard navigation
+  // Keyboard basics
   const onKeyDown = (e) => {
-    if (!open && (e.key === "ArrowDown" || e.key === "Enter")) {
+    if (disabled) return;
+    if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
-      openMenu();
-      return;
-    }
-    if (!open) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setHoverIndex((i) => Math.min(i + 1, visibleOptions.length - 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setHoverIndex((i) => Math.max(i - 1, 0));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      const chosen = visibleOptions[hoverIndex] ?? visibleOptions[0];
-      if (chosen) selectOption(chosen);
+      setOpen((v) => !v);
     } else if (e.key === "Escape") {
-      e.preventDefault();
       closeMenu();
     }
-  };
-
-  // Compute absolute position for the menu ABOVE input
-  const menuStyle = {
-    position: "fixed",
-    top: Math.max(0, coords.top - menuHeight - 8),
-    left: coords.left,
-    width: coords.width,
-    zIndex: 9999,
   };
 
   return (
     <div
       ref={wrapperRef}
-      className={`cs-wrapper ${className}`}
-      data-disabled={disabled ? "true" : "false"}
+      className={`custom-select ${className} ${disabled ? "is-disabled" : ""}`}
+      data-direction={direction}
     >
-      <div className="cs-control" onClick={open ? undefined : openMenu}>
-        <input
-          ref={inputRef}
-          className="cs-input"
-          type="text"
-          placeholder={placeholder}
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            if (!open) setOpen(true);
-            setHoverIndex(-1);
-          }}
-          onKeyDown={onKeyDown}
-          onFocus={() => !open && openMenu()}
-          disabled={disabled}
-          autoComplete="off"
-          spellCheck={false}
-        />
-        <button
-          type="button"
-          className="cs-caret"
-          aria-label="Toggle menu"
-          onClick={() => (open ? closeMenu() : openMenu())}
-          disabled={disabled}
-        >
-          ▴
-        </button>
-      </div>
+      {/* Hidden native input for forms (optional) */}
+      {name ? (
+        <input type="hidden" name={name} value={value?.value ?? ""} readOnly />
+      ) : null}
 
-      {open &&
-        createPortal(
-          <div
-            className={`cs-menu ${open ? "cs-menu-open" : ""}`}
-            style={menuStyle}
-            ref={menuRef}
-            onWheel={stopInsideScroll}
-            onTouchMove={stopInsideScroll}
-          >
-            {visibleOptions.length === 0 ? (
-              <div className="cs-empty">No options</div>
-            ) : (
-              <ul className="cs-options" role="listbox">
-                {visibleOptions.map((opt, idx) => (
-                  <li
-                    key={opt.value}
-                    className={`cs-option ${
-                      idx === hoverIndex ? "cs-option-hover" : ""
-                    }`}
-                    onMouseEnter={() => setHoverIndex(idx)}
-                    onMouseDown={(e) => e.preventDefault()} // prevent input blur before onClick
-                    onClick={() => selectOption(opt)}
-                    role="option"
-                    aria-selected={
-                      value?.value === opt.value ? "true" : "false"
+      {/* Control */}
+      <button
+        type="button"
+        ref={inputRef}
+        className={`cs-control ${open ? "is-open" : ""}`}
+        onClick={handleControlClick}
+        onKeyDown={onKeyDown}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className={`cs-value ${value ? "has-value" : "is-placeholder"}`}>
+          {value?.label ?? placeholder}
+        </span>
+      </button>
+
+      {/* Menu (overlay, absolute, matches control width) */}
+      <div
+        ref={menuRef}
+        className={`cs-menu ${open ? "menu-enter" : "menu-exit"}`}
+        role="listbox"
+        aria-hidden={!open}
+        style={{ pointerEvents: open ? "auto" : "none" }}
+      >
+        {/* Search inside menu */}
+        <div className="cs-search-row">
+          <input
+            className="cs-search-input"
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search…"
+            inputMode="search"
+          />
+        </div>
+
+        <div className="cs-options" role="presentation">
+          {filtered.length === 0 ? (
+            <div className="cs-empty">No options</div>
+          ) : (
+            filtered.map((opt) => {
+              const selected = value?.value === opt.value;
+              return (
+                <div
+                  key={opt.value}
+                  className={`cs-option ${selected ? "is-selected" : ""}`}
+                  role="option"
+                  aria-selected={selected}
+                  tabIndex={0}
+                  // 🔑 Commit selection on mousedown so it runs before blur/outside handlers
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // keep focus from jumping to the option
+                    e.stopPropagation(); // don't bubble to wrapper/outside
+                    handleSelect(opt); // calls onChange + closeMenu()
+                  }}
+                  // Mobile safety (tap)
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSelect(opt);
+                  }}
+                  // Optional keyboard support
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSelect(opt);
                     }
-                    title={opt.label}
-                  >
-                    <span className="cs-option-label">{opt.label}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>,
-          document.body
-        )}
+                  }}
+                >
+                  <span className="cs-option-label">{opt.label}</span>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
     </div>
   );
 }

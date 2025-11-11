@@ -26,7 +26,7 @@ export default function OtpInput({
   useEffect(() => {
     if (autoFocus) {
       const firstEmpty = value.split("").findIndex((ch) => ch === "");
-      const idx = firstEmpty === -1 ? length - 1 : firstEmpty;
+      const idx = firstEmpty === -1 ? firstEmpty : length - 1;
       inputsRef.current[idx]?.focus();
     }
   }, [autoFocus, value, length]);

@@ -4,13 +4,13 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
   padding: 20px;
+  max-width: 550px;
   border-radius: 20px;
   background-color: #ffffff;
 
   /* ✨ Add shadow & outline */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
+  /* box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06); */
 
   outline: 2px solid #ffffff;
   outline-offset: -8px;
@@ -89,9 +89,9 @@ select {
   align-items: center;
   gap: 5px;
   justify-content: flex-start;
-  border: 1px solid black;
+  border: 1px solid rgb(232, 232, 232);
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 20px;
 }
 
 .form-step-4,
@@ -129,12 +129,28 @@ select {
   display: flex;
   justify-content: space-between;
 }
+.form-step input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--bcgcolor) inset !important; /* background */
+  -webkit-text-fill-color: #333 !important; /* text color */
+}
 
+.form-step input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--bcgcolor) inset !important; /* background when focused */
+  -webkit-text-fill-color: #111 !important;
+}
+
+.form-step input:-webkit-autofill::first-line {
+  color: #333 !important; /* extra safety */
+}
 .form-step label {
   font-size: 12px;
-  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-  font-weight: 400;
+  color: var(--namehead);
+  font-weight: 600;
   margin: 2px 0 7px 0;
+}
+.form-step input {
+  background-color: white;
+  border-radius: 20px;
 }
 .form-step2-6 input {
   border-radius: 5px;
@@ -152,7 +168,9 @@ select {
   padding: 5px;
   border: 1px lsolid rgb(238, 232, 232);
 }
-
+.register-form h2 {
+  color: var(--namehead);
+}
 .input-register {
   width: 100%; /* fills parent width */
   padding: 10px 14px; /* inner spacing */
@@ -205,20 +223,26 @@ select {
   gap: 12px; /* spacing between selects */
   margin-top: 10px;
 }
-
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--bcgcolor);
+}
 /* Select box styling */
 .dob-container select {
   padding: 10px 14px;
   border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
+  border-radius: 20px;
+
   font-size: 14px;
   color: #333;
   outline: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 100%;
   flex: 1; /* makes all three equal width */
-  min-width: 100px;
   appearance: none; /* removes default arrow */
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23666' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>")
     no-repeat right 10px center;
@@ -259,9 +283,8 @@ select {
   padding: 10px 14px; /* same as input */
   font-size: 15px; /* match input font */
   color: #111827; /* same text color */
-  background: #f9fafb; /* same bg as input */
   border: 1px solid #d1d5db; /* same border */
-  border-radius: 8px; /* same rounding */
+  border-radius: 20px; /* same rounding */
   cursor: pointer;
   outline: none;
   transition: border 0.2s, box-shadow 0.2s, background 0.2s;
@@ -360,9 +383,18 @@ select {
 .password-toggle:hover {
   color: #111;
 }
+.register-1 {
+  display: flex;
+  gap: 20px;
+}
 .css-13cymwt-control,
 .css-t3ipsp-control {
   min-width: 420px;
+}
+.register-2 {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
 }
 /* ---------- Mobile (0px–465px) ---------- */
 @media (min-width: 0px) and (max-width: 465px) {
@@ -372,7 +404,33 @@ select {
     z-index: 1;
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
+  .form-step label {
+    margin: 0;
+  }
 
+  .register-form {
+    width: 300px;
+  }
+  .graduate-date {
+    width: 130px;
+    font-size: 10px;
+  }
+  .register-2 {
+    /* flex-direction: column; */
+  }
+  .dob-container select {
+    font-size: 10px;
+  }
+  .role-gender-container {
+    flex-direction: column;
+  }
+  .gender-options label,
+  select {
+    border: none;
+  }
+  .gender-options label {
+    font-size: 12px;
+  }
   .mess-7 {
     position: absolute;
     top: 0;

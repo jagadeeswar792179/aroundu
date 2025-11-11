@@ -95,7 +95,7 @@ const LoginPage = () => {
 
   return (
     <div className="login-container">
-      <div className="logo-login">
+      <div className="logo-login flex-c center">
         {/* <BrandLogo /> */}
         <img className="logo-png" src="logo.png" />
         <p>

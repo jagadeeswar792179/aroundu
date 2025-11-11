@@ -42,14 +42,15 @@
   }
 }
 .otp-div {
-  outline: 1px solid #ccc;
   padding: 20px;
   width: 350px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  box-shadow: var(--boxshadowmain);
   gap: 20px;
-  background-color: #fafafa;
+
+  background-color: var(--bcgcolor);
   border-radius: 20px;
 }
 .otp-div h3 {
@@ -65,6 +66,12 @@
   .otp-input {
     width: 35px;
     height: 35px;
+    border-radius: 1px;
+  }
+  .otp-root {
+    display: flex;
+    gap: 4px;
+    align-items: center;
   }
 }
 

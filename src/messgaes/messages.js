@@ -549,7 +549,9 @@ function Messages() {
               </div>
             </div>
           </div>
-          <LostFound />
+          <div className="hider-small">
+            <LostFound />
+          </div>
         </div>
       </div>
     </>
