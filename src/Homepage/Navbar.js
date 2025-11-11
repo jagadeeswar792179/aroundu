@@ -167,7 +167,8 @@ export default function Navbar() {
           </svg>
           <p>LogOut</p>
         </div>
-        <div>
+
+        <div className="hider-big">
           <svg
             onClick={() => {
               setKebabOpen(true);

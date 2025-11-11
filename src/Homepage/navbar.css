@@ -124,6 +124,9 @@
 .feed-container-2 {
   overflow: hidden;
 }
+.hider-big {
+  display: none;
+}
 @media (min-width: 0px) and (max-width: 466px) {
   .searchbar {
     gap: 10px;
@@ -198,8 +201,14 @@
   .modal {
     width: 314px;
   }
+  .hider-big {
+    display: block;
+  }
 }
 @media (min-width: 466px) and (max-width: 770px) {
+  .hider-big {
+    display: block;
+  }
   .container-1,
   .container-2 {
     background-color: #ffffff;
