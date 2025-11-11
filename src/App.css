@@ -34,6 +34,40 @@ body {
 .App {
   text-align: center;
 }
+/* Opt out of auto-darkening of form controls on mobile */
+:root {
+  color-scheme: light; /* declares the page is designed for light UI */
+}
+
+/* Make sure form controls stay light even if the OS is dark */
+input,
+textarea,
+select {
+  background-color: #fff !important; /* or var(--bcgcolor) */
+  color: #111 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Fix mobile autofill (Chrome/Safari) painting yellow/gray */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important; /* keep light bg */
+  -webkit-text-fill-color: #111 !important;
+  caret-color: #111;
+}
+
+/* (Optional) If you use your var for backgrounds: */
+input,
+textarea,
+select {
+  background-color: var(--bcgcolor) !important;
+}
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--bcgcolor) inset !important;
+}
 
 .App-logo {
   height: 40vmin;
