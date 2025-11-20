@@ -167,11 +167,11 @@ export default function CustomSelect({
                   aria-selected={selected}
                   tabIndex={0}
                   // Mouse selection
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSelect(opt);
-                  }}
+                  // onMouseDown={(e) => {
+                  //   e.preventDefault();
+                  //   e.stopPropagation();
+                  //   handleSelect(opt);
+                  // }}
                   // ✅ Touch here is ONLY for selecting the option (inside),
                   //    not for global "touch close"
                   onTouchStart={(e) => {
@@ -179,12 +179,12 @@ export default function CustomSelect({
                     e.stopPropagation();
                     handleSelect(opt);
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleSelect(opt);
-                    }
-                  }}
+                  // onKeyDown={(e) => {
+                  //   if (e.key === "Enter") {
+                  //     e.preventDefault();
+                  //     handleSelect(opt);
+                  //   }
+                  // }}
                 >
                   <span className="cs-option-label">{opt.label}</span>
                 </div>
