@@ -38,7 +38,7 @@ export default function CustomSelect({
   const handleSelect = (opt) => {
     onChange(opt);
     // For single-select we usually close:
-    requestAnimationFrame(() => closeMenu());
+    closeMenu();
     // focus back to the "input"
     inputRef.current?.focus();
   };
