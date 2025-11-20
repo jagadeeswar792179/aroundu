@@ -152,7 +152,7 @@
     gap: 35px;
   }
   .search-input {
-    width: 178px;
+    width: 100%;
     border-radius: 25px;
   }
   .search-input:focus {
@@ -164,7 +164,7 @@
     height: 55px;
   }
   .feed-container {
-    width: 300px;
+    width: 100%;
   }
   .feed-container-1 {
     width: 90%;
@@ -176,12 +176,12 @@
     display: none;
   }
   .feed-image {
-    width: 300px;
-    height: 422px;
+    width: 100%;
+    height: 100%;
   }
 
   .postcontainer {
-    width: 300px;
+    width: 100%;
     border-radius: 30px;
   }
   .searchbar {
@@ -195,7 +195,7 @@
   }
 
   .switch-container {
-    width: 300px;
+    width: 100%;
     flex-wrap: wrap;
   }
   .modal {

@@ -10,6 +10,8 @@ const UserActivity = ({ userId }) => {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+  const [activityTab, setActivityTab] = useState("posts"); // "posts" | "discussion"
+
   const server = process.env.REACT_APP_SERVER;
   const loggedinuser = JSON.parse(localStorage.getItem("user"))?.id;
   const fetchUserPosts = async (
@@ -128,29 +130,80 @@ const UserActivity = ({ userId }) => {
       </div>
     );
   }
+  const filteredPosts = posts.filter((post) => {
+    if (activityTab === "posts") {
+      return post.post_type !== "discussion"; // only non-discussion posts
+    }
+    if (activityTab === "discussion") {
+      return post.post_type === "discussion"; // only discussion posts
+    }
+    return true;
+  });
 
   return (
     <div className="activity-container">
+      <div className="switch-container">
+        <button
+          onClick={() => setActivityTab("posts")}
+          className={`switch-btn ${activityTab === "posts" ? "active" : ""}`}
+        >
+          Posts
+        </button>
+        <button
+          onClick={() => setActivityTab("discussion")}
+          className={`switch-btn ${
+            activityTab === "discussion" ? "active" : ""
+          }`}
+        >
+          Discussion
+        </button>
+      </div>
+
       <div className="posts-grid">
-        {posts.map((post) => (
-          <div key={post.id} className="post-card">
-            {post.image_url && (
-              <>
-                <img src={post.image_url} alt="Post" className="post-image" />
-                {userId == loggedinuser && (
-                  <button
-                    className="delete-btn"
-                    aria-label="Delete post"
-                    onClick={() => handleDelete(post.id)}
-                    title="Delete post"
-                  >
-                    <MdDeleteOutline size={20} />
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+        {filteredPosts.length === 0 ? (
+          <p className="no-posts">
+            {activityTab === "posts" ? "No posts yet." : "No discussions yet."}
+          </p>
+        ) : (
+          filteredPosts.map((post) => (
+            <div key={post.id} className="post-card">
+              {post.image_url ? (
+                <>
+                  <img src={post.image_url} alt="Post" className="post-image" />
+                  {userId == loggedinuser && (
+                    <button
+                      className="delete-btn"
+                      aria-label="Delete post"
+                      onClick={() => handleDelete(post.id)}
+                      title="Delete post"
+                    >
+                      <MdDeleteOutline size={20} />
+                    </button>
+                  )}
+                </>
+              ) : (
+                // optional: show something for discussion without image
+                <div className="feed-container" style={{ padding: "20px" }}>
+                  <b>
+                    {post.first_name}
+                    {post.last_name}
+                  </b>
+                  {userId == loggedinuser && (
+                    <button
+                      className="delete-btn"
+                      aria-label="Delete post"
+                      onClick={() => handleDelete(post.id)}
+                      title="Delete post"
+                    >
+                      <MdDeleteOutline size={20} />
+                    </button>
+                  )}
+                  <div className="user-activity-caption">{post.caption}</div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
 
       {hasMore && (

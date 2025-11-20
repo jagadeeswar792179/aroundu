@@ -10,7 +10,7 @@ export default function Explore() {
         <Navbar />
       </div>
       <div className="container-2">
-        <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
+        <div className="explore-container">
           <div className="explore-1">
             {" "}
             <div className="explore-1">

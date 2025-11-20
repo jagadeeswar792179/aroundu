@@ -14,6 +14,8 @@ function SavedPosts() {
   const server = process.env.REACT_APP_SERVER;
 
   const [activePostId, setActivePostId] = useState(null);
+  const [savedTab, setSavedTab] = useState("posts"); // "posts" | "discussion"
+
   const [savedPostsState, setSavedPostsState] = useState({}); // postId -> saved_by_me
   const [savedPosts, setSavedPosts] = useState([]);
   const [page, setPage] = useState(1);
@@ -112,6 +114,16 @@ function SavedPosts() {
       setSavedPosts((prev) => ({ ...prev, [postId]: currentlySaved }));
     }
   };
+  const filteredSavedPosts = savedPosts.filter((post) => {
+    if (savedTab === "posts") {
+      return post.post_type !== "discussion"; // only non-discussion
+    }
+    if (savedTab === "discussion") {
+      return post.post_type === "discussion"; // only discussion
+    }
+    return true;
+  });
+
   return (
     <>
       <div className="container-1">
@@ -134,7 +146,7 @@ function SavedPosts() {
                   alignItems: "center",
                 }}
               >
-                {[...Array(6)].map((_, index) => (
+                {[...Array(1)].map((_, index) => (
                   <div
                     className="load-4"
                     style={{
@@ -146,30 +158,63 @@ function SavedPosts() {
                 ))}
               </div>
             ) : (
-              <InfiniteScroll
-                dataLength={savedPosts.length} // required
-                next={fetchSavedPosts}
-                hasMore={hasMore}
-                endMessage={
-                  <p className="no-posts">You have seen all saved posts</p>
-                }
-              >
-                <div className="grid-container">
-                  {savedPosts.map((post) => (
-                    <div
-                      key={post.id}
-                      className="grid-item"
-                      onClick={() => setSelectedPost(post)}
-                    >
-                      {post.image_url ? (
-                        <img src={post.image_url} alt={post.title} />
-                      ) : (
-                        <div className="no-image">No Image</div>
-                      )}
-                    </div>
-                  ))}
+              <>
+                <div className="switch-container">
+                  <button
+                    onClick={() => setSavedTab("posts")}
+                    className={`switch-btn ${
+                      savedTab === "posts" ? "active" : ""
+                    }`}
+                  >
+                    Posts
+                  </button>
+                  <button
+                    onClick={() => setSavedTab("discussion")}
+                    className={`switch-btn ${
+                      savedTab === "discussion" ? "active" : ""
+                    }`}
+                  >
+                    Discussion
+                  </button>
                 </div>
-              </InfiniteScroll>
+
+                <InfiniteScroll
+                  dataLength={filteredSavedPosts.length} // use filtered length
+                  next={fetchSavedPosts}
+                  hasMore={hasMore}
+                  // endMessage={
+                  //   <p className="no-posts">
+                  //     {savedTab === "posts"
+                  //       ? "You have seen all saved posts"
+                  //       : "You have seen all saved discussions"}
+                  //   </p>
+                  // }
+                >
+                  <div className="grid-container">
+                    {filteredSavedPosts.map((post) => (
+                      <div
+                        key={post.id}
+                        className="grid-item"
+                        onClick={() => setSelectedPost(post)}
+                      >
+                        {post.image_url ? (
+                          <img src={post.image_url} alt={post.title} />
+                        ) : (
+                          <div className="feed-container">
+                            <b>
+                              {post?.user?.first_name}
+                              {post?.user?.last_name}
+                            </b>
+                            <div className="user-activity-caption">
+                              {post.caption}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </InfiniteScroll>
+              </>
             )}
           </div>
 
@@ -210,16 +255,11 @@ function SavedPosts() {
                             src={selectedPost.image_url}
                             alt="post"
                             className="feed-image"
-                            style={{
-                              width: "570px",
-                              height: "500px",
-                              objectFit: "cover",
-                            }}
                           />
                         )}
                       </div>
 
-                      <div className="feed-container-3-2">
+                      {/* <div className="feed-container-3-2">
                         <div className="feed-container-3-2-1">
                           <div
                             onClick={() => toggleLike(selectedPost.id)}
@@ -271,15 +311,7 @@ function SavedPosts() {
                             <FaBookmark size={24} color="gray" />
                           )}
                         </div>
-                      </div>
-
-                      <Line
-                        length={550}
-                        size={1}
-                        color={"black"}
-                        center={true}
-                        transparency={0.3}
-                      />
+                      </div> */}
 
                       <div className="feed-container-4">
                         <div className="feed-container-4-1">

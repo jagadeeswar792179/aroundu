@@ -65,6 +65,12 @@ const RegisterForm = () => {
     { value: "reading", label: "Reading" },
     { value: "technology", label: "Technology" },
     { value: "other", label: "Other" },
+    { value: "sports", label: "Sports" },
+    { value: "music", label: "Music" },
+    { value: "travel", label: "Travel" },
+    { value: "reading", label: "Reading" },
+    { value: "technology", label: "Technology" },
+    { value: "other", label: "Other" },
   ];
   const [selectedOptions, setSelectedOptions] = useState([]);
   const courseOptions = [
@@ -789,7 +795,7 @@ const RegisterForm = () => {
         </button>
         <button
           onClick={() => {
-            setStep(2);
+            setStep(3);
           }}
           className="form-button"
         >

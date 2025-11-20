@@ -256,7 +256,22 @@
 .show-more-btn:hover .arrow {
   transform: translateY(5px);
 }
+.explore-container {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+}
 @media (min-width: 0px) and (max-width: 465px) {
+  .explore-container {
+    display: block;
+    width: 100%;
+    margin: 10px;
+  }
+  .prof-card {
+    width: 100%;
+    min-width: 280px;
+    max-width: 500px;
+  }
   .explore-1 {
     display: none;
   }
@@ -265,10 +280,10 @@
   }
   .explore-2-2,
   .explore-2-1 {
-    width: 300px;
+    width: 100%;
   }
 }
-@media (min-width: 466px) and (max-width: 770px) {
+@media (min-width: 465px) and (max-width: 770px) {
   .explore-1 {
     display: none;
   }

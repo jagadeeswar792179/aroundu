@@ -37,7 +37,7 @@ export default function CustomSelect({
   // Select an option
   const handleSelect = (opt) => {
     onChange(opt);
-    // keep menu open behavior? For single-select we usually close:
+    // For single-select we usually close:
     requestAnimationFrame(() => closeMenu());
     // focus back to the "input"
     inputRef.current?.focus();
@@ -49,58 +49,48 @@ export default function CustomSelect({
     else openMenu();
   };
 
-  // Close on outside click/touch
+  // ✅ Close on outside *mouse* click
+  // ❌ No touch-based outside close
   useEffect(() => {
     if (!open) return;
 
-    const onPointerDown = (e) => {
+    const onMouseDown = (e) => {
       const wr = wrapperRef.current;
       if (wr && !wr.contains(e.target)) {
-        closeMenu();
+        // closeMenu();
       }
     };
 
-    document.addEventListener("mousedown", onPointerDown, true);
-    document.addEventListener("touchstart", onPointerDown, true);
+    document.addEventListener("mousedown", onMouseDown, true);
 
     return () => {
-      document.removeEventListener("mousedown", onPointerDown, true);
-      document.removeEventListener("touchstart", onPointerDown, true);
+      document.removeEventListener("mousedown", onMouseDown, true);
     };
   }, [open, closeMenu]);
 
-  // Close on OUTSIDE scroll (not when the menu itself scrolls)
+  // ✅ Close on scroll (inside OR outside)
+  // ❌ No touchmove-based close
   useEffect(() => {
     if (!open) return;
 
-    const onWheel = (e) => {
-      if (menuRef.current?.contains(e.target)) return; // ignore internal menu scroll
-      closeMenu();
-    };
-    const onTouchMove = (e) => {
-      if (menuRef.current?.contains(e.target)) return; // ignore internal touch scroll
-      closeMenu();
-    };
-    const onWindowScroll = () => {
-      // Window/body scroll closes the menu
-      closeMenu();
+    const onWheel = () => {
+      // any wheel scroll closes menu
+      // closeMenu();
     };
 
-    // Wheel/touchmove capture “outside” scrolling
+    const onWindowScroll = () => {
+      // any window scroll closes menu
+      // closeMenu();
+    };
+
     document.addEventListener("wheel", onWheel, {
       passive: true,
       capture: true,
     });
-    document.addEventListener("touchmove", onTouchMove, {
-      passive: true,
-      capture: true,
-    });
-    // Window scroll
     window.addEventListener("scroll", onWindowScroll, { passive: true });
 
     return () => {
       document.removeEventListener("wheel", onWheel, { capture: true });
-      document.removeEventListener("touchmove", onTouchMove, { capture: true });
       window.removeEventListener("scroll", onWindowScroll);
     };
   }, [open, closeMenu]);
@@ -176,19 +166,19 @@ export default function CustomSelect({
                   role="option"
                   aria-selected={selected}
                   tabIndex={0}
-                  // 🔑 Commit selection on mousedown so it runs before blur/outside handlers
+                  // Mouse selection
                   onMouseDown={(e) => {
-                    e.preventDefault(); // keep focus from jumping to the option
-                    e.stopPropagation(); // don't bubble to wrapper/outside
-                    handleSelect(opt); // calls onChange + closeMenu()
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSelect(opt);
                   }}
-                  // Mobile safety (tap)
+                  // ✅ Touch here is ONLY for selecting the option (inside),
+                  //    not for global "touch close"
                   onTouchStart={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleSelect(opt);
                   }}
-                  // Optional keyboard support
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();

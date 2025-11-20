@@ -279,7 +279,7 @@ export default function Navbar() {
             </svg>
             Profile viewers
           </div>
-          {/* <div
+          <div
             onClick={() => navigate("/saved-items")}
             style={{ cursor: "pointer" }}
             className="flex-r center-c"
@@ -300,7 +300,7 @@ export default function Navbar() {
               />
             </svg>
             Saved items
-          </div> */}
+          </div>
 
           <div
             onClick={() => handlemodal(2)}
