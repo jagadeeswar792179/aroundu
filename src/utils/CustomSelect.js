@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import "./custom-select.css";
 
 export default function CustomSelect({
@@ -15,7 +15,6 @@ export default function CustomSelect({
   const [query, setQuery] = useState("");
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
-  const menuRef = useRef(null);
 
   // Filter options by query (case-insensitive)
   const filtered = query
@@ -34,75 +33,25 @@ export default function CustomSelect({
     setQuery(""); // reset search on close
   }, []);
 
-  // Select an option
+  // Select an option → close menu
   const handleSelect = (opt) => {
     onChange(opt);
-    // For single-select we usually close:
     closeMenu();
-    // focus back to the "input"
     inputRef.current?.focus();
   };
 
-  // Toggle on control click
+  // Toggle on control click → open/close
   const handleControlClick = () => {
     if (open) closeMenu();
     else openMenu();
   };
 
-  // ✅ Close on outside *mouse* click
-  // ❌ No touch-based outside close
-  useEffect(() => {
-    if (!open) return;
-
-    const onMouseDown = (e) => {
-      const wr = wrapperRef.current;
-      if (wr && !wr.contains(e.target)) {
-        // closeMenu();
-      }
-    };
-
-    document.addEventListener("mousedown", onMouseDown, true);
-
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown, true);
-    };
-  }, [open, closeMenu]);
-
-  // ✅ Close on scroll (inside OR outside)
-  // ❌ No touchmove-based close
-  useEffect(() => {
-    if (!open) return;
-
-    const onWheel = () => {
-      // any wheel scroll closes menu
-      // closeMenu();
-    };
-
-    const onWindowScroll = () => {
-      // any window scroll closes menu
-      // closeMenu();
-    };
-
-    document.addEventListener("wheel", onWheel, {
-      passive: true,
-      capture: true,
-    });
-    window.addEventListener("scroll", onWindowScroll, { passive: true });
-
-    return () => {
-      document.removeEventListener("wheel", onWheel, { capture: true });
-      window.removeEventListener("scroll", onWindowScroll);
-    };
-  }, [open, closeMenu]);
-
-  // Keyboard basics
+  // Keyboard basics (only toggling, no extra closing logic)
   const onKeyDown = (e) => {
     if (disabled) return;
     if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
-      setOpen((v) => !v);
-    } else if (e.key === "Escape") {
-      closeMenu();
+      setOpen((v) => !v); // toggle like click
     }
   };
 
@@ -135,7 +84,6 @@ export default function CustomSelect({
 
       {/* Menu (overlay, absolute, matches control width) */}
       <div
-        ref={menuRef}
         className={`cs-menu ${open ? "menu-enter" : "menu-exit"}`}
         role="listbox"
         aria-hidden={!open}
@@ -166,25 +114,8 @@ export default function CustomSelect({
                   role="option"
                   aria-selected={selected}
                   tabIndex={0}
-                  // Mouse selection
-                  // onMouseDown={(e) => {
-                  //   e.preventDefault();
-                  //   e.stopPropagation();
-                  //   handleSelect(opt);
-                  // }}
-                  // ✅ Touch here is ONLY for selecting the option (inside),
-                  //    not for global "touch close"
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSelect(opt);
-                  }}
-                  // onKeyDown={(e) => {
-                  //   if (e.key === "Enter") {
-                  //     e.preventDefault();
-                  //     handleSelect(opt);
-                  //   }
-                  // }}
+                  // ONLY onClick closes by selecting
+                  onClick={() => handleSelect(opt)}
                 >
                   <span className="cs-option-label">{opt.label}</span>
                 </div>
