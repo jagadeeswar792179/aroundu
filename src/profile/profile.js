@@ -891,7 +891,7 @@ export default function Profile() {
               {profile.university && <p>{profile.university}</p>}
 
               {status ? (
-                <div>{status}</div>
+                <div>{profile.location}</div>
               ) : (
                 <div>
                   {location.city}, {location.state}, {location.country}
@@ -911,7 +911,6 @@ export default function Profile() {
               <h2>About</h2>
               {!profile.about ? (
                 <div>
-                  <div>add about</div>
                   <IoMdAdd onClick={() => editinfo("about", 0)} size={20} />
                 </div>
               ) : (
@@ -922,7 +921,13 @@ export default function Profile() {
                 </>
               )}
             </div>
-            <div>{profile.about}</div>
+            <div>
+              {!profile.about ? (
+                <div>Add about</div>
+              ) : (
+                <div>{profile.about}</div>
+              )}
+            </div>
           </div>
           <div className="prof-4">
             <p>Activity</p>

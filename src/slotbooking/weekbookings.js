@@ -457,8 +457,8 @@ export default function WeekBookings({ profileOwnerId = null }) {
         throw new Error(body?.error || "Accept failed");
       }
       // remove from list locally and refresh day counts
-      setRequestsList((prev) => prev.filter((r) => r.id !== requestId));
-      setRequestsTotal((t) => Math.max(0, t - 1));
+      // setRequestsList((prev) => prev.filter((r) => r.id !== requestId));
+      // setRequestsTotal((t) => Math.max(0, t - 1));
       await fetchDay(selectedDayIso);
     } catch (err) {
       console.error("acceptRequest error", err);
@@ -690,20 +690,20 @@ export default function WeekBookings({ profileOwnerId = null }) {
                     <div className="wb-request-meta">
                       {r.university || "—"} · {r.course || "—"}
                     </div>
-                    {/* {r.requester_message && (
+                    {r.requester_message && (
                       <div className="wb-request-message">
                         {r.requester_message}
                       </div>
-                    )} */}
+                    )}
                   </div>
 
                   <div className="wb-request-actions">
-                    {/* <button
+                    <button
                       className="wb-btn wb-btn-primary wb-request-accept"
                       onClick={() => acceptRequest(r.id)}
                     >
                       Accept
-                    </button> */}
+                    </button>
                     <button
                       onClick={() =>
                         setSelectedPeer({

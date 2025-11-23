@@ -31,7 +31,7 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
-/* Ensure Chrome autofill uses your font & colors */
+/* Chrome autofill */
 .ms-input:-webkit-autofill,
 .ms-input:-webkit-autofill:hover,
 .ms-input:-webkit-autofill:focus {
@@ -49,7 +49,7 @@
   cursor: not-allowed;
 }
 
-/* Tags container below input */
+/* Tags */
 .ms-tags {
   display: flex;
   flex-wrap: wrap;
@@ -69,15 +69,14 @@
   align-items: center;
   gap: 6px;
   color: var(--namehead);
-
   padding: 6px 10px;
-  border: 1px solid var(--namehead); /* indigo-200 */
+  border: 1px solid var(--namehead);
   border-radius: 999px;
   font-size: 13px;
   user-select: none;
 }
 
-/* Chips: mount animation */
+/* Chip animations */
 .ms-chip--in {
   animation: msChipIn 140ms ease-out both;
 }
@@ -92,7 +91,6 @@
   }
 }
 
-/* Chips: removing animation */
 .ms-chip--removing {
   animation: msChipOut 160ms ease-in forwards;
 }
@@ -129,47 +127,37 @@
   transform: scale(0.96);
 }
 
-/* Menu (portal, fixed above input) */
+/* Menu (portal, absolute, positioned via JS) */
 .ms-menu {
+  position: absolute;
   z-index: 9999;
-  /* anchor at input's top, then lift above with translateY */
-  transform: translateY(-6px) translateY(-100%);
-  /* visual */
+
   background: #fff;
   border: 1px solid #cbd5e1;
   border-radius: 30px;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.1), 0 2px 12px rgba(2, 6, 23, 0.05);
   overflow: hidden;
   padding: 10px;
-  max-height: 260px; /* overall cap (ul also has cap) */
+  max-height: 260px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
 }
 
-/* open/close animations */
+/* Direction: up or down */
+.ms-menu--up {
+  transform: translateY(calc(-100% - 8px)); /* above input */
+}
+
+.ms-menu--down {
+  transform: translateY(8px); /* below input */
+}
+
+/* Visible */
 .ms-menu--open {
-  animation: msMenuIn 130ms ease-out both;
-}
-.ms-menu--closing {
-  animation: msMenuOut 130ms ease-in both;
-}
-@keyframes msMenuIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px) translateY(-110%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(-6px) translateY(-100%);
-  }
-}
-@keyframes msMenuOut {
-  from {
-    opacity: 1;
-    transform: translateY(-6px) translateY(-100%);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-6px) translateY(-110%);
-  }
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Options list */

@@ -5,10 +5,11 @@ import "./navbar.css";
 import Modal from "../utils/Modal";
 import ProfileViewers from "../profileview/ProfileViewers";
 import Bugreport from "../bugreport/Bugreport";
+import { getUserFromToken } from "../utils/auth";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { profile } = useUser();
+  const [profile, setProfile] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [ModalType, setModalType] = useState(null);
 
@@ -20,6 +21,10 @@ export default function Navbar() {
     localStorage.removeItem("token");
     navigate("/");
   };
+  useEffect(() => {
+    const user = getUserFromToken();
+    if (user) setProfile(user);
+  }, []);
 
   const handleSearch = (e) => {
     if (e.key === "Enter" || e.type === "click") {

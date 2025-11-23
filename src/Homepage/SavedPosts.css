@@ -81,6 +81,7 @@
   overflow-x: hidden; /* hide horizontal scroll */
   scroll-behavior: smooth;
   max-width: 590px;
+  scrollbar-width: none;
   width: 100%;
   height: 500px;
   position: relative;

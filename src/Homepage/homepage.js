@@ -16,18 +16,48 @@ import ProfileViewers from "../profileview/ProfileViewers";
 import Bugreport from "../bugreport/Bugreport";
 import UsercardLoad from "../Loading/usercardload";
 import LostFound from "../LostFound/LostFound";
-import { useUser } from "../UserContext/UserContext";
+import { getUserFromToken } from "../utils/auth";
+import { getToken, isTokenExpired, clearAuth } from "../utils/auth"; // ⬅️ NEW
 function Homepage() {
-  const { profile } = useUser();
   const [ModalType, setModalType] = useState(null);
   const { location, status } = useLocation();
   const navigate = useNavigate();
   const [number, setNumber] = useState(1);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isConnectionLost, setIsConnectionLost] = useState(false);
   const handlemodal = (num) => {
     setModalType(num);
     setModalOpen(true);
   };
+
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const user = getUserFromToken();
+    if (user) setProfile(user); // ✔ store user details from token
+  }, []);
+  // 🔹 Check token on mount
+  useEffect(() => {
+    const token = getToken();
+
+    if (!token || isTokenExpired(token)) {
+      clearAuth();
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
+
+  // 🔹 Show popup if connection goes offline
+  useEffect(() => {
+    const handleOffline = () => {
+      setIsConnectionLost(true);
+    };
+
+    window.addEventListener("offline", handleOffline);
+    return () => window.removeEventListener("offline", handleOffline);
+  }, []);
+
+  // if not loading and there's an error or no profile → push to login
+
   return (
     <>
       <div className="container-1">
@@ -43,18 +73,16 @@ function Homepage() {
                   className="icon"
                   alt="profile"
                 />
-
                 <h3>
                   {profile?.first_name} {profile?.last_name}
                 </h3>
                 <p>{profile?.course}</p>
-                <p>{profile?.experience[0]?.title}</p>
+                <p>{profile?.experience?.[0]?.title}</p> {/* ✅ safer */}
                 {status ? (
                   <p>{status}</p>
                 ) : (
                   <p>
-                    {" "}
-                    {location.city}, {location.state}, {location.country}{" "}
+                    {location.city}, {location.state}, {location.country}
                   </p>
                 )}
               </div>
@@ -69,6 +97,32 @@ function Homepage() {
                 ) : (
                   <Bugreport onClose={() => setModalOpen(false)} />
                 )}
+              </Modal>
+            }
+            {
+              <Modal isOpen={isConnectionLost}>
+                <div style={{ padding: "16px", textAlign: "center" }}>
+                  <h3>Connection lost</h3>
+                  <p>
+                    It looks like your internet connection was interrupted.
+                    Please reload the page once your connection is back.
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    style={{
+                      marginTop: "12px",
+                      padding: "8px 16px",
+                      borderRadius: "30px",
+                      border: "none",
+                      cursor: "pointer",
+                      backgroundColor: "#205b99",
+                      color: "#fff",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Reload page
+                  </button>
+                </div>
               </Modal>
             }
             <div className="homecontainer-1-3">

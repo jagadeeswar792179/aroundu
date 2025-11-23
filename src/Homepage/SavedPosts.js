@@ -231,7 +231,10 @@ function SavedPosts() {
                   >
                     <div className="feed-container">
                       <div className="feed-container-sep">
-                        <div className="feed-container-1">
+                        <div
+                          className="feed-container-1"
+                          style={{ justifyContent: "flex-start" }}
+                        >
                           <img
                             src={selectedPost.user?.avatar_url || "/avatar.jpg"}
                             className="icon"

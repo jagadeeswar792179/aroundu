@@ -166,6 +166,7 @@ export default function Uprofile() {
 
               {profile.course && <p>{profile.course}</p>}
               {profile.university && <p>{profile.university}</p>}
+              {profile.location && <p>{profile.location}</p>}
 
               <button
                 onClick={() => setSelectedPeer(profile)}

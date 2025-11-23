@@ -65,12 +65,6 @@ const RegisterForm = () => {
     { value: "reading", label: "Reading" },
     { value: "technology", label: "Technology" },
     { value: "other", label: "Other" },
-    { value: "sports", label: "Sports" },
-    { value: "music", label: "Music" },
-    { value: "travel", label: "Travel" },
-    { value: "reading", label: "Reading" },
-    { value: "technology", label: "Technology" },
-    { value: "other", label: "Other" },
   ];
   const [selectedOptions, setSelectedOptions] = useState([]);
   const courseOptions = [
@@ -729,7 +723,7 @@ const RegisterForm = () => {
 
             <label className="label-register ">
               Expected Graduation Date
-              <input type="month" className="input-register graduate-date" />
+              <input type="date" className="input-register graduate-date" />
             </label>
           </div>
         </>

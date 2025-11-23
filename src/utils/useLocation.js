@@ -21,19 +21,47 @@ export default function useLocation() {
           const data = await res.json();
 
           const address = data.address || {};
-          setLocation({
+
+          const finalLocation = {
             city: address.city || address.town || address.village || "",
             state: address.state || "",
             country: address.country || "",
-          });
+          };
+
+          setLocation(finalLocation);
           setStatus("");
+
+          const formatted =
+            `${finalLocation.city}, ${finalLocation.state}, ${finalLocation.country}`.replace(
+              /(^[,\s]+)|([,\s]+$)/g,
+              ""
+            );
+
+          // 🔥 Only send to backend if location fetched successfully
+          if (formatted.length > 0) {
+            await fetch(
+              `${process.env.REACT_APP_SERVER}/api/user/update-location`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({ location: formatted }),
+              }
+            );
+          }
         } catch (err) {
           setStatus("Failed to fetch location data.");
+          // ❌ DO NOT send anything to backend
         }
       },
+
+      // ❌ If denied => do not send anything
       () => {
         setStatus("Could not get location. Permission denied.");
       },
+
       { enableHighAccuracy: true }
     );
   }, []);

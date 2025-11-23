@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Server } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import "./LoginPage.css";
 import Line from "../utils/line";
 import { BeatLoader } from "react-spinners";
-import BrandLogo from "../utils/BrandLogo";
+import { saveAuth } from "../utils/auth"; // ⬅️ NEW
 
 const LoginPage = () => {
-  const navigate = useNavigate(); // Hook to navigate pages
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -16,18 +16,10 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const server = process.env.REACT_APP_SERVER;
-  console.log(server + " dsf");
 
   const validateEmail = (value) => {
     setEmail(value);
-    // const eduRegex = /^[^\s@]+@(wne|springfield)\.edu$/i;
-    // if (!value) {
-    //   setEmailError("Email is required");
-    // } else if (!eduRegex.test(value)) {
-    //   setEmailError("Please enter a valid educational email");
-    // } else {
-    //   setEmailError("");
-    // }
+    // add validation later if needed
   };
 
   const validatePassword = (value) => {
@@ -46,7 +38,6 @@ const LoginPage = () => {
   };
 
   const handleLogin = async () => {
-    // final client-side guard
     if (emailError || passwordError || !email || !password) {
       alert("Please fix the errors before logging in.");
       return;
@@ -67,11 +58,9 @@ const LoginPage = () => {
         throw new Error(data.msg || "Login failed");
       }
 
-      // ✅ Save token and user data
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // ✅ Use helper to save token + user
+      saveAuth(data.token, data.user);
 
-      alert("Login successful!");
       navigate("/home");
     } catch (err) {
       setLoading(false);
@@ -81,7 +70,6 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // re-run validations to ensure errors show if empty
     validateEmail(email);
     validatePassword(password);
     if (!emailError && !passwordError) {

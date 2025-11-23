@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "./MultiSelectTags.css";
+
 /**
- * MultiSelect
+ * MultiSelectTags
  * props:
- *  - options: [{value, label}]
- *  - value:   [{value, label}]
+ *  - options: [{ value, label }]
+ *  - value:   [{ value, label }]
  *  - onChange: (arr) => void
  *  - placeholder?: string
  *  - maxSelected?: number (default 7)
- *  - className?: string (extra class on root)
+ *  - className?: string
+ *  - direction?: "up" | "down" (default "up")
  */
 export default function MultiSelectTags({
   options = [],
@@ -18,20 +20,23 @@ export default function MultiSelectTags({
   placeholder = "Select...",
   maxSelected = 7,
   className = "",
+  direction = "up", // "up" | "down"
 }) {
   const rootRef = useRef(null);
   const inputRef = useRef(null);
   const menuRef = useRef(null);
 
   const [query, setQuery] = useState("");
-  const [menuVisible, setMenuVisible] = useState(false); // controls portal mount
-  const [menuOpen, setMenuOpen] = useState(false); // controls animation class
-  const [closedByScroll, setClosedByScroll] = useState(false);
-
-  // track tags playing "remove" animation: Set<value>
+  const [isOpen, setIsOpen] = useState(false);
   const [removing, setRemoving] = useState(() => new Set());
 
-  // compute options not yet selected
+  const [menuStyle, setMenuStyle] = useState({
+    left: 0,
+    top: 0,
+    width: 0,
+  });
+
+  // map of selected values for quick lookup
   const selectedMap = useMemo(() => {
     const m = new Map();
     value.forEach((v) => m.set(v.value, true));
@@ -47,60 +52,57 @@ export default function MultiSelectTags({
       );
   }, [options, selectedMap, query]);
 
-  // ===== Menu positioning (fixed, above input, width = input width) =====
-  const [menuStyle, setMenuStyle] = useState({
-    left: 0,
-    top: 0,
-    width: 0,
-  });
+  const disableInput = value.length >= maxSelected;
 
+  // Position menu relative to input, using document coordinates
   const positionMenu = () => {
     if (!inputRef.current) return;
+
     const r = inputRef.current.getBoundingClientRect();
+
+    const scrollY =
+      window.scrollY ??
+      window.pageYOffset ??
+      document.documentElement.scrollTop ??
+      0;
+    const scrollX =
+      window.scrollX ??
+      window.pageXOffset ??
+      document.documentElement.scrollLeft ??
+      0;
+
     setMenuStyle({
-      left: Math.max(8, r.left), // small padding against viewport edge
-      top: r.top, // anchor at input top; CSS translates up
+      left: r.left + scrollX,
+      top: r.top + scrollY, // anchor at input top, CSS will offset up/down
       width: r.width,
     });
   };
 
-  // Open / Close with animation
   const openMenu = () => {
+    if (isOpen) return;
     positionMenu();
-    setMenuVisible(true);
-    // next frame -> play in animation
-    requestAnimationFrame(() => setMenuOpen(true));
+    setIsOpen(true);
   };
 
   const closeMenu = () => {
-    setMenuOpen(false);
-    // let closing animation finish
-    setTimeout(() => setMenuVisible(false), 160);
+    setIsOpen(false);
   };
 
-  // focus opens menu (unless already open)
-  const handleFocus = () => {
-    if (!menuVisible) openMenu();
-  };
-
-  // Select option
   const handleSelect = (opt) => {
-    if (value.length >= maxSelected) return; // hard cap
-    const next = [...value, opt];
-    onChange(next);
-    // keep menu open for faster multiple selections
-    setQuery("");
+    if (value.length >= maxSelected) return;
+    onChange([...value, opt]);
+    setQuery(""); // clear query after selecting
   };
 
-  // Remove tag with exit animation
   const handleRemove = (tag) => {
+    // trigger remove animation
     setRemoving((prev) => new Set(prev).add(tag.value));
   };
 
   const onTagAnimationEnd = (tag) => {
     if (!removing.has(tag.value)) return;
     const next = value.filter((v) => v.value !== tag.value);
-    onChange(next); // immediately makes it appear back in menu
+    onChange(next);
     setRemoving((prev) => {
       const n = new Set(prev);
       n.delete(tag.value);
@@ -108,138 +110,73 @@ export default function MultiSelectTags({
     });
   };
 
-  // Outside click to close
+  // Open on focus/click
+  const handleInputFocus = () => {
+    openMenu();
+  };
+
+  const handleInputClick = () => {
+    openMenu();
+  };
+
+  // Close on outside click
   useEffect(() => {
+    if (!isOpen) return;
+
     const onPointerDown = (e) => {
       const path = e.composedPath ? e.composedPath() : [];
-      const clickedInsideMenu =
-        menuRef.current && path.includes(menuRef.current);
-      const clickedInsideRoot =
-        rootRef.current && path.includes(rootRef.current);
 
-      if (!clickedInsideMenu && !clickedInsideRoot) {
-        // Outside completely
-        if (menuVisible) {
-          setClosedByScroll(false);
-          closeMenu();
-        }
+      const insideRoot = rootRef.current && path.includes(rootRef.current);
+      const insideMenu = menuRef.current && path.includes(menuRef.current);
+
+      if (!insideRoot && !insideMenu) {
+        closeMenu();
       }
     };
 
-    // capture so outside interactions still work
     document.addEventListener("pointerdown", onPointerDown, true);
     return () =>
       document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [menuVisible]);
+  }, [isOpen]);
 
   // Close on Escape
   useEffect(() => {
+    if (!isOpen) return;
+
     const onKey = (e) => {
-      if (e.key === "Escape" && menuVisible) {
-        setClosedByScroll(false);
+      if (e.key === "Escape") {
         closeMenu();
         inputRef.current?.blur();
       }
     };
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [menuVisible]);
+  }, [isOpen]);
 
-  // Reposition on resize
+  // Reposition on resize/scroll while open
   useEffect(() => {
-    const onResize = () => {
-      if (menuVisible) positionMenu();
-    };
+    if (!isOpen) return;
+
+    const onResize = () => positionMenu();
+    const onScroll = () => positionMenu();
+
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [menuVisible]);
-
-  // Scroll handling:
-  // - If scrolling happens OUTSIDE menu, close (and mark closedByScroll)
-  // - Scrolling INSIDE menu should NOT close
-  // - After scroll ends (debounced), if input is still focused, reopen
-  useEffect(() => {
-    let reopenTimer = null;
-    let debounceTimer = null;
-
-    const maybeReopen = () => {
-      if (document.activeElement === inputRef.current) {
-        positionMenu();
-        setClosedByScroll(false);
-        openMenu();
-      }
-    };
-
-    const markScrollEnd = () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        if (closedByScroll) {
-          // reopen softly after scroll settles
-          maybeReopen();
-        }
-      }, 180);
-    };
-
-    // capture scrolls on any element
-    const onAnyScroll = (e) => {
-      // if the scroll target (or its path) is the menu, ignore
-      const path = e.composedPath ? e.composedPath() : [];
-      const insideMenu = menuRef.current && path.includes(menuRef.current);
-
-      // also ignore if the root/input area is scrolling itself
-      const insideRoot = rootRef.current && path.includes(rootRef.current);
-
-      if (!insideMenu && !insideRoot) {
-        if (menuVisible) {
-          setClosedByScroll(true);
-          closeMenu();
-        }
-      }
-      markScrollEnd();
-    };
-
-    // wheel and touchmove help on some browsers
-    const onAnyWheelOrTouch = (e) => {
-      const path = e.composedPath ? e.composedPath() : [];
-      const insideMenu = menuRef.current && path.includes(menuRef.current);
-      const insideRoot = rootRef.current && path.includes(rootRef.current);
-      if (!insideMenu && !insideRoot) {
-        if (menuVisible) {
-          setClosedByScroll(true);
-          closeMenu();
-        }
-      }
-      markScrollEnd();
-    };
-
-    document.addEventListener("scroll", onAnyScroll, true);
-    document.addEventListener("wheel", onAnyWheelOrTouch, {
-      passive: true,
-      capture: true,
-    });
-    document.addEventListener("touchmove", onAnyWheelOrTouch, {
-      passive: true,
-      capture: true,
-    });
+    window.addEventListener("scroll", onScroll, true);
 
     return () => {
-      clearTimeout(reopenTimer);
-      clearTimeout(debounceTimer);
-      document.removeEventListener("scroll", onAnyScroll, true);
-      document.removeEventListener("wheel", onAnyWheelOrTouch, true);
-      document.removeEventListener("touchmove", onAnyWheelOrTouch, true);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll, true);
     };
-  }, [menuVisible, closedByScroll]);
+  }, [isOpen]);
 
-  // Keep menu width synced while open
+  // Keep width synced if input size changes
   useEffect(() => {
-    if (!menuVisible) return;
+    if (!isOpen) return;
     const ro = new ResizeObserver(positionMenu);
     if (inputRef.current) ro.observe(inputRef.current);
     return () => ro.disconnect();
-  }, [menuVisible]);
-
-  const disableInput = value.length >= maxSelected;
+  }, [isOpen]);
 
   return (
     <div ref={rootRef} className={`multi-select ${className}`}>
@@ -252,19 +189,17 @@ export default function MultiSelectTags({
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            if (!menuVisible) openMenu();
+            if (!isOpen) openMenu();
           }}
-          onFocus={handleFocus}
-          onClick={() => {
-            if (!menuVisible) openMenu();
-          }}
+          onFocus={handleInputFocus}
+          onClick={handleInputClick}
           disabled={disableInput}
           autoComplete="off"
           inputMode="text"
         />
       </div>
 
-      {/* Selected tags BELOW the input */}
+      {/* Tags below input */}
       <div className="ms-tags">
         {value.length > 0 ? (
           value.map((tag) => {
@@ -294,21 +229,19 @@ export default function MultiSelectTags({
         )}
       </div>
 
-      {/* MENU (portal, fixed, above input) */}
-      {menuVisible &&
+      {/* Menu via portal */}
+      {isOpen &&
         createPortal(
           <div
             ref={menuRef}
-            className={`ms-menu ${
-              menuOpen ? "ms-menu--open" : "ms-menu--closing"
+            className={`ms-menu ms-menu--${direction} ${
+              isOpen ? "ms-menu--open" : ""
             }`}
             style={{
-              position: "fixed",
               left: `${menuStyle.left}px`,
               top: `${menuStyle.top}px`,
               width: `${menuStyle.width}px`,
             }}
-            // prevent internal scrolls from propagating outward
             onScroll={(e) => e.stopPropagation()}
           >
             <ul className="ms-options">
@@ -319,7 +252,7 @@ export default function MultiSelectTags({
                   <li
                     key={opt.value}
                     className="ms-option"
-                    onMouseDown={(e) => e.preventDefault()} // keep focus on input
+                    onMouseDown={(e) => e.preventDefault()} // keep focus
                     onClick={() => handleSelect(opt)}
                   >
                     <span className="ms-option-label">{opt.label}</span>
