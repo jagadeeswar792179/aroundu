@@ -79,7 +79,7 @@ function Homepage() {
                 <p>{profile?.course}</p>
                 <p>{profile?.experience?.[0]?.title}</p> {/* ✅ safer */}
                 {status ? (
-                  <p>{status}</p>
+                  <p>{profile.location}</p>
                 ) : (
                   <p>
                     {location.city}, {location.state}, {location.country}

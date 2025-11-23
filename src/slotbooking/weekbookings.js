@@ -457,8 +457,8 @@ export default function WeekBookings({ profileOwnerId = null }) {
         throw new Error(body?.error || "Accept failed");
       }
       // remove from list locally and refresh day counts
-      // setRequestsList((prev) => prev.filter((r) => r.id !== requestId));
-      // setRequestsTotal((t) => Math.max(0, t - 1));
+      setRequestsList((prev) => prev.filter((r) => r.id !== requestId));
+      setRequestsTotal((t) => Math.max(0, t - 1));
       await fetchDay(selectedDayIso);
     } catch (err) {
       console.error("acceptRequest error", err);
