@@ -42,7 +42,7 @@ function Homepage() {
 
     if (!token || isTokenExpired(token)) {
       clearAuth();
-      navigate("/login", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 
