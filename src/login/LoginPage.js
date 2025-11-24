@@ -98,8 +98,9 @@ const LoginPage = () => {
           <span>U</span>
         </p>
         <p>
-          AroundU helps you connect and share
-          <br /> with the people in your life.
+          Keeping Campuses Connected
+          <br />
+          With AroundU
         </p>
       </div>
 
