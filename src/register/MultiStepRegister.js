@@ -38,6 +38,7 @@ const RegisterForm = () => {
     birthYear: "",
     university: "",
     universityOther: "",
+    bloglink: "", // 👈 new
   });
 
   const months = [
@@ -280,6 +281,9 @@ const RegisterForm = () => {
     if (userType === "professor" && !formData.specialization) {
       errors.push("Specialization is required for professors.");
     }
+    if (userType === "professor" && !formData.bloglink.trim()) {
+      errors.push("Blog link is required for professors.");
+    }
 
     const interests = (selectedOptions || []).map((opt) => opt.value);
     if (interests.length === 0 || interests.length > 4) {
@@ -314,15 +318,15 @@ const RegisterForm = () => {
     }
 
     const payload = {
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
+      first_name: formData.firstName.trim(),
+      last_name: formData.lastName.trim(),
       email: formData.email.trim(),
       password: formData.password,
       gender:
         formData.gender === "other"
           ? formData.other_gender.trim()
           : formData.gender,
-      userType,
+      user_type: userType, // ✅ match backend
       dob,
       university: finalUniversity,
       interests,
@@ -332,6 +336,7 @@ const RegisterForm = () => {
       }),
       ...(userType === "professor" && {
         specialization: formData.specialization,
+        blog_link: formData.bloglink.trim(), // ✅ match DB column
       }),
     };
 
@@ -767,6 +772,20 @@ const RegisterForm = () => {
             isSearchable
             placeholder="Select or search specialization"
           />
+
+          {/* 👇 New blog link input */}
+          <label className="label-register" style={{ marginTop: "10px" }}>
+            Blog Link (required for professors)
+            <input
+              type="url"
+              placeholder="https://your-blog.com"
+              value={formData.bloglink}
+              onChange={(e) =>
+                setFormData({ ...formData, bloglink: e.target.value })
+              }
+              className="input-register"
+            />
+          </label>
         </>
       )}
 

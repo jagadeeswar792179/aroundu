@@ -1,5 +1,6 @@
 // src/components/PostFetch.jsx
 import Line from "../utils/line";
+import "./PostsFetch.css";
 import InfiniteScroll from "react-infinite-scroll-component";
 import TimeAgo from "../utils/TimeAgo";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
@@ -15,12 +16,31 @@ import PostUploadModal from "./PostUploadModal";
 import PostLoad from "../Loading/postload";
 import DiscussionUploadModal from "./DiscussionUploadModal";
 import { CommentOutlineMinimal } from "../utils/CommentOutline";
+import ReportModal from "../utils/ReportModal";
+import BlockConfirmModal from "../utils/BlockConfirmModal";
+
 // ...
 function PostFetch({ profile }) {
   const server = process.env.REACT_APP_SERVER;
 
   const navigate = useNavigate();
+  const [openMenuPostId, setOpenMenuPostId] = useState(null);
+  // report state
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null); // { kind: 'post'|'user', postId?, userId? }
+  const [reportTargetLabel, setReportTargetLabel] = useState("");
 
+  // block state
+  const [blockModalOpen, setBlockModalOpen] = useState(false);
+  const [blockTargetUserId, setBlockTargetUserId] = useState(null);
+  const [blockTargetName, setBlockTargetName] = useState("");
+
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [isBlocking, setIsBlocking] = useState(false);
+
+  const reportModalKey = reportTarget
+    ? `${reportTarget.kind}-${reportTarget.postId || reportTarget.userId}`
+    : "none";
   // try localStorage user first (login stores it), else fallback to profile prop
   const storedUser = JSON.parse(localStorage.getItem("user")) || {};
   const loggedInUserId = storedUser?.id || profile?.id || null;
@@ -619,27 +639,116 @@ function PostFetch({ profile }) {
     }));
   };
 
-  // clicking on a post's university or course will switch to that tab and filter
-  // const onClickPostUniversity = (uni) => {
-  //   if (!uni) return;
-  //   setSelectedUniversity(uni);
-  //   setSelectedCourse(null);
-  //   setTab("university");
-  //   setCache((prev) => ({
-  //     ...prev,
-  //     university: { posts: [], page: 1, hasMore: true },
-  //   }));
-  // };
-  // const onClickPostCourse = (course) => {
-  //   if (!course) return;
-  //   setSelectedCourse(course);
-  //   setSelectedUniversity(null);
-  //   setTab("course");
-  //   setCache((prev) => ({
-  //     ...prev,
-  //     course: { posts: [], page: 1, hasMore: true },
-  //   }));
-  // };
+  // open report modals
+  const openPostReportModal = (post) => {
+    setReportTarget({
+      kind: "post",
+      postId: post.id,
+      userId: post.user_id,
+    });
+    setReportTargetLabel("this post");
+    setReportModalOpen(true);
+    setOpenMenuPostId(null);
+  };
+
+  const openUserReportModal = (post) => {
+    setReportTarget({
+      kind: "user",
+      userId: post.user_id,
+    });
+    setReportTargetLabel(
+      `${post.user?.first_name || ""} ${post.user?.last_name || ""}`.trim() ||
+        "this person"
+    );
+    setReportModalOpen(true);
+    setOpenMenuPostId(null);
+  };
+
+  // submit report to backend
+  const handleSubmitReport = async ({ type, reason }) => {
+    if (!reportTarget || isSubmittingReport) return; // prevent double-click
+    try {
+      setIsSubmittingReport(true);
+
+      const token = localStorage.getItem("token");
+
+      if (reportTarget.kind === "post") {
+        await axios.post(
+          `${server}/api/moderation/report/post/${reportTarget.postId}`,
+          { type, reason },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        alert("Thank you. The post has been reported.");
+      } else {
+        await axios.post(
+          `${server}/api/moderation/report/user/${reportTarget.userId}`,
+          { type, reason },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        alert("Thank you. The user has been reported.");
+      }
+    } catch (err) {
+      console.error("Report error:", err);
+      alert("Failed to submit report. Please try again.");
+    } finally {
+      setIsSubmittingReport(false);
+      setReportModalOpen(false);
+      setReportTarget(null);
+    }
+  };
+
+  // open block modal
+  const openBlockModal = (post) => {
+    setBlockTargetUserId(post.user_id);
+    setBlockTargetName(
+      `${post.user?.first_name || ""} ${post.user?.last_name || ""}`.trim() ||
+        "this person"
+    );
+    setBlockModalOpen(true);
+    setOpenMenuPostId(null);
+  };
+
+  // confirm block: API + remove posts
+  const handleConfirmBlock = async () => {
+    if (!blockTargetUserId || isBlocking) return;
+    try {
+      setIsBlocking(true);
+
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${server}/api/moderation/block/${blockTargetUserId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // remove their posts from feed
+      setPosts((prev) => prev.filter((p) => p.user_id !== blockTargetUserId));
+
+      setCache((prev) => {
+        const next = { ...prev };
+        for (const tabKey of Object.keys(next)) {
+          const bucket = next[tabKey];
+          if (!bucket || !Array.isArray(bucket.posts)) continue;
+          next[tabKey] = {
+            ...bucket,
+            posts: bucket.posts.filter((p) => p.user_id !== blockTargetUserId),
+          };
+        }
+        return next;
+      });
+
+      alert(`You blocked ${blockTargetName || "this person"}.`);
+    } catch (err) {
+      console.error("Block error:", err);
+      alert("Could not block user. Please try again.");
+    } finally {
+      setIsBlocking(false);
+      setBlockModalOpen(false);
+      setBlockTargetUserId(null);
+      setBlockTargetName("");
+    }
+  };
+
   const contentdivform = (post) => {
     return (
       <div className="feed-container-4">
@@ -679,9 +788,34 @@ function PostFetch({ profile }) {
       </div>
     );
   };
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuPostId(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <>
+      <ReportModal
+        key={reportModalKey} // 👈 this forces fresh state per target
+        isOpen={reportModalOpen}
+        onClose={() => {
+          setReportModalOpen(false);
+          setReportTarget(null);
+        }}
+        onSubmit={handleSubmitReport}
+        targetLabel={reportTargetLabel}
+        isSubmitting={isSubmittingReport}
+      />
+
+      <BlockConfirmModal
+        isOpen={blockModalOpen}
+        onClose={() => setBlockModalOpen(false)}
+        onConfirm={handleConfirmBlock}
+        targetName={blockTargetName}
+        isBlocking={isBlocking}
+      />
+
       <div className="homecontainer-2">
         <div className="postcontainer">
           <div className="postwrite-container">
@@ -847,6 +981,55 @@ function PostFetch({ profile }) {
                         {post.user?.role} at {post.user?.university}
                       </p>
                     </div>
+                    {post.user_id !== loggedInUserId && (
+                      <div className="kebab-wrapper">
+                        <div
+                          className="kebab-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuPostId(
+                              openMenuPostId === post.id ? null : post.id
+                            );
+                          }}
+                        >
+                          ⋮
+                        </div>
+
+                        {openMenuPostId === post.id && (
+                          <div className="kebab-menu">
+                            <div
+                              className="kebab-item"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openPostReportModal(post);
+                              }}
+                            >
+                              Report this post
+                            </div>
+
+                            <div
+                              className="kebab-item"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openUserReportModal(post);
+                              }}
+                            >
+                              Report this person
+                            </div>
+
+                            <div
+                              className="kebab-item danger"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openBlockModal(post);
+                              }}
+                            >
+                              Block this person
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

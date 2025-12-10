@@ -486,6 +486,12 @@ export default function Profile() {
   const filteredInterestOptions = interestOptions.filter(
     (opt) => !interestsTemp.includes(opt.value)
   );
+  const getBlogUrl = (rawUrl) => {
+    if (!rawUrl) return "#";
+    if (/^https?:\/\//i.test(rawUrl)) return rawUrl; // already ok
+    return `https://${rawUrl}`; // default to https
+  };
+
   return (
     <>
       <div className="container-1">
@@ -886,7 +892,28 @@ export default function Profile() {
               <p className="name-prof">
                 {profile.first_name} {profile.last_name}
               </p>
-
+              {profile.user_type === "professor" && (
+                <>
+                  {profile.verified ? (
+                    <>
+                      <span className="verified-badge">✔ verified</span>
+                      {profile.blog_link && (
+                        <a
+                          href={getBlogUrl(profile.blog_link)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="form-button"
+                          style={{ width: "fit-content" }}
+                        >
+                          Visit blog
+                        </a>
+                      )}
+                    </>
+                  ) : (
+                    <span>Not verified</span>
+                  )}
+                </>
+              )}
               {profile.course && <p>{profile.course}</p>}
               {profile.university && <p>{profile.university}</p>}
 

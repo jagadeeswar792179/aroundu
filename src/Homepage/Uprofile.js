@@ -17,7 +17,10 @@ export default function Uprofile() {
   const [profileUrl, setProfileUrl] = useState(null);
   const token = localStorage.getItem("token");
   const server = process.env.REACT_APP_SERVER;
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [unblockLoading, setUnblockLoading] = useState(false);
 
+  const me = JSON.parse(localStorage.getItem("user"));
   // Send profile view to backend (always inserts a row).
   // Fire-and-forget: logs success/failure but doesn't block UI.
   const sendProfileView = async (targetId) => {
@@ -88,9 +91,13 @@ export default function Uprofile() {
         });
         setProfileUrl(data.profile || null);
 
-        // record a profile view after successful profile fetch
-        // (fire-and-forget)
-        sendProfileView(userId);
+        // 👇 NEW: track block state
+        setIsBlocked(!!data.is_blocked_by_me);
+
+        // 👇 Only record profile view if **not blocked**
+        if (!data.is_blocked_by_me) {
+          sendProfileView(userId);
+        }
       } catch (err) {
         if (err.name === "AbortError") {
           console.log("Profile fetch aborted");
@@ -126,6 +133,37 @@ export default function Uprofile() {
         : ""
     }`;
   }
+
+  const handleUnblock = async () => {
+    if (!userId) return;
+    setUnblockLoading(true);
+
+    try {
+      const res = await fetch(`${server}/api/moderation/block/${userId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Unblock failed: ${res.status}`);
+      }
+
+      setIsBlocked(false);
+    } catch (err) {
+      console.error("Error unblocking user:", err);
+      alert("Failed to unblock. Please try again.");
+    } finally {
+      setUnblockLoading(false);
+    }
+  };
+  const getBlogUrl = (rawUrl) => {
+    if (!rawUrl) return "#";
+    if (/^https?:\/\//i.test(rawUrl)) return rawUrl; // already ok
+    return `https://${rawUrl}`; // default to https
+  };
 
   if (loading) return <ProfileLoadFull />;
   if (!profile) return <div>No profile data</div>;
@@ -164,17 +202,59 @@ export default function Uprofile() {
                 </b>
               </div>
 
+              {profile.user_type === "professor" && (
+                <>
+                  {profile.verified ? (
+                    <>
+                      <span className="verified-badge">✔ verified</span>
+                      {profile.blog_link && (
+                        <a
+                          href={getBlogUrl(profile.blog_link)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="form-button"
+                          style={{ width: "fit-content" }}
+                        >
+                          Visit blog
+                        </a>
+                      )}
+                    </>
+                  ) : (
+                    <span>Not verified</span>
+                  )}
+                </>
+              )}
+
               {profile.course && <p>{profile.course}</p>}
               {profile.university && <p>{profile.university}</p>}
-              {profile.location && <p>{profile.location}</p>}
+              {profile.location && <div>{profile.location}</div>}
 
-              <button
-                onClick={() => setSelectedPeer(profile)}
-                className="form-button"
-                style={{ width: "fit-content" }}
-              >
-                Message
-              </button>
+              {/* Don't show any button on own profile */}
+              {me?.id !== userId && (
+                <>
+                  {!isBlocked ? (
+                    <button
+                      onClick={() => setSelectedPeer(profile)}
+                      className="form-button"
+                      style={{ width: "fit-content" }}
+                    >
+                      Message
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleUnblock}
+                      className="form-button"
+                      style={{
+                        width: "fit-content",
+                        backgroundColor: "#c62828",
+                      }}
+                      disabled={unblockLoading}
+                    >
+                      {unblockLoading ? "Unblocking..." : "Unblock"}
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
 

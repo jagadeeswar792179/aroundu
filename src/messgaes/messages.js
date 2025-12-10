@@ -9,6 +9,7 @@ import LoadMess2 from "../Loading/LoadMess2";
 import Navbar from "../Homepage/Navbar";
 import LostFound from "../LostFound/LostFound";
 import { useNavigate } from "react-router-dom";
+import BlockConfirmModal from "../utils/BlockConfirmModal";
 const API_BASE = process.env.REACT_APP_SERVER;
 function Messages() {
   const navigate = useNavigate();
@@ -27,6 +28,10 @@ function Messages() {
 
   // mobile open state
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openMenuConvId, setOpenMenuConvId] = useState(null);
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [blockTarget, setBlockTarget] = useState(null); // { peerId, name }
+  const [blockLoading, setBlockLoading] = useState(false);
 
   const newsArray = [
     "India, Canada reset diplomatic ties; 10m ago",
@@ -293,9 +298,59 @@ function Messages() {
       }));
     }
   };
+  const handleConfirmBlock = async () => {
+    if (!blockTarget) return;
 
+    setBlockLoading(true);
+
+    try {
+      await authFetch(
+        `${API_BASE}/api/moderation/block/${blockTarget.peerId}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            reason: "Blocked from messages",
+          }),
+        }
+      );
+
+      // ✅ Immediately remove blocked convo from list
+      setConvos((prev) => prev.filter((c) => c.peer_id !== blockTarget.peerId));
+
+      // ✅ Close active chat if this conversation is open
+      if (active?.peer_id === blockTarget.peerId) {
+        setActive(null);
+        setMsgs([]);
+      }
+
+      // Close modal
+      setShowBlockModal(false);
+      setBlockTarget(null);
+    } catch (err) {
+      console.error("Block failed:", err);
+      alert("Blocking failed. Try again.");
+    } finally {
+      setBlockLoading(false);
+    }
+  };
+  const openBlockModalFromConvo = (convo, name) => {
+    setBlockTarget({ peerId: convo.peer_id, name });
+    setShowBlockModal(true);
+  };
   return (
     <>
+      <BlockConfirmModal
+        isOpen={showBlockModal}
+        isBlocking={blockLoading}
+        targetName={blockTarget?.name}
+        onClose={() => {
+          if (blockLoading) return;
+          setShowBlockModal(false);
+          setBlockTarget(null);
+        }}
+        onConfirm={handleConfirmBlock}
+      />
+
       <div className="container-1">
         <Navbar />
       </div>
@@ -380,8 +435,38 @@ function Messages() {
                               className="conversation-text"
                               title={c.last_message || ""}
                             >
-                              {c.last_message || "Say hi 👋"}
+                              {c.last_message || "Say hello"}
                             </div>
+                          </div>
+                          <div className="kebab-wrapper">
+                            <div
+                              className="kebab-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenMenuConvId(
+                                  openMenuConvId === c.conversation_id
+                                    ? null
+                                    : c.conversation_id
+                                );
+                              }}
+                            >
+                              ⋮
+                            </div>
+
+                            {openMenuConvId === c.conversation_id && (
+                              <div className="kebab-menu">
+                                <div
+                                  className="kebab-item danger"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenMenuConvId(null);
+                                    openBlockModalFromConvo(c, name);
+                                  }}
+                                >
+                                  Block this person
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
