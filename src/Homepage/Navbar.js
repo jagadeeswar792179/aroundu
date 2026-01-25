@@ -143,7 +143,7 @@ export default function Navbar() {
           </svg>
           <p>Explore</p>
         </div>
-         <div>
+         <div className="logout-hide-small-screen">
 
 <svg
   onClick={() => navigate("/marketplace")}
@@ -281,7 +281,27 @@ export default function Navbar() {
             </svg>{" "}
             <p>LogOut</p>{" "}
           </div>
+<div className="flex-r center-c" style={{gap:"10px"}}>
 
+<svg
+  onClick={() => navigate("/marketplace")}
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+   color="#205b99"
+  stroke="currentColor"
+  strokeWidth="2"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+>
+  <path d="M3 9l1-5h16l1 5" />
+  <path d="M4 9h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+  <path d="M9 22V12h6v10" />
+</svg>
+<p>Marketplace</p>
+        </div>
           <div
             onClick={() => handlemodal(1)}
             style={{ cursor: "pointer" }}
