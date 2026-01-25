@@ -985,7 +985,7 @@ import "./Marketplace.css";
 import TimeAgo from "../utils/TimeAgo";
 import MessageModal from "../messgaes/MessageModal";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_SERVER || "http://localhost:5000";
 const MAX_IMAGES = 6;
 
 export default function Marketplace() {
