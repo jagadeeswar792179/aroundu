@@ -44,37 +44,48 @@ const LoginPage = () => {
     setShowPassword((prev) => !prev);
   };
 
+
+
+
   const handleLogin = async () => {
-    if (emailError || passwordError || !email || !password) {
-      alert("Please fix the errors before logging in.");
-      return;
+  if (emailError || passwordError || !email || !password) {
+    alert("Please fix the errors before logging in.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const response = await fetch(`${server}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.msg || "Login failed");
     }
 
-    try {
-      setLoading(true);
-      const response = await fetch(`${server}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    // ✅ Clear old session (expired/corrupt)
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-      const data = await response.json();
-      setLoading(false);
+    // ✅ Save new token + user
+    saveAuth(data.token, data.user);
 
-      if (!response.ok) {
-        throw new Error(data.msg || "Login failed");
-      }
+    // ✅ Debug (remove later)
+    console.log("TOKEN SAVED:", localStorage.getItem("token"));
+    console.log("USER SAVED:", localStorage.getItem("user"));
 
-      // ✅ Use helper to save token + user
-      saveAuth(data.token, data.user);
-
-      navigate("/home");
-    } catch (err) {
-      setLoading(false);
-      alert(err.message);
-    }
-  };
-
+    navigate("/home");
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   const handleSubmit = (e) => {
     e.preventDefault();
     validateEmail(email);

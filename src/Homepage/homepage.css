@@ -149,7 +149,7 @@
   border-radius: 50%;
 }
 .feed-container-1 {
-  width: 80%;
+  width: 100%;
   justify-content: space-between;
 }
 .feed-container-1-2 h3 {
@@ -166,13 +166,12 @@
   align-items: center;
   padding: 0 30px 0 0;
 }
-.feed-container-1,
-.feed-container-sep {
+.feed-container-1 {
   display: flex;
 }
 .feed-container-sep {
+  width: 100%;
   padding: 15px 0 15px 15px;
-  justify-content: space-between;
 }
 
 .tags-tab {

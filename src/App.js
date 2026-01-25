@@ -16,6 +16,7 @@ import ForgotPassword from "./login/ForgotPassword";
 import { UserProvider } from "./UserContext/UserContext";
 import SavedPosts from "./Homepage/SavedPosts";
 import LostFoundPage from "./LostFound/LostFoundPage";
+import Marketplace from "./marketplace/Marketplace";
 const App = () => {
   return (
     <Router>
@@ -33,6 +34,7 @@ const App = () => {
         <Route path="/profileview" element={<ProfileViewers />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/lost-found" element={<LostFoundPage />} />
+        <Route path="/marketplace" element={<Marketplace />} />
       </Routes>
     </Router>
   );

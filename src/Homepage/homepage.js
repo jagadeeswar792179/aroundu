@@ -37,14 +37,14 @@ function Homepage() {
     if (user) setProfile(user); // ✔ store user details from token
   }, []);
   // 🔹 Check token on mount
-  useEffect(() => {
-    const token = getToken();
+  // useEffect(() => {
+  //   const token = getToken();
 
-    if (!token || isTokenExpired(token)) {
-      clearAuth();
-      navigate("/", { replace: true });
-    }
-  }, [navigate]);
+  //   if (!token || isTokenExpired(token)) {
+  //     clearAuth();
+  //     navigate("/", { replace: true });
+  //   }
+  // }, [navigate]);
 
   // 🔹 Show popup if connection goes offline
   useEffect(() => {

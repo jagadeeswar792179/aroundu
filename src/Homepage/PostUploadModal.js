@@ -73,10 +73,15 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
     reader.readAsDataURL(file);
   };
 
-  const handleCropConfirm = async () => {
-    const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
-    setFinalBlob(blob);
-  };
+ const handleCropConfirm = async () => {
+  const blob = await getCroppedImg(imageSrc, croppedAreaPixels, {
+    maxWidth: 1080,
+    maxHeight: 1350,
+    quality: 0.75,
+    mimeType: "image/jpeg",
+  });
+  setFinalBlob(blob);
+};
 
   const handlePostClick = () => {
     if (!finalBlob) {

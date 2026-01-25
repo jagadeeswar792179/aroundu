@@ -949,8 +949,8 @@ function PostFetch({ profile }) {
                   <div style={{ display: "flex", gap: "10px" }}>
                     {post.user?.avatar_url ? (
                       <img
+                      className="avatar-img"
                         src={post.user.avatar_url}
-                        className="avatar-img"
                         alt="profile"
                       />
                     ) : (
@@ -960,76 +960,83 @@ function PostFetch({ profile }) {
                         }`.toUpperCase()}
                       </div>
                     )}
-
-                    <div className="feed-container-1-2">
-                      <b
-                        className={`username ${
-                          post.user_id !== loggedInUserId ? "clickable" : ""
-                        }`}
-                        onClick={() => {
-                          if (post.user_id !== loggedInUserId)
-                            navigate(`/profile/${post.user_id}`);
-                        }}
-                      >
-                        {`${post.user?.first_name || ""} ${
-                          post.user?.last_name || ""
-                        }`.trim() || "Unknown User"}
-                      </b>
-
-                      <p>{post.user?.course}</p>
-                      <p>
-                        {post.user?.role} at {post.user?.university}
-                      </p>
-                    </div>
-                    {post.user_id !== loggedInUserId && (
-                      <div className="kebab-wrapper">
-                        <div
-                          className="kebab-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenMenuPostId(
-                              openMenuPostId === post.id ? null : post.id
-                            );
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "40px",
+                        width: "100%",
+                      }}
+                    >
+                      <div className="feed-container-1-2">
+                        <b
+                          className={`username ${
+                            post.user_id !== loggedInUserId ? "clickable" : ""
+                          }`}
+                          onClick={() => {
+                            if (post.user_id !== loggedInUserId)
+                              navigate(`/profile/${post.user_id}`);
                           }}
                         >
-                          ⋮
-                        </div>
+                          {`${post.user?.first_name || ""} ${
+                            post.user?.last_name || ""
+                          }`.trim() || "Unknown User"}
+                        </b>
 
-                        {openMenuPostId === post.id && (
-                          <div className="kebab-menu">
-                            <div
-                              className="kebab-item"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openPostReportModal(post);
-                              }}
-                            >
-                              Report this post
-                            </div>
-
-                            <div
-                              className="kebab-item"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openUserReportModal(post);
-                              }}
-                            >
-                              Report this person
-                            </div>
-
-                            <div
-                              className="kebab-item danger"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openBlockModal(post);
-                              }}
-                            >
-                              Block this person
-                            </div>
-                          </div>
-                        )}
+                        <p>{post.user?.course}</p>
+                        <p>
+                          {post.user?.role} at {post.user?.university}
+                        </p>
                       </div>
-                    )}
+                      {post.user_id !== loggedInUserId && (
+                        <div className="kebab-wrapper">
+                          <div
+                            className="kebab-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuPostId(
+                                openMenuPostId === post.id ? null : post.id
+                              );
+                            }}
+                          >
+                            ⋮
+                          </div>
+
+                          {openMenuPostId === post.id && (
+                            <div className="kebab-menu">
+                              <div
+                                className="kebab-item"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openPostReportModal(post);
+                                }}
+                              >
+                                Report this post
+                              </div>
+
+                              <div
+                                className="kebab-item"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openUserReportModal(post);
+                                }}
+                              >
+                                Report this person
+                              </div>
+
+                              <div
+                                className="kebab-item danger"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openBlockModal(post);
+                                }}
+                              >
+                                Block this person
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

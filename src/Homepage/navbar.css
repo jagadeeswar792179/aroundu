@@ -167,7 +167,7 @@
     width: 100%;
   }
   .feed-container-1 {
-    width: 90%;
+    width: 100%;
   }
   .homecontainer-1-1,
   .navbar-1 p,
@@ -256,7 +256,7 @@
     box-shadow: var(--boxshadowmain);
   }
   .feed-container-1 {
-    width: 90%;
+    width: 100%;
   }
   .homecontainer-1-1,
   .navbar-1 p,
@@ -327,7 +327,7 @@
     border: 1px solid black;
   }
   .feed-container-1 {
-    width: 90%;
+    width: 100%;
   }
   .homecontainer-3,
   .homecontainer-1-1,
