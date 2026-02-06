@@ -5,7 +5,7 @@ import "./LoginPage.css";
 import Line from "../utils/line";
 import { BeatLoader } from "react-spinners";
 import { saveAuth } from "../utils/auth"; // ⬅️ NEW
-
+import { useUser } from "../UserContext/UserContext";
 const LoginPage = () => {
   const navigate = useNavigate();
 
@@ -16,6 +16,7 @@ const LoginPage = () => {
     }
   }, [navigate]);
 
+const { refreshUser } = useUser();
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [password, setPassword] = useState("");
@@ -47,7 +48,7 @@ const LoginPage = () => {
 
 
 
-  const handleLogin = async () => {
+const handleLogin = async () => {
   if (emailError || passwordError || !email || !password) {
     alert("Please fix the errors before logging in.");
     return;
@@ -68,17 +69,17 @@ const LoginPage = () => {
       throw new Error(data.msg || "Login failed");
     }
 
-    // ✅ Clear old session (expired/corrupt)
+    // ✅ clear any old session
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
-    // ✅ Save new token + user
+    // ✅ save new token
     saveAuth(data.token, data.user);
 
-    // ✅ Debug (remove later)
-    console.log("TOKEN SAVED:", localStorage.getItem("token"));
-    console.log("USER SAVED:", localStorage.getItem("user"));
+    // 🔥 THIS IS THE MISSING PIECE
+    await refreshUser();
 
+    // ✅ now navigate
     navigate("/home");
   } catch (err) {
     alert(err.message);
@@ -86,6 +87,7 @@ const LoginPage = () => {
     setLoading(false);
   }
 };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     validateEmail(email);

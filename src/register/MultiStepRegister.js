@@ -9,7 +9,10 @@ import { BeatLoader } from "react-spinners";
 import CustomSelect from "../utils/CustomSelect";
 import MultiSelectTags from "../utils/MultiSelectTags";
 import { VerifiedIcon } from "lucide-react";
-
+import {
+  universityOptions,
+  universityEmailDomains
+} from "./universities";
 const RegisterForm = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
@@ -153,24 +156,7 @@ const RegisterForm = () => {
     "Secondary Education",
     "Education",
   ].map((c) => ({ value: c, label: c }));
-  const universityOptions = [
-    "Western New England University",
-    "SpringField University",
-    "Harvard University",
-    "Stanford University",
-    "University of Oxford",
-    "University of Cambridge",
-    "Other",
-  ].map((u) => ({ value: u, label: u }));
-  const universityEmailDomains = {
-    "Western New England University": "wne.edu",
-    "SpringField University": "springfield.edu",
-    "Harvard University": "harvard.edu",
-    "Stanford University": "stanford.edu",
-    "University of Oxford": "oxford.edu",
-    others: "gmail.com", // <-- match the option label
-    "University of Cambridge": "cambridge.edu",
-  };
+
   const getDomainForUniversity = (uni) =>
     universityEmailDomains[uni] || "wne.edu"; // default domain if unknown
 

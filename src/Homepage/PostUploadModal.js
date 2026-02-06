@@ -195,8 +195,8 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
                   options={tagOptions}
                   value={selectedTags}
                   onChange={setSelectedTags}
-                  placeholder="Select up to 7 tags"
-                  maxSelected={7}
+                  placeholder="Select up to 15 tags"
+                  maxSelected={15}
                 />
                 <div
                   style={{ display: "flex", justifyContent: "space-between" }}

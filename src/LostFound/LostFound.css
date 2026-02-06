@@ -67,6 +67,14 @@ h4 {
   box-shadow: var(--boxshadowmain);
   transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.2s ease;
 }
+.item-card-nope {
+  width: 250px;
+  background: #ffffff;
+  border-radius: 25px;
+  padding: 10px 10px 5px 10px;
+  margin: 12px 0;
+  word-wrap: break-word;
+}
 .item-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(17, 24, 39, 0.1);

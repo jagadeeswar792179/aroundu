@@ -5,17 +5,14 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import TimeAgo from "../utils/TimeAgo";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import CommentModal from "./CommentModal";
-import { RiVideoFill } from "react-icons/ri";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import LikesModal from "./LikesModal";
-import { FaRegCommentDots, FaShare, FaBookmark } from "react-icons/fa";
-import { MdImage } from "react-icons/md";
+import { FaShare } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PostUploadModal from "./PostUploadModal";
 import PostLoad from "../Loading/postload";
 import DiscussionUploadModal from "./DiscussionUploadModal";
-import { CommentOutlineMinimal } from "../utils/CommentOutline";
 import ReportModal from "../utils/ReportModal";
 import BlockConfirmModal from "../utils/BlockConfirmModal";
 

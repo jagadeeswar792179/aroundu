@@ -1,56 +1,51 @@
-// src/UserContext/UserContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
-const UserContext = createContext(null);
+const UserContext = createContext();
 
-export function UserProvider({ children }) {
-  // 1️⃣ Start with user from localStorage so homepage has data instantly
-  const storedUser = localStorage.getItem("user");
-  const [profile, setProfile] = useState(
-    storedUser ? JSON.parse(storedUser) : null
-  );
-  const [loading, setLoading] = useState(false); // only for the /me refresh
+export const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchMe = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return; // not logged in → nothing to fetch
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
 
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`${process.env.REACT_APP_SERVER}/api/user/me`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    try {
+      const res = await axios.get(
+        `${process.env.REACT_APP_SERVER}/api/auth/me`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setUser(res.data);
+    } catch (err) {
+      localStorage.removeItem("token");
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!res.ok) {
-          console.error("Profile /me failed with status:", res.status);
-          return;
-        }
-
-        const data = await res.json();
-
-        const user = data.user ?? data; // supports both {user: {...}} or plain object
-        setProfile(user);
-        // keep localStorage in sync
-        localStorage.setItem("user", JSON.stringify(user));
-      } catch (err) {
-        console.error("Profile fetch failed:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
+  // 🔥 initial load
+  useEffect(() => {
+    fetchMe();
   }, []);
 
   return (
-    <UserContext.Provider value={{ profile, setProfile, loading }}>
+    <UserContext.Provider
+      value={{
+        user,
+        loading,
+        setUser,      // 👈 expose setter
+        refreshUser: fetchMe, // 👈 expose refetch
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
-}
+};
 
 export const useUser = () => useContext(UserContext);

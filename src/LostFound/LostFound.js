@@ -294,7 +294,9 @@ export default function LostFound() {
 
         <div className="items-list" ref={listRef}>
           {viewItems.length === 0 && !uiLoading && (
-            <div className="no-items">No items listed</div>
+            <div className="item-card-nope">
+            No items listed
+              </div>
           )}
 
           {viewItems.map((item, idx) => {

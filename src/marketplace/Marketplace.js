@@ -1854,6 +1854,7 @@ function PostItemModal({ mode, initialData, onClose, onCreated, onUpdated, getAu
               <select value={category} onChange={(e) => setCategory(e.target.value)}>
                 <option value="">Select category</option>
                 <option value="electronics">Electronics</option>
+                <option value="housing">Housing</option>
                 <option value="books_notes">Books & Notes</option>
                 <option value="furniture">Furniture</option>
                 <option value="fashion">Clothing & Accessories</option>

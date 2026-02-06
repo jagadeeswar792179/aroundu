@@ -5,8 +5,14 @@ import "react-toastify/dist/ReactToastify.css";
 import "./ua.css";
 import { MdDeleteOutline } from "react-icons/md";
 import { AiFillDelete } from "react-icons/ai";
+
+
+
+import SinglePostModal from "./SinglePostModal";
 const UserActivity = ({ userId }) => {
   const [posts, setPosts] = useState([]);
+  const [activePostId, setActivePostId] = useState(null);
+
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
@@ -142,6 +148,14 @@ const UserActivity = ({ userId }) => {
 
   return (
     <div className="activity-container">
+{activePostId && (
+  <SinglePostModal
+    postId={activePostId}
+    onClose={() => setActivePostId(null)}
+  />
+)}
+
+
       <div className="switch-container">
         <button
           onClick={() => setActivityTab("posts")}
@@ -169,7 +183,13 @@ const UserActivity = ({ userId }) => {
             <div key={post.id} className="post-card">
               {post.image_url ? (
                 <>
-                  <img src={post.image_url} alt="Post" className="post-image" />
+                  <img
+  src={post.image_url}
+  className="post-image"
+onClick={() => setActivePostId(post.id)}
+
+/>
+
                   {userId == loggedinuser && (
                     <button
                       className="delete-btn"

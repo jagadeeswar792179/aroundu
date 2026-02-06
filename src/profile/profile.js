@@ -957,7 +957,7 @@ export default function Profile() {
             </div>
           </div>
           <div className="prof-4">
-            <p>Activity</p>
+            <p className="prof-4-p">Activity</p>
             <UserActivity userId={loggedInUserId} />
           </div>
           <div className="prof-5">
