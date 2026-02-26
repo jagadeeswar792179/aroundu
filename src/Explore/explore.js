@@ -1,15 +1,11 @@
 import ProfessorsSection from "./ProfessorsSection";
 import PeopleSection from "./PeopleSection";
 import "./explore.css";
-import Navbar from "../Homepage/Navbar";
 import RequestList from "./RequestList";
 export default function Explore() {
   return (
     <>
-      <div className="container-1">
-        <Navbar />
-      </div>
-      <div className="container-2">
+   
         <div className="explore-container">
           <div className="explore-1">
             {" "}
@@ -25,7 +21,7 @@ export default function Explore() {
             <PeopleSection initialSameUniversity={true} />
           </div>
         </div>
-      </div>
+      
     </>
   );
 }

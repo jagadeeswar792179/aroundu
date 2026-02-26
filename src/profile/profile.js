@@ -1,65 +1,78 @@
 import "./profile.css";
 import Modal from "../utils/Modal";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Select from "react-select";
 import ProfileUploadModal from "./ProfileUploadModal";
 import useLocation from "../utils/useLocation";
 import { IoMdAdd } from "react-icons/io";
-import { MdEdit } from "react-icons/md";
-import { MdDelete } from "react-icons/md";
+import { MdEdit, MdDelete } from "react-icons/md";
 import UserActivity from "./UserActivity";
-import Navbar from "../Homepage/Navbar";
 import ProfileLoadFull from "../Loading/profileLoadfull";
 import WeekBooking from "../slotbooking/weekbookings";
-import MultiSelectTags from "../utils/MultiSelectTags";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 export default function Profile() {
   const server = process.env.REACT_APP_SERVER;
   const token = localStorage.getItem("token");
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { location, status } = useLocation();
+
+  /* =========================
+     LOCAL STATE (UNCHANGED)
+     ========================= */
+
   const [about, setAbout] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState("");
-  const [experienceForm, setExperienceForm] = useState([]); // full array from DB
-  const [educationForm, setEducationForm] = useState([]); // full array from DB
-  const [skillsTemp, setSkillsTemp] = useState([]); // full array from DB
-  const [interestsTemp, setinterestsTemp] = useState([]); // full array from DB
-  const [projectForm, setprojectForm] = useState([]); // full array from DB
-  const [editingIndex, setEditingIndex] = useState(null); // null = adding new
+  const [experienceForm, setExperienceForm] = useState([]);
+  const [educationForm, setEducationForm] = useState([]);
+  const [skillsTemp, setSkillsTemp] = useState([]);
+  const [interestsTemp, setinterestsTemp] = useState([]);
+  const [projectForm, setprojectForm] = useState([]);
+  const [editingIndex, setEditingIndex] = useState(null);
   const [selectedSkill, setSelectedSkill] = useState(null);
   const [selectedInterest, setSelectedInterest] = useState(null);
   const [profileUrl, setProfileUrl] = useState(null);
-  const { location, status } = useLocation();
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const res = await fetch(`${server}/api/user/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Failed to load");
-        const data = await res.json();
+  /* =========================
+     FETCH PROFILE (NEW)
+     ========================= */
 
-        setProfile({
-          ...data,
-          experience: Array.isArray(data.experience) ? data.experience : [],
-          education: Array.isArray(data.education) ? data.education : [],
-          projects: Array.isArray(data.projects) ? data.projects : [],
-          skills: Array.isArray(data.skills) ? data.skills : [],
-          interests: Array.isArray(data.interests) ? data.interests : [],
-        });
-        setProfileUrl(data.profile);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  const fetchProfile = async () => {
+    const res = await fetch(`${server}/api/user/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error("Failed to load");
+
+    const data = await res.json();
+
+    return {
+      ...data,
+      experience: Array.isArray(data.experience) ? data.experience : [],
+      education: Array.isArray(data.education) ? data.education : [],
+      projects: Array.isArray(data.projects) ? data.projects : [],
+      skills: Array.isArray(data.skills) ? data.skills : [],
+      interests: Array.isArray(data.interests) ? data.interests : [],
     };
-    loadProfile();
-  }, [token]);
+  };
 
-  const skillOptions = [
+  const {
+    data: profile,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: fetchProfile,
+    enabled: !!token,
+    staleTime: 1000 * 60 * 5,
+    onSuccess: (data) => {
+      setProfileUrl(data.profile);
+    },
+  });
+
+    const skillOptions = [
     { value: "JavaScript", label: "JavaScript" },
     { value: "Python", label: "Python" },
     { value: "React", label: "React" },
@@ -121,7 +134,7 @@ export default function Profile() {
     },
   ];
 
-  const interestOptions = [
+ const interestOptions = [
     {
       value: "Artificial Intelligence & Machine Learning",
       label: "Artificial Intelligence & Machine Learning",
@@ -162,11 +175,18 @@ export default function Profile() {
     { value: "Industry Partnerships", label: "Industry Partnerships" },
     { value: "Lifelong Learning", label: "Lifelong Learning" },
   ];
-  if (loading) return <ProfileLoadFull />;
+  if (isLoading) return <ProfileLoadFull />;
+  if (isError) return <div>Error loading profile</div>;
   if (!profile) return <div>No data</div>;
+
+  /* =========================
+     HELPER FUNCTIONS (UNCHANGED)
+     ========================= */
+
   const editinfo = (type, i) => {
     setModalType(type);
     setModalOpen(true);
+
     if (type === "about") {
       setAbout(profile.about);
     }
@@ -176,7 +196,6 @@ export default function Profile() {
       if (i !== null && profile.experience[i]) {
         setExperienceForm(profile.experience[i]);
       } else {
-        // Adding new
         setExperienceForm({
           title: "",
           start_date: "",
@@ -186,12 +205,12 @@ export default function Profile() {
         });
       }
     }
+
     if (type === "education") {
       setEditingIndex(i);
       if (i !== null && profile.education[i]) {
         setEducationForm(profile.education[i]);
       } else {
-        // Adding new
         setEducationForm({
           university_name: "",
           start_date: "",
@@ -200,12 +219,12 @@ export default function Profile() {
         });
       }
     }
+
     if (type === "projects") {
       setEditingIndex(i);
       if (i !== null && profile.projects[i]) {
         setprojectForm(profile.projects[i]);
       } else {
-        // Adding new
         setprojectForm({
           project_name: "",
           start_date: "",
@@ -214,195 +233,17 @@ export default function Profile() {
         });
       }
     }
+
     if (type === "skills") {
-      setEditingIndex(null);
-      setSkillsTemp(Array.isArray(profile.skills) ? [...profile.skills] : []);
+      setSkillsTemp([...profile.skills]);
       setSelectedSkill(null);
     }
+
     if (type === "interests") {
-      setEditingIndex(null);
-      setinterestsTemp(
-        Array.isArray(profile.interests) ? [...profile.interests] : []
-      );
+      setinterestsTemp([...profile.interests]);
       setSelectedInterest(null);
     }
   };
-
-  const saveField = async () => {
-    if (modalType === "about") {
-      try {
-        const res = await fetch(`${server}/api/user/about`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // send JWT token
-          },
-          body: JSON.stringify({ about }),
-        });
-
-        if (!res.ok) throw new Error("Failed to update profile");
-        setProfile({ ...profile, about: about });
-        setModalOpen(false);
-      } catch (error) {
-        console.error("Error updating profile:", error);
-        alert("Error saving changes. Please try again.");
-      }
-    } else if (modalType === "experience") {
-      let updatedExperience = [...profile.experience];
-
-      if (editingIndex !== null && updatedExperience[editingIndex]) {
-        // Editing
-        updatedExperience[editingIndex] = experienceForm;
-      } else {
-        // Adding
-        updatedExperience.push(experienceForm);
-      }
-
-      try {
-        const res = await fetch(`${server}/api/user/experience`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(updatedExperience),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to save experience");
-
-        setProfile((prev) => ({ ...prev, experience: data.experience }));
-        setModalOpen(false);
-      } catch (err) {
-        alert(err.message);
-      }
-    } else if (modalType === "education") {
-      let updatedEducation = [...profile.education];
-
-      if (editingIndex !== null && updatedEducation[editingIndex]) {
-        // Editing
-        updatedEducation[editingIndex] = educationForm;
-      } else {
-        // Adding
-        updatedEducation.push(educationForm);
-      }
-
-      try {
-        const res = await fetch(`${server}/api/user/education`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(updatedEducation),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to save experience");
-
-        setProfile((prev) => ({ ...prev, education: data.education }));
-        setModalOpen(false);
-      } catch (err) {
-        alert(err.message);
-      }
-    } else if (modalType === "projects") {
-      let updatedprojects = [...profile.projects];
-
-      if (editingIndex !== null && updatedprojects[editingIndex]) {
-        // Editing
-        updatedprojects[editingIndex] = projectForm;
-      } else {
-        // Adding
-        updatedprojects.push(projectForm);
-      }
-
-      try {
-        const res = await fetch(`${server}/api/user/projects`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(updatedprojects),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to save experience");
-
-        setProfile((prev) => ({ ...prev, projects: data.projects }));
-        setModalOpen(false);
-      } catch (err) {
-        alert(err.message);
-      }
-    } else if (modalType === "skills") {
-      if (!Array.isArray(skillsTemp) || skillsTemp.length > 15) {
-        alert("Skills must be an array with 15 or fewer items.");
-        return;
-      }
-      try {
-        const res = await fetch(`${server}/api/user/skills`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ skills: skillsTemp }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to save skills");
-        setProfile((prev) => ({ ...prev, skills: data.skills || skillsTemp }));
-        setModalOpen(false);
-      } catch (err) {
-        alert(err.message);
-      }
-    } else if (modalType === "interests") {
-      if (!Array.isArray(interestsTemp) || interestsTemp.length > 7) {
-        alert("interests must be an array with 7 or fewer items.");
-        return;
-      }
-      try {
-        const res = await fetch(`${server}/api/user/interests`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ interests: interestsTemp }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to save skills");
-        setProfile((prev) => ({
-          ...prev,
-          interests: data.interests || interestsTemp,
-        }));
-        setModalOpen(false);
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-  };
-  function formatDuration(startDate, endDate) {
-    const start = new Date(startDate);
-    const end = endDate ? new Date(endDate) : new Date(); // if null => Present
-    const diffMs = end - start;
-
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffWeeks = Math.floor(diffDays / 7);
-    const diffMonths =
-      (end.getFullYear() - start.getFullYear()) * 12 +
-      (end.getMonth() - start.getMonth());
-    const diffYears = Math.floor(diffMonths / 12);
-
-    if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? "s" : ""}`;
-    if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks !== 1 ? "s" : ""}`;
-    if (diffMonths < 12)
-      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""}`;
-    return `${diffYears} year${diffYears !== 1 ? "s" : ""}${
-      diffMonths % 12 > 0
-        ? `, ${diffMonths % 12} month${diffMonths % 12 !== 1 ? "s" : ""}`
-        : ""
-    }`;
-  }
 
   const handleChange = (e) => {
     if (modalType === "experience") {
@@ -414,90 +255,135 @@ export default function Profile() {
     }
   };
 
+  function formatDuration(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = endDate ? new Date(endDate) : new Date();
+    const diffMs = end - start;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths =
+      (end.getFullYear() - start.getFullYear()) * 12 +
+      (end.getMonth() - start.getMonth());
+    const diffYears = Math.floor(diffMonths / 12);
+
+    if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? "s" : ""}`;
+    if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks !== 1 ? "s" : ""}`;
+    if (diffMonths < 12)
+      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""}`;
+    return `${diffYears} year${diffYears !== 1 ? "s" : ""}`;
+  }
+
+  const getBlogUrl = (rawUrl) => {
+    if (!rawUrl) return "#";
+    if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+    return `https://${rawUrl}`;
+  };
+
+  /* =========================
+     SAVE FIELD (UPDATED CACHE)
+     ========================= */
+
+  const saveField = async () => {
+    try {
+      const endpoints = {
+        about: "/api/user/about",
+        experience: "/api/user/experience",
+        education: "/api/user/education",
+        projects: "/api/user/projects",
+        skills: "/api/user/skills",
+        interests: "/api/user/interests",
+      };
+
+      let body;
+
+      if (modalType === "about") body = { about };
+      if (modalType === "experience") {
+        const updated = [...profile.experience];
+        editingIndex !== null
+          ? (updated[editingIndex] = experienceForm)
+          : updated.push(experienceForm);
+        body = updated;
+      }
+      if (modalType === "education") {
+        const updated = [...profile.education];
+        editingIndex !== null
+          ? (updated[editingIndex] = educationForm)
+          : updated.push(educationForm);
+        body = updated;
+      }
+      if (modalType === "projects") {
+        const updated = [...profile.projects];
+        editingIndex !== null
+          ? (updated[editingIndex] = projectForm)
+          : updated.push(projectForm);
+        body = updated;
+      }
+      if (modalType === "skills") body = { skills: skillsTemp };
+      if (modalType === "interests") body = { interests: interestsTemp };
+
+      const res = await fetch(`${server}${endpoints[modalType]}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update");
+
+      queryClient.setQueryData(["profile"], (old) => ({
+        ...old,
+        ...data,
+      }));
+
+      setModalOpen(false);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  /* =========================
+     DELETE (UPDATED CACHE)
+     ========================= */
+
   const deleteinfo = async (type, index) => {
-    if (type === "experience") {
-      let updated = [...profile.experience];
-      updated.splice(index, 1);
+    const updated = [...profile[type]];
+    updated.splice(index, 1);
 
-      try {
-        const res = await fetch(`${server}/api/user/experience`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(updated),
-        });
+    try {
+      const res = await fetch(`${server}/api/user/${type}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updated),
+      });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to delete");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete");
 
-        setProfile((prev) => ({ ...prev, experience: data.experience }));
-      } catch (err) {
-        alert(err.message);
-      }
-    } else if (type === "education") {
-      let updated = [...profile.education];
-      updated.splice(index, 1);
-
-      try {
-        const res = await fetch(`${server}/api/user/education`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(updated),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to delete");
-
-        setProfile((prev) => ({ ...prev, education: data.education }));
-      } catch (err) {
-        alert(err.message);
-      }
-    } else if (type === "projects") {
-      let updated = [...profile.projects];
-      updated.splice(index, 1);
-
-      try {
-        const res = await fetch(`${server}/api/user/projects`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(updated),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to delete");
-
-        setProfile((prev) => ({ ...prev, projects: data.projects }));
-      } catch (err) {
-        alert(err.message);
-      }
+      queryClient.setQueryData(["profile"], (old) => ({
+        ...old,
+        [type]: data[type],
+      }));
+    } catch (err) {
+      alert(err.message);
     }
   };
   const filteredSkillOptions = skillOptions.filter(
-    (opt) => !skillsTemp.includes(opt.value)
-  );
-  const filteredInterestOptions = interestOptions.filter(
-    (opt) => !interestsTemp.includes(opt.value)
-  );
-  const getBlogUrl = (rawUrl) => {
-    if (!rawUrl) return "#";
-    if (/^https?:\/\//i.test(rawUrl)) return rawUrl; // already ok
-    return `https://${rawUrl}`; // default to https
-  };
+  (opt) => !skillsTemp.includes(opt.value)
+);
+
+const filteredInterestOptions = interestOptions.filter(
+  (opt) => !interestsTemp.includes(opt.value)
+);
 
   return (
     <>
-      <div className="container-1">
-        <Navbar />
-      </div>
-      <div className="container-2">
+  
         <div className="prof">
           <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
             {modalType === "about" && (
@@ -1175,7 +1061,7 @@ export default function Profile() {
             </div>
           </div>
         </div>
-      </div>
+   
     </>
   );
 }

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">aroundu</string>
+    <string name="title_activity_main">aroundu</string>
+    <string name="package_name">com.aroundu.app</string>
+    <string name="custom_url_scheme">com.aroundu.app</string>
+</resources>

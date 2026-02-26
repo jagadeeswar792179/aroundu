@@ -1,53 +1,32 @@
 import "./messages.css";
-import Line from "../utils/line";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { FiSend } from "react-icons/fi";
 import LoadMessage from "../Loading/LoadMessages";
-import { FaBookmark, FaChevronDown } from "react-icons/fa";
 import LoadMess2 from "../Loading/LoadMess2";
-import Navbar from "../Homepage/Navbar";
 import LostFound from "../LostFound/LostFound";
 import { useNavigate } from "react-router-dom";
+import {
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import BlockConfirmModal from "../utils/BlockConfirmModal";
+
 const API_BASE = process.env.REACT_APP_SERVER;
+
 function Messages() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const token = localStorage.getItem("token");
   const me = JSON.parse(localStorage.getItem("user"));
 
-  const [convos, setConvos] = useState([]);
   const [active, setActive] = useState(null);
-  const [msgsCache, setMsgsCache] = useState({});
-  const [msgs, setMsgs] = useState([]);
   const [text, setText] = useState("");
-
-  const [users, setUsers] = useState([]);
-  const [loadingMsgs, setLoadingMsgs] = useState(false);
-  const [loadingConvos, setLoadingConvos] = useState(true);
-
-  // mobile open state
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openMenuConvId, setOpenMenuConvId] = useState(null);
   const [showBlockModal, setShowBlockModal] = useState(false);
-  const [blockTarget, setBlockTarget] = useState(null); // { peerId, name }
+  const [blockTarget, setBlockTarget] = useState(null);
   const [blockLoading, setBlockLoading] = useState(false);
-
-  const newsArray = [
-    "India, Canada reset diplomatic ties; 10m ago",
-    "More Indians invest in mutual funds; 10m ago",
-    "Big Four goes big on hiring; 5h ago • 4,851 readers",
-    "More recruiters get AI savvy; 5h ago • 3,599 readers",
-    "What's shaping IT deals; 5h ago • 3,294 readers",
-    "India, Canada reset diplomatic ties; 10m ago",
-    "More Indians invest in mutual funds; 10m ago",
-    "Big Four goes big on hiring; 5h ago • 4,851 readers",
-    "More recruiters get AI savvy; 5h ago • 3,599 readers",
-    "What's shaping IT deals; 5h ago • 3,294 readers",
-    "India, Canada reset diplomatic ties; 10m ago",
-    "More Indians invest in mutual funds; 10m ago",
-    "Big Four goes big on hiring; 5h ago • 4,851 readers",
-  ];
+const [openMenuConvId, setOpenMenuConvId] = useState(null);
   const bottomRef = useRef(null);
 
   const socket = useMemo(
@@ -70,154 +49,107 @@ function Messages() {
     });
 
   const scrollDown = () =>
-    setTimeout(
-      () => bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-      0
-    );
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/test-users/all`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        setUsers(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchUsers();
-  }, [token]);
+  // ===============================
+  // Conversations Query
+  // ===============================
+  const {
+    data: convos = [],
+    isLoading: loadingConvos,
+  } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: async () => {
+      const res = await authFetch(`${API_BASE}/api/messages/conversations`);
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-  useEffect(() => {
-    if (!token) return;
-    setLoadingConvos(true);
-    authFetch(`${API_BASE}/api/messages/conversations`)
-      .then((r) => r.json())
-      .then((data) => setConvos(data))
-      .catch(console.error)
-      .finally(() => setLoadingConvos(false)); // ✅ stop loader
-  }, [token]);
+  // ===============================
+  // Messages Query (Per Conversation)
+  // ===============================
+  const {
+    data: msgs = [],
+    isLoading: loadingMsgs,
+  } = useQuery({
+    queryKey: ["messages", active?.conversation_id],
+    queryFn: async () => {
+      if (!active?.conversation_id) return [];
+      const r = await authFetch(
+        `${API_BASE}/api/messages/${active.conversation_id}`
+      );
+      if (!r.ok) throw new Error("Failed");
+      const data = await r.json();
+      return data.reverse();
+    },
+    enabled: !!active?.conversation_id,
+    staleTime: 1000 * 60 * 5,
+  });
 
+  // ===============================
+  // Socket Logic
+  // ===============================
   useEffect(() => {
     if (!me?.id) return;
+
     socket.connect();
     socket.emit("join", me.id);
 
     const onNew = (msg) => {
-      // If active convo, append to UI
-      if (msg.conversation_id === active?.conversation_id) {
-        setMsgs((prev) => [...prev, msg]);
-      }
+      // Update messages cache
+      queryClient.setQueryData(
+        ["messages", msg.conversation_id],
+        (old = []) => [...old, msg]
+      );
 
-      // Update cache
-      setMsgsCache((prev) => ({
-        ...prev,
-        [msg.conversation_id]: [...(prev[msg.conversation_id] || []), msg],
-      }));
-
-      // Reorder conversations instantly
-      setConvos((prev) => {
-        const idx = prev.findIndex(
+      // Update conversation preview
+      queryClient.setQueryData(["conversations"], (old = []) => {
+        const idx = old.findIndex(
           (c) => c.conversation_id === msg.conversation_id
         );
-        if (idx === -1) return prev; // not found
-        const convo = prev[idx];
-        const others = [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-        return [convo, ...others];
+        if (idx === -1) return old;
+
+        const convo = old[idx];
+        const others = [...old.slice(0, idx), ...old.slice(idx + 1)];
+        return [{ ...convo, last_message: msg.body }, ...others];
       });
 
-      // scrollDown();
+      scrollDown();
     };
 
     socket.on("message:new", onNew);
+
     return () => {
       socket.off("message:new", onNew);
       socket.disconnect();
     };
-  }, [me?.id, active?.conversation_id, socket]);
+  }, [me?.id, socket, queryClient]);
 
-  // Close mobile panel if window grows beyond breakpoint
-  useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth > 700 && mobileOpen) {
-        setMobileOpen(false);
-      }
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [mobileOpen]);
+  // ===============================
+  // Open Conversation
+  // ===============================
+  const openConversation = (c) => {
+    setActive({
+      conversation_id: c.conversation_id,
+      peer_id: c.peer_id,
+      peer_name:
+        `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || c.email,
+      profile: c.profile,
+      university: c.university,
+    });
 
-  const openConversation = async (
-    conversation_id,
-    peer_id,
-    peer_name,
-    profile,
-    university
-  ) => {
-    // 1) set active and open right away (instant UI)
-    setActive({ conversation_id, peer_id, peer_name, profile, university });
-
-    // open mobile slide immediately on narrow screens
-    if (typeof window !== "undefined" && window.innerWidth <= 700) {
-      setMobileOpen(true); // <-- move up here
-    }
-
-    // 2) serve from cache if available
-    if (msgsCache[conversation_id]) {
-      setMsgs(msgsCache[conversation_id]);
-      // optionally mark seen without waiting
-      authFetch(`${API_BASE}/api/messages/${conversation_id}/seen`, {
-        method: "POST",
-      }).catch(() => {});
-      return;
-    }
-
-    // 3) otherwise show skeleton + fetch
-    setMsgs([]);
-    setLoadingMsgs(true);
-    try {
-      const r = await authFetch(`${API_BASE}/api/messages/${conversation_id}`);
-      const data = await r.json();
-      const ordered = [...data].reverse();
-
-      setMsgs(ordered);
-      setMsgsCache((prev) => ({ ...prev, [conversation_id]: ordered }));
-
-      authFetch(`${API_BASE}/api/messages/${conversation_id}/seen`, {
-        method: "POST",
-      }).catch(() => {});
-    } catch (err) {
-      console.error(err);
-      setMsgs([{ id: "err", body: "Failed to load messages", failed: true }]);
-    } finally {
-      setLoadingMsgs(false);
-      // scrollDown();
+    if (window.innerWidth <= 700) {
+      setMobileOpen(true);
     }
   };
-  const startChatWith = async (user) => {
-    const convo = await authFetch(`${API_BASE}/api/messages/conversation`, {
-      method: "POST",
-      body: JSON.stringify({ peerId: user.id }),
-    }).then((r) => r.json());
 
-    const peerName =
-      `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || user.email;
-    await openConversation(
-      convo.id,
-      user.id,
-      peerName,
-      user.profile,
-      user.university
-    );
-
-    authFetch(`${API_BASE}/api/messages/conversations`)
-      .then((r) => r.json())
-      .then((data) => setConvos(data))
-      .catch(() => {});
-  };
-
+  // ===============================
+  // Send Message (Optimistic)
+  // ===============================
   const send = async () => {
     if (!text.trim() || !active) return;
 
@@ -232,26 +164,23 @@ function Messages() {
       sender_profile: me?.profile,
     };
 
-    setMsgs((prev) => [...prev, optimisticMsg]);
-    setMsgsCache((prev) => ({
-      ...prev,
-      [active.conversation_id]: [
-        ...(prev[active.conversation_id] || []),
-        optimisticMsg,
-      ],
-    }));
-    setConvos((prev) => {
-      const idx = prev.findIndex(
+    // Optimistic update
+    queryClient.setQueryData(
+      ["messages", active.conversation_id],
+      (old = []) => [...old, optimisticMsg]
+    );
+
+    queryClient.setQueryData(["conversations"], (old = []) => {
+      const idx = old.findIndex(
         (c) => c.conversation_id === active.conversation_id
       );
-      if (idx === -1) return prev;
-      const convo = {
-        ...prev[idx],
-        last_message: optimisticMsg.body,
-      };
-      const others = [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-      return [convo, ...others];
+      if (idx === -1) return old;
+
+      const convo = old[idx];
+      const others = [...old.slice(0, idx), ...old.slice(idx + 1)];
+      return [{ ...convo, last_message: optimisticMsg.body }, ...others];
     });
+
     setText("");
     scrollDown();
 
@@ -261,82 +190,61 @@ function Messages() {
         { method: "POST", body: JSON.stringify({ body: optimisticMsg.body }) }
       ).then((r) => r.json());
 
-      setMsgs((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...msg, pending: false } : m))
+      queryClient.setQueryData(
+        ["messages", active.conversation_id],
+        (old = []) =>
+          old.map((m) =>
+            m.id === tempId ? { ...msg, pending: false } : m
+          )
       );
-      setMsgsCache((prev) => ({
-        ...prev,
-        [active.conversation_id]: prev[active.conversation_id].map((m) =>
-          m.id === tempId ? { ...msg, pending: false } : m
-        ),
-      }));
-      // Move active convo to top after sending
-      setConvos((prev) => {
-        const idx = prev.findIndex(
-          (c) => c.conversation_id === active.conversation_id
-        );
-        if (idx === -1) return prev;
-        const convo = {
-          ...prev[idx],
-          last_message: msg.body,
-        };
-        const others = [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-        return [convo, ...others];
-      });
     } catch (err) {
       console.error(err);
-      setMsgs((prev) =>
-        prev.map((m) =>
-          m.id === tempId ? { ...m, pending: false, failed: true } : m
-        )
-      );
-      setMsgsCache((prev) => ({
-        ...prev,
-        [active.conversation_id]: prev[active.conversation_id].map((m) =>
-          m.id === tempId ? { ...m, pending: false, failed: true } : m
-        ),
-      }));
     }
   };
+
+
   const handleConfirmBlock = async () => {
-    if (!blockTarget) return;
+  if (!blockTarget) return;
 
-    setBlockLoading(true);
+  setBlockLoading(true);
 
-    try {
-      await authFetch(
-        `${API_BASE}/api/moderation/block/${blockTarget.peerId}`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            reason: "Blocked from messages",
-          }),
-        }
-      );
-
-      // ✅ Immediately remove blocked convo from list
-      setConvos((prev) => prev.filter((c) => c.peer_id !== blockTarget.peerId));
-
-      // ✅ Close active chat if this conversation is open
-      if (active?.peer_id === blockTarget.peerId) {
-        setActive(null);
-        setMsgs([]);
+  try {
+    await authFetch(
+      `${API_BASE}/api/moderation/block/${blockTarget.peerId}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          reason: "Blocked from messages",
+        }),
       }
+    );
 
-      // Close modal
-      setShowBlockModal(false);
-      setBlockTarget(null);
-    } catch (err) {
-      console.error("Block failed:", err);
-      alert("Blocking failed. Try again.");
-    } finally {
-      setBlockLoading(false);
+    // Remove conversation from React Query cache
+    queryClient.setQueryData(["conversations"], (old = []) =>
+      old.filter((c) => c.peer_id !== blockTarget.peerId)
+    );
+
+    // Close chat if active
+    if (active?.peer_id === blockTarget.peerId) {
+      setActive(null);
     }
-  };
-  const openBlockModalFromConvo = (convo, name) => {
-    setBlockTarget({ peerId: convo.peer_id, name });
-    setShowBlockModal(true);
-  };
+
+    setShowBlockModal(false);
+    setBlockTarget(null);
+  } catch (err) {
+    console.error("Block failed:", err);
+    alert("Blocking failed. Try again.");
+  } finally {
+    setBlockLoading(false);
+  }
+};
+const openBlockModalFromConvo = (convo, name) => {
+  setBlockTarget({ peerId: convo.peer_id, name });
+  setShowBlockModal(true);
+};
+  // ===============================
+  // UI
+  // ===============================
   return (
     <>
       <BlockConfirmModal
@@ -351,11 +259,6 @@ function Messages() {
         onConfirm={handleConfirmBlock}
       />
 
-      <div className="container-1">
-        <Navbar />
-      </div>
-      <div className="container-2">
-        <div className="homecontainer">
           <div className="mess-0">
             <div className="mess-1">
               <h2>Messaging</h2>
@@ -392,11 +295,7 @@ function Messages() {
                           key={c.conversation_id}
                           onClick={() =>
                             openConversation(
-                              c.conversation_id,
-                              c.peer_id,
-                              name,
-                              c.profile,
-                              c.university
+                             c
                             )
                           }
                         >
@@ -637,8 +536,7 @@ function Messages() {
           <div className="hider-small">
             <LostFound />
           </div>
-        </div>
-      </div>
+       
     </>
   );
 }

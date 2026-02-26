@@ -1,10 +1,8 @@
 // src/components/Uprofile.jsx
 import "../profile/profile.css";
-import React, { useEffect, useState } from "react";
-import useLocation from "../utils/useLocation";
+import  { useEffect, useState } from "react";
 import UserActivity from "../profile/UserActivity";
 import { useParams } from "react-router-dom";
-import Navbar from "./Navbar";
 import ProfileLoadFull from "../Loading/profileLoadfull";
 import ProfileWeekBookings from "../slotbooking/ProfileWeekBookings";
 import MessageModal from "../messgaes/MessageModal";
@@ -170,9 +168,7 @@ export default function Uprofile() {
 
   return (
     <>
-      <div className="container-1">
-        <Navbar />
-      </div>
+    
       {selectedPeer && (
         <MessageModal
           isOpen={!!selectedPeer}
@@ -180,7 +176,7 @@ export default function Uprofile() {
           peer={selectedPeer}
         />
       )}
-      <div className="container-2">
+  
         <div className="prof">
           <div className="prof-1">
             <div className="prof-11">
@@ -394,7 +390,7 @@ export default function Uprofile() {
             </div>
           </div>
         </div>
-      </div>
+      
     </>
   );
 }

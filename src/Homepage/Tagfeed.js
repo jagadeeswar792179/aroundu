@@ -1,9 +1,7 @@
 // src/components/TagFeed.jsx
-import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Feed from "./feed";
-import Navbar from "./Navbar";
-import { FaBookmark, FaChevronDown } from "react-icons/fa";
+
 import LostFound from "../LostFound/LostFound";
 
 export default function TagFeed() {
@@ -17,19 +15,11 @@ export default function TagFeed() {
     params: { page },
   });
 
-  const newsArray = [
-    "India, Canada reset diplomatic ties; 10m ago",
-    "More Indians invest in mutual funds; 10m ago",
-    "Big Four goes big on hiring; 5h ago • 4,851 readers",
-    "More recruiters get AI savvy; 5h ago • 3,599 readers",
-    "What's shaping IT deals; 5h ago • 3,294 readers",
-  ];
+
 
   return (
     <>
-      <div className="container-1">
-        <Navbar />
-      </div>
+   
       <div className="search-cont-2">
         <div>
           <h2

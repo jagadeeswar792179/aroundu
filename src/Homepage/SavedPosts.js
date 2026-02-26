@@ -3,7 +3,6 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import axios from "axios";
 import "./SavedPosts.css";
 import SinglePostModal from "../profile/SinglePostModal";
-import Navbar from "./Navbar";
 
 function SavedPosts() {
   const server = process.env.REACT_APP_SERVER;
@@ -59,11 +58,7 @@ function SavedPosts() {
 
   return (
     <>
-      <div className="container-1">
-        <Navbar />
-      </div>
 
-      <div className="container-2">
         <div className="saved-posts-container">
           <h3>Saved Posts</h3>
 
@@ -154,7 +149,6 @@ function SavedPosts() {
             </InfiniteScroll>
           )}
         </div>
-      </div>
 
       {/* 🔥 SINGLE POST MODAL */}
       {activePostId && (

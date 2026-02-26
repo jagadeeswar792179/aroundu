@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import "./LostFound.css";
-
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaCheckCircle } from "react-icons/fa";
 import { BeatLoader, ClipLoader } from "react-spinners";
 import LFload from "../Loading/lostfoundload";
-
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 const PAGE_SIZE = 10; // match backend or pass &limit
 const TABS = ["lost", "found", "my"];
 
@@ -16,14 +15,12 @@ export default function LostFound() {
   const [deletingId, setDeletingId] = useState(null); // which item is deleting (id or null)
 
   const [activeTab, setActiveTab] = useState("lost");
-  const [viewItems, setViewItems] = useState([]);
-  const [uiLoading, setUiLoading] = useState(false);
+const queryClient = useQueryClient();
 
   // modal state
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("create"); // "create" | "edit"
   const [editId, setEditId] = useState(null);
-
   // form
   const [itemName, setItemName] = useState("");
   const [itemDescription, setItemDescription] = useState("");
@@ -44,19 +41,6 @@ export default function LostFound() {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const menuRefs = useRef(new Map()); // id -> HTMLElement
 
-  // per-tab cache
-  const cacheRef = useRef(
-    TABS.reduce((acc, t) => {
-      acc[t] = {
-        items: [],
-        page: 1,
-        hasMore: true,
-        initialized: false,
-        inFlight: false,
-      };
-      return acc;
-    }, {})
-  );
 
   const listRef = useRef(null);
   const observer = useRef(null);
@@ -65,53 +49,37 @@ export default function LostFound() {
     const token = localStorage.getItem("token");
     return { headers: { Authorization: `Bearer ${token}` } };
   };
+const {
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+  isLoading,
+} = useInfiniteQuery({
+  queryKey: ["lostfound", activeTab],
+  queryFn: async ({ pageParam = 1 }) => {
+    const res = await axios.get(
+      `${process.env.REACT_APP_SERVER}/api/lostfound?filter=${activeTab}&page=${pageParam}&limit=${PAGE_SIZE}`,
+      getAuth()
+    );
 
-  const appendUnique = (oldItems, newItems) => {
-    const seen = new Set(oldItems.map((i) => i.id));
-    return [...oldItems, ...(newItems?.filter((i) => !seen.has(i.id)) || [])];
-  };
+    return res.data;
+  },
+  getNextPageParam: (lastPage, pages) => {
+    const items = Array.isArray(lastPage?.items)
+      ? lastPage.items
+      : [];
+    return items.length < PAGE_SIZE ? undefined : pages.length + 1;
+  },
+  staleTime: 1000 * 60 * 5,
+});
+const items = data?.pages.flatMap(p => p.items) || [];
 
   const fmt = (ts) =>
     ts
       ? new Date(ts).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
       : "—";
 
-  const fetchNextPage = useCallback(
-    async (tab) => {
-      const bucket = cacheRef.current[tab];
-      if (!bucket.hasMore || bucket.inFlight) return;
-
-      bucket.inFlight = true;
-      if (tab === activeTab) setUiLoading(true);
-
-      try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_SERVER}/api/lostfound?filter=${tab}&page=${bucket.page}&limit=${PAGE_SIZE}`,
-          getAuth()
-        );
-        const fetched = Array.isArray(res?.data?.items) ? res.data.items : [];
-
-        bucket.items = appendUnique(bucket.items, fetched);
-        bucket.page += 1;
-        bucket.hasMore = fetched.length > 0; // robust
-        bucket.initialized = true;
-
-        if (tab === activeTab) setViewItems([...bucket.items]);
-      } catch (e) {
-        console.error("fetchNextPage failed:", e);
-      } finally {
-        bucket.inFlight = false;
-        if (tab === activeTab) setUiLoading(false);
-      }
-    },
-    [activeTab]
-  );
-
-  useEffect(() => {
-    const b = cacheRef.current[activeTab];
-    setViewItems([...b.items]);
-    if (!b.initialized) fetchNextPage(activeTab);
-  }, [activeTab, fetchNextPage]);
 
   // 🔧 outside click that respects per-item refs
   useEffect(() => {
@@ -130,50 +98,26 @@ export default function LostFound() {
     return () => document.removeEventListener("mousedown", onDocMouseDown);
   }, [menuOpenId]);
 
-  // infinite scroll
-  const lastItemRef = useCallback(
-    (node) => {
-      if (observer.current) observer.current.disconnect();
+const lastItemRef = useCallback(
+  (node) => {
+    if (observer.current) observer.current.disconnect();
 
-      observer.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            const b = cacheRef.current[activeTab];
-            if (b.hasMore && !b.inFlight) fetchNextPage(activeTab);
-          }
-        },
-        { root: listRef.current || null, rootMargin: "400px", threshold: 0 }
-      );
+    observer.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      },
+      { root: listRef.current || null, rootMargin: "400px", threshold: 0 }
+    );
 
-      if (node) observer.current.observe(node);
-    },
-    [activeTab, fetchNextPage]
-  );
+    if (node) observer.current.observe(node);
+  },
+  [fetchNextPage, hasNextPage]
+);
 
-  // cache helpers
-  const replaceItemInAllCaches = (updated) => {
-    ["lost", "found", "my"].forEach((t) => {
-      const b = cacheRef.current[t];
-      const idx = b.items.findIndex((x) => x.id === updated.id);
-      if (idx !== -1) {
-        const copy = [...b.items];
-        copy[(idx = idx)] = { ...copy[idx], ...updated };
-        b.items = copy;
-        if (t === activeTab) setViewItems(copy);
-      }
-    });
-  };
 
-  const removeItemFromAllCaches = (id) => {
-    ["lost", "found", "my"].forEach((t) => {
-      const b = cacheRef.current[t];
-      const filtered = b.items.filter((x) => x.id !== id);
-      if (filtered.length !== b.items.length) {
-        b.items = filtered;
-        if (t === activeTab) setViewItems(filtered);
-      }
-    });
-  };
+
 
   // modal open helpers
   const openCreate = () => {
@@ -204,7 +148,21 @@ export default function LostFound() {
         `${process.env.REACT_APP_SERVER}/api/lostfound/${it.id}`,
         getAuth()
       );
-      removeItemFromAllCaches(it.id);
+
+      queryClient.setQueriesData(
+  { queryKey: ["lostfound"] },
+  (old) => {
+    if (!old) return old;
+
+    return {
+      ...old,
+      pages: old.pages.map(page => ({
+        ...page,
+        items: page.items.filter(x => x.id !== it.id),
+      })),
+    };
+  }
+);
     } catch (e) {
       console.error("delete failed:", e);
       alert("Failed to delete item.");
@@ -226,7 +184,6 @@ export default function LostFound() {
       return;
 
     try {
-      setUiLoading(true);
       setIsSubmitting(true);
 
       if (modalMode === "create") {
@@ -237,14 +194,7 @@ export default function LostFound() {
         );
         const newItem = res?.data?.item;
 
-        ["my", itemType].forEach((t) => {
-          const b = cacheRef.current[t];
-          if (newItem && !b.items.find((i) => i.id === newItem.id)) {
-            b.items = [newItem, ...b.items];
-          }
-          b.initialized = true;
-          if (t === activeTab) setViewItems([...b.items]);
-        });
+       queryClient.invalidateQueries(["lostfound"]);
       } else {
         const res = await axios.put(
           `${process.env.REACT_APP_SERVER}/api/lostfound/${editId}`,
@@ -252,7 +202,24 @@ export default function LostFound() {
           getAuth()
         );
         const updated = res?.data?.item;
-        if (updated) replaceItemInAllCaches(updated);
+        if (updated) {
+  queryClient.setQueriesData(
+    { queryKey: ["lostfound"] },
+    (old) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        pages: old.pages.map(page => ({
+          ...page,
+          items: page.items.map(x =>
+            x.id === updated.id ? { ...x, ...updated } : x
+          ),
+        })),
+      };
+    }
+  );
+}
       }
 
       setShowModal(false);
@@ -267,7 +234,6 @@ export default function LostFound() {
       console.error("submit failed:", e);
       alert("Failed to save item.");
     } finally {
-      setUiLoading(false);
       setIsSubmitting(false);
     }
   };
@@ -293,14 +259,14 @@ export default function LostFound() {
         </div>
 
         <div className="items-list" ref={listRef}>
-          {viewItems.length === 0 && !uiLoading && (
+          {items.length === 0 && !isLoading && (
             <div className="item-card-nope">
             No items listed
               </div>
           )}
 
-          {viewItems.map((item, idx) => {
-            const isLast = idx === viewItems.length - 1;
+          {items.map((item, idx) => {
+            const isLast = idx === items.length - 1;
             const isOpen = expanded.has(item.id);
             const showReadMore = (item.item_description || "").length > 160;
 
@@ -465,8 +431,8 @@ export default function LostFound() {
               </div>
             );
           })}
-
-          {uiLoading && <LFload />}
+          
+{isFetchingNextPage && <LFload />}
         </div>
 
         {showModal && (

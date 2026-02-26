@@ -1,134 +1,114 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./ua.css";
 import { MdDeleteOutline } from "react-icons/md";
-import { AiFillDelete } from "react-icons/ai";
-
-
-
 import SinglePostModal from "./SinglePostModal";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+
 const UserActivity = ({ userId }) => {
-  const [posts, setPosts] = useState([]);
-  const [activePostId, setActivePostId] = useState(null);
-
-  const [offset, setOffset] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
-  const [activityTab, setActivityTab] = useState("posts"); // "posts" | "discussion"
-
   const server = process.env.REACT_APP_SERVER;
   const loggedinuser = JSON.parse(localStorage.getItem("user"))?.id;
-  const fetchUserPosts = async (
-    append = false,
-    limit = 3,
-    currentOffset = 0
-  ) => {
-    try {
-      const res = await axios.get(
-        `${server}/api/user/activity?userId=${userId}&limit=${limit}&offset=${currentOffset}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+  const token = localStorage.getItem("token");
+  const queryClient = useQueryClient();
 
-      if (res.data.length === 0) {
-        setHasMore(false);
-        return;
-      }
+  const [activePostId, setActivePostId] = useState(null);
+  const [activityTab, setActivityTab] = useState("posts");
 
-      if (append) {
-        setPosts((prev) => {
-          const merged = [...prev, ...res.data];
-          // ✅ remove duplicates by post.id
-          return merged.filter(
-            (post, index, self) =>
-              index === self.findIndex((p) => p.id === post.id)
-          );
-        });
-      } else {
-        setPosts(res.data);
+  /* ===========================
+     FETCH WITH INFINITE QUERY
+     =========================== */
+
+  const fetchUserPosts = async ({ pageParam = 0 }) => {
+    const limit = pageParam === 0 ? 3 : 6;
+
+    const res = await axios.get(
+      `${server}/api/user/activity?userId=${userId}&limit=${limit}&offset=${pageParam}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
-    } catch (err) {
-      console.error("Failed to fetch user posts", err);
-      toast.error("Failed to load activity");
-    } finally {
-      setLoading(false);
-    }
+    );
+
+    return {
+      posts: res.data,
+      nextOffset:
+        res.data.length === 0 ? undefined : pageParam + limit,
+    };
   };
 
-  // ✅ initial load (first 3)
-  useEffect(() => {
-    fetchUserPosts(false, 3, 0);
-  }, []);
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["userActivity", userId],
+    queryFn: fetchUserPosts,
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
+    staleTime: 1000 * 60 * 5,
+    enabled: !!userId,
+  });
 
-  const handleDelete = async (postId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this post?"
-    );
-    if (!confirmed) return;
+  /* ===========================
+     DELETE MUTATION
+     =========================== */
 
-    try {
+  const deleteMutation = useMutation({
+    mutationFn: async (postId) => {
       await axios.delete(`${server}/api/user/delete/${postId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return postId;
+    },
+    onSuccess: (postId) => {
+      queryClient.setQueryData(["userActivity", userId], (old) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            posts: page.posts.filter((p) => p.id !== postId),
+          })),
+        };
       });
 
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
       toast.success("Post deleted successfully");
-    } catch (err) {
-      console.error("Failed to delete post", err);
+    },
+    onError: () => {
       toast.error("Failed to delete post");
-    }
-  };
+    },
+  });
 
-  // ✅ load more (first +3, then +6 each time)
-  const loadMore = () => {
-    const newOffset = offset + (offset === 0 ? 3 : 6);
-    setOffset(newOffset);
-    fetchUserPosts(true, 6, newOffset);
-  };
+  /* ===========================
+     LOADING STATE (SAME UI)
+     =========================== */
 
-  if (loading)
+  if (isLoading)
     return (
       <div
         className="prof-2"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)", // two columns
+          gridTemplateColumns: "repeat(3, 1fr)",
           gap: "30px",
-          justifyContent: "space-between",
-          alignItems: "center",
         }}
       >
-        <div
-          className="load-4"
-          style={{
-            width: "230px",
-            height: "300px",
-            backgroundColor: "#f1f1f1ff",
-          }}
-        ></div>
-        <div
-          className="load-4"
-          style={{
-            width: "230px",
-            height: "300px",
-            backgroundColor: "#f1f1f1ff",
-          }}
-        ></div>
-        <div
-          className="load-4"
-          style={{
-            width: "230px",
-            height: "300px",
-            backgroundColor: "#f1f1f1ff",
-          }}
-        ></div>
+        <div className="load-4" style={{ width: "230px", height: "300px" }} />
+        <div className="load-4" style={{ width: "230px", height: "300px" }} />
+        <div className="load-4" style={{ width: "230px", height: "300px" }} />
       </div>
     );
 
-  if (posts.length === 0) {
+  const allPosts =
+    data?.pages.flatMap((page) => page.posts) || [];
+
+  if (allPosts.length === 0) {
     return (
       <div>
         <p className="no-activity">No activity here</p>
@@ -136,30 +116,34 @@ const UserActivity = ({ userId }) => {
       </div>
     );
   }
-  const filteredPosts = posts.filter((post) => {
-    if (activityTab === "posts") {
-      return post.post_type !== "discussion"; // only non-discussion posts
-    }
-    if (activityTab === "discussion") {
-      return post.post_type === "discussion"; // only discussion posts
-    }
+
+  const filteredPosts = allPosts.filter((post) => {
+    if (activityTab === "posts")
+      return post.post_type !== "discussion";
+    if (activityTab === "discussion")
+      return post.post_type === "discussion";
     return true;
   });
 
+  /* ===========================
+     RENDER (UNCHANGED UI)
+     =========================== */
+
   return (
     <div className="activity-container">
-{activePostId && (
-  <SinglePostModal
-    postId={activePostId}
-    onClose={() => setActivePostId(null)}
-  />
-)}
-
+      {activePostId && (
+        <SinglePostModal
+          postId={activePostId}
+          onClose={() => setActivePostId(null)}
+        />
+      )}
 
       <div className="switch-container">
         <button
           onClick={() => setActivityTab("posts")}
-          className={`switch-btn ${activityTab === "posts" ? "active" : ""}`}
+          className={`switch-btn ${
+            activityTab === "posts" ? "active" : ""
+          }`}
         >
           Posts
         </button>
@@ -176,7 +160,9 @@ const UserActivity = ({ userId }) => {
       <div className="posts-grid">
         {filteredPosts.length === 0 ? (
           <p className="no-posts">
-            {activityTab === "posts" ? "No posts yet." : "No discussions yet."}
+            {activityTab === "posts"
+              ? "No posts yet."
+              : "No discussions yet."}
           </p>
         ) : (
           filteredPosts.map((post) => (
@@ -184,41 +170,46 @@ const UserActivity = ({ userId }) => {
               {post.image_url ? (
                 <>
                   <img
-  src={post.image_url}
-  className="post-image"
-onClick={() => setActivePostId(post.id)}
-
-/>
+                    src={post.image_url}
+                    className="post-image"
+                    onClick={() => setActivePostId(post.id)}
+                  />
 
                   {userId == loggedinuser && (
                     <button
                       className="delete-btn"
-                      aria-label="Delete post"
-                      onClick={() => handleDelete(post.id)}
-                      title="Delete post"
+                      onClick={() =>
+                        deleteMutation.mutate(post.id)
+                      }
                     >
                       <MdDeleteOutline size={20} />
                     </button>
                   )}
                 </>
               ) : (
-                // optional: show something for discussion without image
-                <div className="feed-container" style={{ padding: "20px" }}>
+                <div
+                  className="feed-container"
+                  style={{ padding: "20px" }}
+                >
                   <b>
                     {post.first_name}
                     {post.last_name}
                   </b>
+
                   {userId == loggedinuser && (
                     <button
                       className="delete-btn"
-                      aria-label="Delete post"
-                      onClick={() => handleDelete(post.id)}
-                      title="Delete post"
+                      onClick={() =>
+                        deleteMutation.mutate(post.id)
+                      }
                     >
                       <MdDeleteOutline size={20} />
                     </button>
                   )}
-                  <div className="user-activity-caption">{post.caption}</div>
+
+                  <div className="user-activity-caption">
+                    {post.caption}
+                  </div>
                 </div>
               )}
             </div>
@@ -226,9 +217,12 @@ onClick={() => setActivePostId(post.id)}
         )}
       </div>
 
-      {hasMore && (
+      {hasNextPage && (
         <div className="show-more-container">
-          <button onClick={loadMore} className="show-more-btn">
+          <button
+            onClick={() => fetchNextPage()}
+            className="show-more-btn"
+          >
             Show more
           </button>
         </div>

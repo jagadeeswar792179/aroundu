@@ -106,9 +106,7 @@ export default function SearchPage() {
           peer={selectedPeer}
         />
       )}
-      <div className="container-1">
-        <Navbar />
-      </div>
+     
 
       <div className="search-cont-2">
         <div className="search-page">

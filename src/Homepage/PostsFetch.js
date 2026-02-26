@@ -15,74 +15,73 @@ import PostLoad from "../Loading/postload";
 import DiscussionUploadModal from "./DiscussionUploadModal";
 import ReportModal from "../utils/ReportModal";
 import BlockConfirmModal from "../utils/BlockConfirmModal";
-
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 // ...
 function PostFetch({ profile }) {
   const server = process.env.REACT_APP_SERVER;
-
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [openMenuPostId, setOpenMenuPostId] = useState(null);
-  // report state
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportTarget, setReportTarget] = useState(null); // { kind: 'post'|'user', postId?, userId? }
   const [reportTargetLabel, setReportTargetLabel] = useState("");
-
-  // block state
   const [blockModalOpen, setBlockModalOpen] = useState(false);
   const [blockTargetUserId, setBlockTargetUserId] = useState(null);
   const [blockTargetName, setBlockTargetName] = useState("");
-
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [isBlocking, setIsBlocking] = useState(false);
-
   const reportModalKey = reportTarget
     ? `${reportTarget.kind}-${reportTarget.postId || reportTarget.userId}`
     : "none";
-  // try localStorage user first (login stores it), else fallback to profile prop
   const storedUser = JSON.parse(localStorage.getItem("user")) || {};
   const loggedInUserId = storedUser?.id || profile?.id || null;
   const [discussionModalOpen, setDiscussionModalOpen] = useState(false);
-
+  const [tab, setTab] = useState("all");
   const [activeLikesPostId, setActiveLikesPostId] = useState(null);
   const [savedPosts, setSavedPosts] = useState({});
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [posts, setPosts] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-
-  const [likeCounts, setLikeCounts] = useState({}); // postId -> count
-  const [likedPosts, setLikedPosts] = useState({});
-
-  // followStatuses: authorId -> 'follow'|'requested'|'friends'
   const [followStatuses, setFollowStatuses] = useState({});
-  // loading flags for follow ops
-  const [loadingFollowOps, setLoadingFollowOps] = useState({});
-
   const [activePostId, setActivePostId] = useState(null);
-
-  // Tabs: all | interests | university | course
-  const [tab, setTab] = useState("all");
-
-  // selected filters for uni/course (used when user clicks a card or clicks the button)
   const [selectedUniversity, setSelectedUniversity] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+} = useInfiniteQuery({
+  queryKey: ["posts", tab, selectedUniversity, selectedCourse],
+  queryFn: async ({ pageParam = 1 }) => {
+    const token = localStorage.getItem("token");
 
-  // cache per tab: store posts, next page to fetch, hasMore
-  const [cache, setCache] = useState({
-    all: { posts: [], page: 1, hasMore: true },
-    interests: { posts: [], page: 1, hasMore: true },
-    university: { posts: [], page: 1, hasMore: true },
-    course: { posts: [], page: 1, hasMore: true },
-  });
+    const endpoint = buildEndpoint(pageParam);
 
-  // helper to set loading flag for a user
-  const setFollowLoading = (userId, val) => {
-    setLoadingFollowOps((m) => ({ ...m, [userId]: val }));
-  };
+    const res = await axios.get(endpoint, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return res.data;
+  },
+  getNextPageParam: (lastPage, pages) => {
+    if (!lastPage.posts || lastPage.posts.length === 0) return undefined;
+    return pages.length + 1;
+  },
+  staleTime: 1000 * 60 * 5,
+  keepPreviousData: true,
+});
+
+  useEffect(() => {
+  if (data) {
+    const merged = data.pages.flatMap(page => page.posts);
+    setPosts(merged);
+  }
+}, [data]);
+
 
   // Build endpoint for current tab using cached page
-  const buildEndpoint = () => {
-    const page = cache[tab]?.page || 1;
+  const buildEndpoint = (page) => {
 
     if (tab === "interests") {
       // allow passing filters as well if selected
@@ -118,196 +117,57 @@ function PostFetch({ profile }) {
     return url;
   };
 
-  // Fetch posts for current tab (uses cache[tab].page)
-  const fetchPosts = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const endpoint = buildEndpoint();
 
-      const res = await axios.get(endpoint, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+const likeMutation = useMutation({
+  mutationFn: async (postId) => {
+    const token = localStorage.getItem("token");
+    return axios.patch(
+      `${server}/api/posts/${postId}/like`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  },
 
-      const newPosts = res.data.posts || [];
+  onMutate: async (postId) => {
+    await queryClient.cancelQueries({ queryKey: ["posts"] });
 
-      if (!newPosts || newPosts.length === 0) {
-        // update cache and UI
-        setHasMore(false);
-        setCache((prev) => ({
-          ...prev,
-          [tab]: { ...prev[tab], hasMore: false },
-        }));
-        return;
-      }
+    const previousData = queryClient.getQueriesData({ queryKey: ["posts"] });
 
-      // hydrate like/saved/follow states for new posts
-      const likes = {};
-      const counts = {};
-      const saved = {};
-      const newFollowStatuses = {};
-      newPosts.forEach((p) => {
-        likes[p.id] = !!p.liked_by_me;
-        counts[p.id] = Number(p.like_count) || 0;
-        saved[p.id] = !!p.saved_by_me;
-        if (p.follow_status) newFollowStatuses[p.user_id] = p.follow_status;
-      });
-      setLikedPosts((prev) => ({ ...prev, ...likes }));
-      setLikeCounts((prev) => ({ ...prev, ...counts }));
-      setSavedPosts((prev) => ({ ...prev, ...saved }));
-      setFollowStatuses((prev) => ({ ...prev, ...newFollowStatuses }));
+    previousData.forEach(([key, data]) => {
+      if (!data) return;
 
-      // update cache (avoid duplicates)
-      setCache((prev) => {
-        const existingIds = new Set(prev[tab].posts.map((p) => p.id));
-        const unique = newPosts.filter((p) => !existingIds.has(p.id));
+      queryClient.setQueryData(key, old => {
+        if (!old) return old;
+
         return {
-          ...prev,
-          [tab]: {
-            posts: [...prev[tab].posts, ...unique],
-            page: prev[tab].page + 1,
-            hasMore: true,
-          },
+          ...old,
+          pages: old.pages.map(page => ({
+            ...page,
+            posts: page.posts.map(post =>
+              post.id === postId
+                ? {
+                    ...post,
+                    liked_by_me: !post.liked_by_me,
+                    like_count: post.liked_by_me
+                      ? post.like_count - 1
+                      : post.like_count + 1,
+                  }
+                : post
+            ),
+          })),
         };
       });
+    });
 
-      // append to visible posts (dedupe)
-      setPosts((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id));
-        const unique = newPosts.filter((p) => !existingIds.has(p.id));
-        return [...prev, ...unique];
-      });
+    return { previousData };
+  },
 
-      setHasMore(true);
-    } catch (err) {
-      console.error("fetchPosts error:", err);
-      setHasMore(false);
-    }
-  };
-
-  // When tab or selected filters change, restore from cache or fetch new
-  useEffect(() => {
-    const c = cache[tab];
-    // If cache has posts and the filter matches (we treat selectedUniversity/course as part of identity)
-    if (c && c.posts && c.posts.length > 0) {
-      setPosts(c.posts);
-      setHasMore(c.hasMore);
-      return;
-    }
-    // reset visible posts & fetch fresh
-    setPosts([]);
-    setHasMore(true);
-    // ensure page is set to 1 in cache for this tab when starting fresh
-    setCache((prev) => ({
-      ...prev,
-      [tab]: { posts: [], page: 1, hasMore: true },
-    }));
-    // fetch first page
-    fetchPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, selectedUniversity, selectedCourse]);
-
-  // initial load
-  useEffect(() => {
-    fetchPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // FOLLOW helpers (send / cancel / unfollow)
-  const sendFollowRequest = async (targetId) => {
-    if (!targetId) return;
-    const prev = followStatuses[targetId] || "follow";
-    setFollowStatuses((s) => ({ ...s, [targetId]: "requested" }));
-    setFollowLoading(targetId, true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        `${server}/api/follow/${targetId}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const serverStatus = res.data?.status || res.data?.follow_status;
-      if (serverStatus === "accepted" || serverStatus === "friends")
-        setFollowStatuses((s) => ({ ...s, [targetId]: "friends" }));
-      else setFollowStatuses((s) => ({ ...s, [targetId]: "requested" }));
-    } catch (err) {
-      console.error("Failed to send follow request", err);
-      setFollowStatuses((s) => ({ ...s, [targetId]: prev }));
-      alert("Could not send follow request");
-    } finally {
-      setFollowLoading(targetId, false);
-    }
-  };
-
-  const cancelFollowRequest = async (targetId) => {
-    if (!targetId) return;
-    const prev = followStatuses[targetId] || "follow";
-    setFollowStatuses((s) => ({ ...s, [targetId]: "follow" }));
-    setFollowLoading(targetId, true);
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        `${server}/api/follow/${targetId}/cancel`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch (err) {
-      console.error("Failed to cancel follow request", err);
-      setFollowStatuses((s) => ({ ...s, [targetId]: prev }));
-      alert("Could not cancel request");
-    } finally {
-      setFollowLoading(targetId, false);
-    }
-  };
-
-  const unfollow = async (targetId) => {
-    if (!targetId) return;
-    const prev = followStatuses[targetId] || "friends";
-    setFollowStatuses((s) => ({ ...s, [targetId]: "follow" }));
-    setFollowLoading(targetId, true);
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        `${server}/api/follow/${targetId}/unfollow`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch (err) {
-      console.error("Failed to unfollow", err);
-      setFollowStatuses((s) => ({ ...s, [targetId]: prev }));
-      alert("Could not unfollow");
-    } finally {
-      setFollowLoading(targetId, false);
-    }
-  };
-
-  // Likes (optimistic)
-  const toggleLike = async (postId) => {
-    const currentlyLiked = likedPosts[postId];
-    setLikedPosts((prev) => ({ ...prev, [postId]: !currentlyLiked }));
-    setLikeCounts((prev) => ({
-      ...prev,
-      [postId]: (prev[postId] || 0) + (currentlyLiked ? -1 : 1),
-    }));
-
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.patch(
-        `${server}/api/posts/${postId}/like`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setLikedPosts((prev) => ({ ...prev, [postId]: res.data.liked_by_me }));
-      setLikeCounts((prev) => ({ ...prev, [postId]: res.data.like_count }));
-    } catch (err) {
-      console.error("❌ Failed to toggle like:", err);
-      // rollback
-      setLikedPosts((prev) => ({ ...prev, [postId]: currentlyLiked }));
-      setLikeCounts((prev) => ({
-        ...prev,
-        [postId]: (prev[postId] || 0) + (currentlyLiked ? 1 : -1),
-      }));
-    }
-  };
+  onError: (err, postId, context) => {
+    context.previousData.forEach(([key, data]) => {
+      queryClient.setQueryData(key, data);
+    });
+  },
+});
 
   // Save toggle
   const toggleSave = async (postId) => {
@@ -361,27 +221,8 @@ function PostFetch({ profile }) {
 
       if (matchesUni && matchesCourse) setPosts((prev) => [newPost, ...prev]);
 
-      // also insert into cache for current tab
-      setCache((prev) => {
-        const has = prev[tab].posts.some((p) => p.id === newPost.id);
-        return {
-          ...prev,
-          [tab]: {
-            ...prev[tab],
-            posts: has ? prev[tab].posts : [newPost, ...prev[tab].posts],
-          },
-        };
-      });
 
-      // init engagement states
-      setLikedPosts((prev) => ({
-        ...prev,
-        [newPost.id]: newPost.liked_by_me || false,
-      }));
-      setLikeCounts((prev) => ({
-        ...prev,
-        [newPost.id]: newPost.like_count || 0,
-      }));
+    
       setSavedPosts((prev) => ({
         ...prev,
         [newPost.id]: newPost.saved_by_me || false,
@@ -465,51 +306,12 @@ function PostFetch({ profile }) {
         });
       }
 
-      // === Update cache object (if you maintain a per-tab cache like earlier) ===
-      // Example cache shape assumed: cache = { [tabName]: { posts: [...] , ... } , ... }
-      setCache((prevCache) => {
-        try {
-          const curBucket = prevCache[tab] || { posts: [] };
-          const exists = (curBucket.posts || []).some(
-            (p) => p.id === newPost.id
-          );
-          if (exists) return prevCache;
-
-          return {
-            ...prevCache,
-            [tab]: {
-              ...curBucket,
-              posts: [newPost, ...(curBucket.posts || [])],
-            },
-          };
-        } catch (e) {
-          // if cache shape unexpected, return prev
-          console.warn("cache update skipped:", e);
-          return prevCache;
-        }
-      });
-
-      // === Initialize engagement maps for this post (likes/saves/follows) ===
-      // Ensure these setter names match your component state
-      setLikedPosts((prev) => ({ ...prev, [newPost.id]: false }));
-      setLikeCounts((prev) => ({
-        ...prev,
-        [newPost.id]: newPost.like_count ?? 0,
-      }));
+     
       setSavedPosts((prev) => ({
         ...prev,
         [newPost.id]: !!newPost.saved_by_me,
       }));
-      if (newPost.follow_status) {
-        setFollowStatuses((s) => ({
-          ...s,
-          [newPost.user_id]: newPost.follow_status,
-        }));
-      }
 
-      // (Optional) If you maintain a "total posts count" or pagination cursor, update it here.
-
-      // Return the created post for any caller needs
       return newPost;
     } catch (err) {
       console.error("handleCreateDiscussion error:", err);
@@ -517,84 +319,6 @@ function PostFetch({ profile }) {
       throw err;
     }
   };
-
-  // render the simple follow-status div
-  const renderFollowStatusDiv = (authorId) => {
-    if (!authorId || authorId === loggedInUserId) return null;
-
-    const status = followStatuses[authorId] || "follow";
-    const loading = !!loadingFollowOps[authorId];
-
-    if (status === "friends") {
-      return (
-        <div
-          className="follow-status-div friends"
-          style={{
-            marginLeft: "auto",
-            fontWeight: 600,
-            color: "#2e7d32",
-            padding: "6px 10px",
-          }}
-        >
-          Friends
-        </div>
-      );
-    }
-
-    if (status === "requested") {
-      return (
-        <div className="requested-wrapper">
-          <span className="requested-badge">Requested</span>
-          <button
-            onClick={() => cancelFollowRequest(authorId)}
-            disabled={loading}
-            className={`cancel-btn ${loading ? "disabled" : ""}`}
-          >
-            Cancel
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div
-        role="button"
-        onClick={async () => {
-          if (loading) return;
-          const current = followStatuses[authorId] || "follow";
-          if (current !== "follow") return;
-
-          setFollowStatuses((s) => ({ ...s, [authorId]: "requested" }));
-          setLoadingFollowOps((m) => ({ ...m, [authorId]: true }));
-
-          try {
-            const token = localStorage.getItem("token");
-            const res = await axios.post(
-              `${server}/api/follow/${authorId}`,
-              {},
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            const serverStatus = res.data?.status || res.data?.follow_status;
-            if (serverStatus === "accepted" || serverStatus === "friends")
-              setFollowStatuses((s) => ({ ...s, [authorId]: "friends" }));
-            else setFollowStatuses((s) => ({ ...s, [authorId]: "requested" }));
-          } catch (err) {
-            console.error("Failed to send follow request", err);
-            setFollowStatuses((s) => ({ ...s, [authorId]: "follow" }));
-            alert("Could not send follow request. Try again.");
-          } finally {
-            setLoadingFollowOps((m) => ({ ...m, [authorId]: false }));
-          }
-        }}
-        className={`follow-btn ${loading ? "disabled" : ""}`}
-        aria-disabled={loading}
-      >
-        {!loading && <span className="follow-text">Follow</span>}
-        {loading && <span className="follow-loading">Sending...</span>}
-      </div>
-    );
-  };
-
   // Header button handlers
   const onClickAll = () => {
     setTab("all");
@@ -615,11 +339,7 @@ function PostFetch({ profile }) {
     setSelectedUniversity(uni);
     setSelectedCourse(null);
     setTab("university");
-    // reset cache page for university so we fetch fresh from page 1
-    setCache((prev) => ({
-      ...prev,
-      university: { posts: [], page: 1, hasMore: true },
-    }));
+ 
   };
   const onClickSameCourse = () => {
     const course = storedUser?.course || profile?.course;
@@ -630,10 +350,7 @@ function PostFetch({ profile }) {
     setSelectedCourse(course);
     setSelectedUniversity(null);
     setTab("course");
-    setCache((prev) => ({
-      ...prev,
-      course: { posts: [], page: 1, hasMore: true },
-    }));
+  
   };
 
   // open report modals
@@ -721,18 +438,7 @@ function PostFetch({ profile }) {
       // remove their posts from feed
       setPosts((prev) => prev.filter((p) => p.user_id !== blockTargetUserId));
 
-      setCache((prev) => {
-        const next = { ...prev };
-        for (const tabKey of Object.keys(next)) {
-          const bucket = next[tabKey];
-          if (!bucket || !Array.isArray(bucket.posts)) continue;
-          next[tabKey] = {
-            ...bucket,
-            posts: bucket.posts.filter((p) => p.user_id !== blockTargetUserId),
-          };
-        }
-        return next;
-      });
+    
 
       alert(`You blocked ${blockTargetName || "this person"}.`);
     } catch (err) {
@@ -935,11 +641,13 @@ function PostFetch({ profile }) {
 
         <InfiniteScroll
           dataLength={posts.length}
-          next={fetchPosts}
-          hasMore={hasMore}
+         next={fetchNextPage}
+          hasMore={!!hasNextPage}
           loader={<PostLoad />}
         >
           {posts.map((post) => (
+
+            
             <div className="feed-container" key={post.id}>
               <div className="feed-container-sep">
                 <div className="feed-container-1">
@@ -1048,10 +756,10 @@ function PostFetch({ profile }) {
               <div className="feed-container-3-2">
                 <div className="feed-container-3-2-1">
                   <div
-                    onClick={() => toggleLike(post.id)}
+                    onClick={() => likeMutation.mutate(post.id)}
                     style={{ cursor: "pointer" }}
                   >
-                    {likedPosts[post.id] ? (
+                    {post.liked_by_me ? (
                       <FaHeart size={24} color="red" />
                     ) : (
                       <FaRegHeart size={24} color="#747474ff" />
@@ -1061,7 +769,7 @@ function PostFetch({ profile }) {
                     style={{ cursor: "pointer" }}
                     onClick={() => setActiveLikesPostId(post.id)}
                   >
-                    {likeCounts[post.id] ?? 0}
+                    {post.like_count ?? 0}
                   </span>
                   {activeLikesPostId && (
                     <LikesModal
@@ -1134,26 +842,38 @@ function PostFetch({ profile }) {
 
               {post.post_type === "photo" && <>{contentdivform(post)}</>}
             </div>
-          ))}
+
+          ))
+          
+
+          }
 
           {activePostId && (
             <CommentModal
               postId={activePostId}
               onClose={() => setActivePostId(null)}
-              onCommentAdded={() => {
-                setPosts((prev) =>
-                  prev.map((p) =>
-                    p.id === activePostId
-                      ? { ...p, comment_count: (p.comment_count || 0) + 1 }
-                      : p
-                  )
-                );
-              }}
+             onCommentAdded={() => {
+  queryClient.setQueriesData({ queryKey: ["posts"] }, (old) => {
+    if (!old) return old;
+
+    return {
+      ...old,
+      pages: old.pages.map(page => ({
+        ...page,
+        posts: page.posts.map(post =>
+          post.id === activePostId
+            ? { ...post, comment_count: (post.comment_count || 0) + 1 }
+            : post
+        ),
+      })),
+    };
+  });
+}}
             />
           )}
         </InfiniteScroll>
 
-        {posts.length === 0 && !hasMore && (
+        {posts.length === 0  && (
           <div
             style={{ textAlign: "center", marginTop: "2rem", color: "#888" }}
           >

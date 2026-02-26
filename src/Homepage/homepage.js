@@ -40,12 +40,6 @@ function Homepage() {
 
   return (
     <>
-      <div className="container-1">
-        <Navbar />
-      </div>
-
-      <div className="container-2">
-        <div className="homecontainer">
           <div className="homecontainer-1">
             {loading ? (
               <UsercardLoad />
@@ -180,8 +174,8 @@ function Homepage() {
           <div className="hider-small">
             <LostFound />
           </div>
-        </div>
-      </div>
+   
+    
     </>
   );
 }

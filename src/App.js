@@ -6,6 +6,7 @@ import Homepage from "./Homepage/homepage";
 import Messages from "./messgaes/messages";
 import Uprofile from "./Homepage/Uprofile";
 import TagFeed from "./Homepage/Tagfeed";
+import MainLayout from "./Homepage/MainLayout";
 import Explore from "./Explore/explore";
 import SearchPage from "./search/search";
 import Profile from "./profile/profile";
@@ -24,18 +25,23 @@ const App = () => {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<MultiStepRegister />} />
-          <Route path="/home" element={<Homepage />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/:userId" element={<Uprofile />} />
-          <Route path="/tag/:tag" element={<TagFeed />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/saved-items" element={<SavedPosts />} />
-          <Route path="/profileview" element={<ProfileViewers />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/lost-found" element={<LostFoundPage />} />
-          <Route path="/marketplace" element={<Marketplace />} />
+          <Route element={<MainLayout />}>
+
+    <Route path="/home" element={<Homepage />} />
+    <Route path="/messages" element={<Messages />} />
+    <Route path="/profile" element={<Profile />} />
+    <Route path="/profile/:userId" element={<Uprofile />} />
+    <Route path="/tag/:tag" element={<TagFeed />} />
+    <Route path="/explore" element={<Explore />} />
+    <Route path="/search" element={<SearchPage />} />
+    <Route path="/saved-items" element={<SavedPosts />} />
+    <Route path="/profileview" element={<ProfileViewers />} />
+    <Route path="/lost-found" element={<LostFoundPage />} />
+    <Route path="/marketplace" element={<Marketplace />} />
+
+  </Route>
+        
+        
         </Routes>
       </UserProvider>
     </Router>

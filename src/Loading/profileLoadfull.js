@@ -4,10 +4,7 @@ import Navbar from "../Homepage/Navbar";
 export default function ProfileLoadFull() {
   return (
     <>
-      <div className="container-1">
-        <Navbar />
-      </div>
-      <div className="container-2">
+    
         <div className="prof">
           <div className="prof-1">
             <div className="prof-11">
@@ -74,7 +71,6 @@ export default function ProfileLoadFull() {
             </div>
           ))}
         </div>
-      </div>
     </>
   );
 }

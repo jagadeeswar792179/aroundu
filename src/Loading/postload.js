@@ -19,13 +19,13 @@ export default function PostLoad() {
           <div className="feed-container-2">
             <div
               style={{
-                width: "498px",
-                height: "500px",
+             
                 backgroundColor: "#e8e8e8ff",
               }}
+              className="feed-image"
+
             ></div>
           </div>
-
           <div className="feed-container-4">
             <div className="load-3" style={{ gap: "10px", paddingTop: "20px" }}>
               <div className="load-4-3"></div>
