@@ -273,6 +273,7 @@ function Messages() {
           conversationId={modal.conversation_id}
           title={modal.title}
           setActive={setActive}
+          setMobileOpen={setMobileOpen}
           memberCount={active.member_count}
           close={() => setModal(null)}
           onUpdated={() => {

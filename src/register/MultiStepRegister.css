@@ -181,7 +181,10 @@ select {
   border: 1px solid #d1d5db; /* light gray border */
   border-radius: 8px; /* rounded corners */
   box-sizing: border-box; /* padding inside width */
-  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
 .input-register:focus {
@@ -288,7 +291,10 @@ select {
   border-radius: 20px; /* same rounding */
   cursor: pointer;
   outline: none;
-  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
   appearance: none; /* remove native arrow */
   height: 50px;
   /* custom arrow */
@@ -399,11 +405,16 @@ select {
 }
 /* ---------- Mobile (0px–465px) ---------- */
 @media (min-width: 0px) and (max-width: 465px) {
+  .form-button {
+    padding: 6px;
+  }
   .left-panel {
     min-width: 330px;
     position: relative;
     z-index: 1;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
   }
   .form-step label {
     margin: 0;
@@ -502,7 +513,9 @@ select {
     min-width: 400px;
     position: relative;
     z-index: 1;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
   }
 
   .mess-7 {

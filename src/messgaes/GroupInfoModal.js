@@ -11,6 +11,7 @@ export default function GroupInfoModal({
   memberCount,
   onUpdated,
   setActive,
+  setMobileOpen,
 }) {
   const searchCache = useRef({});
   const server = process.env.REACT_APP_SERVER;
@@ -105,6 +106,7 @@ export default function GroupInfoModal({
 
       // close modal
       close();
+      setMobileOpen(false);
       setActive(null);
     } catch (err) {
       console.error(err);

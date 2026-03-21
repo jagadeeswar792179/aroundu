@@ -139,7 +139,7 @@ export default function Navbar() {
           <p>Explore</p>
         </div>
 
-        <div>
+        <div className="logout-hide-small-screen">
           <svg
             onClick={() => navigate("/marketplace")}
             className="icon"
