@@ -335,6 +335,7 @@ a {
 }
 
 .switch-container {
+  width: 100%;
   display: flex;
   gap: 10px;
   margin: 10px 0;

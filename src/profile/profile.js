@@ -10,6 +10,7 @@ import UserActivity from "./UserActivity";
 import ProfileLoadFull from "../Loading/profileLoadfull";
 import WeekBooking from "../slotbooking/weekbookings";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getTokenPayload } from "../utils/getTokenPayload";
 
 export default function Profile() {
   const server = process.env.REACT_APP_SERVER;
@@ -21,7 +22,7 @@ export default function Profile() {
   /* =========================
      LOCAL STATE (UNCHANGED)
      ========================= */
-
+  const tokenDetails = getTokenPayload();
   const [about, setAbout] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState("");
@@ -384,6 +385,7 @@ const filteredInterestOptions = interestOptions.filter(
   return (
     <>
   
+         
         <div className="prof">
           <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
             {modalType === "about" && (
@@ -420,7 +422,7 @@ const filteredInterestOptions = interestOptions.filter(
                   )}
               </>
             )}
-            {modalType === "profile" && (
+             {modalType === "profile" && (
               <>
                 <ProfileUploadModal
                   isOpen={isModalOpen}
@@ -812,12 +814,15 @@ const filteredInterestOptions = interestOptions.filter(
               )}
             </div>
           </div>
-
+  {tokenDetails.user_type !== "club" && (
+  
           <div className="prof-1">
             <h1>Have free time! Help students And earn Money</h1>
 
             <WeekBooking user={profile} />
           </div>
+  
+  )}
           {/* <div className="prof-2">Suggested for you</div> */}
           <div className="prof-3">
             <div className="prof-3-1">
@@ -896,7 +901,7 @@ const filteredInterestOptions = interestOptions.filter(
               <p>No experiences added yet.</p>
             )}
           </div>
-
+  {tokenDetails.user_type !== "club" && (<>
           <div className="prof-6">
             <div className="prof-5-1">
               <h2>Education</h2>
@@ -1025,6 +1030,8 @@ const filteredInterestOptions = interestOptions.filter(
               )}
             </div>
           </div>
+  </>)}
+
 
           <div className="prof-10">
             <div className="prof-5-1">

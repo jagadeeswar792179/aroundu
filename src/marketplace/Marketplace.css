@@ -2,10 +2,10 @@
 .market-wrap {
   margin: 0 auto;
   padding: 12px;
- width: 1060px;
- display:flex ;
- flex-direction: column;
- gap: 10px;
+  width: 1060px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .market-header {
@@ -30,7 +30,6 @@
   align-items: center;
   gap: 8px;
 }
-
 
 .market-search {
   flex: 1;
@@ -62,7 +61,6 @@
   color: white;
 }
 
-
 .market-err {
   background: #ffecec;
   border: 1px solid #ffbdbd;
@@ -83,17 +81,26 @@
   .market-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  .market-wrap {
+    width: auto;
+  }
 }
 
 @media (max-width: 750px) {
   .market-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .market-wrap {
+    width: auto;
+  }
 }
 
 @media (max-width: 480px) {
   .market-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .market-wrap {
+    width: auto;
   }
 }
 
@@ -179,7 +186,7 @@
 
 .m-modal {
   width: 600px;
-  
+
   max-height: 600px;
   background: #fff;
   border-radius: 14px;
@@ -196,10 +203,9 @@
 }
 
 .m-title {
-color: var(--namehead);
-font-size: 20px;
-font-weight: 400;
-
+  color: var(--namehead);
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .m-close {
@@ -255,7 +261,7 @@ font-weight: 400;
 }
 
 .m-right {
-  display:flex ;
+  display: flex;
   flex-direction: column;
   gap: 8px;
 }
@@ -269,8 +275,8 @@ font-weight: 400;
   font-weight: 700;
   font-size: 16px;
 }
-.m-time{
-  display:flex ;
+.m-time {
+  display: flex;
   align-items: center;
   gap: 5px;
   color: #7a7a7a;
@@ -325,7 +331,7 @@ font-weight: 400;
   font-size: 14px;
   outline: none;
 }
-.p-field select{
+.p-field select {
   padding: 10px 14px;
   border: 1px solid #ccc;
   border-radius: 20px;
@@ -400,7 +406,7 @@ font-weight: 400;
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   color: #fff;
   font-size: 28px;
   display: flex;
@@ -408,8 +414,12 @@ font-weight: 400;
   justify-content: center;
 }
 
-.m-nav-left { left: 10px; }
-.m-nav-right { right: 10px; }
+.m-nav-left {
+  left: 10px;
+}
+.m-nav-right {
+  right: 10px;
+}
 
 .m-nav-disabled {
   opacity: 0.35;
@@ -431,11 +441,11 @@ font-weight: 400;
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  background: rgba(255,255,255,0.55);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .m-dot-active {
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 /* editor modal tweaks */

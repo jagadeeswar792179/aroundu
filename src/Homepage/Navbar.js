@@ -19,8 +19,7 @@ export default function Navbar() {
     localStorage.removeItem("token");
     navigate("/");
   };
- const { user: profile, loading } = useUser();
-
+  const { user: profile, loading } = useUser();
 
   const handleSearch = (e) => {
     if (e.key === "Enter" || e.type === "click") {
@@ -119,7 +118,7 @@ export default function Navbar() {
           </svg>
           <p>Messages</p>
         </div>
-       
+
         <div>
           <svg
             onClick={() => navigate(`/explore`)}
@@ -139,26 +138,26 @@ export default function Navbar() {
           </svg>
           <p>Explore</p>
         </div>
-         <div className="logout-hide-small-screen">
 
-<svg
-  onClick={() => navigate("/marketplace")}
-  className="icon"
-  xmlns="http://www.w3.org/2000/svg"
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  strokeWidth="2"
-  strokeLinecap="round"
-  strokeLinejoin="round"
->
-  <path d="M3 9l1-5h16l1 5" />
-  <path d="M4 9h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
-  <path d="M9 22V12h6v10" />
-</svg>
-<p>Marketplace</p>
+        <div>
+          <svg
+            onClick={() => navigate("/marketplace")}
+            className="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 9l1-5h16l1 5" />
+            <path d="M4 9h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+            <path d="M9 22V12h6v10" />
+          </svg>
+          <p>Marketplace</p>
         </div>
         {
           <Modal isOpen={isModalOpen}>
@@ -169,6 +168,33 @@ export default function Navbar() {
             )}
           </Modal>
         }
+
+        <div className="logout-hide-small-screen">
+          <svg
+            onClick={() => navigate("/settings")}
+            className="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="M4.93 4.93l1.41 1.41"></path>
+            <path d="M17.66 17.66l1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="M6.34 17.66l-1.41 1.41"></path>
+            <path d="M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <p>Settings</p>
+        </div>
         <div>
           <img
             className="profile-avatar"
@@ -179,7 +205,7 @@ export default function Navbar() {
           />
           <p>My Profile</p>
         </div>
-        <div className="logout-hide-small-screen">
+        {/* <div className="logout-hide-small-screen">
           <svg
             onClick={handleLogout}
             width="24"
@@ -197,7 +223,7 @@ export default function Navbar() {
             <line x1="21" x2="9" y1="12" y2="12" />
           </svg>
           <p>LogOut</p>
-        </div>
+        </div> */}
 
         <div className="hider-big">
           <svg
@@ -254,8 +280,7 @@ export default function Navbar() {
             ×
           </button>
         </div>
-
-        <nav className="kebab-list">
+        <div className="kebab-list">
           <div className="flex-r center-c">
             <svg
               onClick={handleLogout}
@@ -277,29 +302,36 @@ export default function Navbar() {
             </svg>{" "}
             <p>LogOut</p>{" "}
           </div>
-<div className="flex-r center-c" style={{gap:"10px"}}>
-
-<svg
-  onClick={() => navigate("/marketplace")}
-  xmlns="http://www.w3.org/2000/svg"
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  fill="none"
-   color="#205b99"
-  stroke="currentColor"
-  strokeWidth="2"
-  strokeLinecap="round"
-  strokeLinejoin="round"
->
-  <path d="M3 9l1-5h16l1 5" />
-  <path d="M4 9h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
-  <path d="M9 22V12h6v10" />
-</svg>
-<p>Marketplace</p>
-        </div>
+          <div className="flex-r center-c" style={{ gap: "10px" }}>
+            <svg
+              onClick={() => {
+                navigate("/marketplace");
+                setKebabOpen(false);
+                document.body.style.overflow = "";
+              }}
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              color="#205b99"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 9l1-5h16l1 5" />
+              <path d="M4 9h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+              <path d="M9 22V12h6v10" />
+            </svg>
+            <p>Marketplace</p>
+          </div>
           <div
-            onClick={() => handlemodal(1)}
+            onClick={() => {
+              handlemodal(1);
+              setKebabOpen(false);
+              document.body.style.overflow = "";
+            }}
             style={{ cursor: "pointer" }}
             className="flex-r center-c"
           >
@@ -322,7 +354,11 @@ export default function Navbar() {
             Profile viewers
           </div>
           <div
-            onClick={() => navigate("/saved-items")}
+            onClick={() => {
+              navigate("/saved-items");
+              setKebabOpen(false);
+              document.body.style.overflow = "";
+            }}
             style={{ cursor: "pointer" }}
             className="flex-r center-c"
           >
@@ -343,9 +379,12 @@ export default function Navbar() {
             </svg>
             Saved items
           </div>
-
           <div
-            onClick={() => handlemodal(2)}
+            onClick={() => {
+              handlemodal(2);
+              setKebabOpen(false);
+              document.body.style.overflow = "";
+            }}
             style={{ cursor: "pointer" }}
             className="flex-r center-c"
           >
@@ -368,7 +407,11 @@ export default function Navbar() {
             Report a bug
           </div>
           <div
-            onClick={() => navigate("/lost-found")}
+            onClick={() => {
+              navigate("/lost-found");
+              setKebabOpen(false);
+              document.body.style.overflow = "";
+            }}
             style={{ cursor: "pointer" }}
             className="flex-r center-c"
           >
@@ -392,7 +435,40 @@ export default function Navbar() {
             </svg>
             Lost & Found
           </div>
-        </nav>
+          <div
+            onClick={() => {
+              navigate("/settings");
+              setKebabOpen(false);
+              document.body.style.overflow = "";
+            }}
+            className="flex-r center-c"
+          >
+            <svg
+              className="icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              color="#205b99"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 2v2"></path>
+              <path d="M12 20v2"></path>
+              <path d="M4.93 4.93l1.41 1.41"></path>
+              <path d="M17.66 17.66l1.41 1.41"></path>
+              <path d="M2 12h2"></path>
+              <path d="M20 12h2"></path>
+              <path d="M6.34 17.66l-1.41 1.41"></path>
+              <path d="M19.07 4.93l-1.41 1.41"></path>
+            </svg>
+            <p>Settings</p>
+          </div>
+        </div>
       </aside>
     </div>
   );

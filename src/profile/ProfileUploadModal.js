@@ -72,8 +72,7 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
+<>
         <div className="profup-1 flex-r center-c">
           <h3>Upload Profile Picture</h3>
           <span onClick={onClose}>✕</span>
@@ -131,8 +130,7 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
             </div>
           )}
         </div>
-      </div>
-    </div>
+     </>
   );
 };
 

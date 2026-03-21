@@ -17,31 +17,32 @@ import LostFoundPage from "./LostFound/LostFoundPage";
 import Marketplace from "./marketplace/Marketplace";
 import { UserProvider } from "./UserContext/UserContext";
 import "./App.css";
+import Settings from "./settings/Settings";
+import Welcome from "./welcome/welcome";
 
 const App = () => {
   return (
     <Router>
       <UserProvider>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<Welcome />} />
           <Route path="/register" element={<MultiStepRegister />} />
           <Route element={<MainLayout />}>
-
-    <Route path="/home" element={<Homepage />} />
-    <Route path="/messages" element={<Messages />} />
-    <Route path="/profile" element={<Profile />} />
-    <Route path="/profile/:userId" element={<Uprofile />} />
-    <Route path="/tag/:tag" element={<TagFeed />} />
-    <Route path="/explore" element={<Explore />} />
-    <Route path="/search" element={<SearchPage />} />
-    <Route path="/saved-items" element={<SavedPosts />} />
-    <Route path="/profileview" element={<ProfileViewers />} />
-    <Route path="/lost-found" element={<LostFoundPage />} />
-    <Route path="/marketplace" element={<Marketplace />} />
-
-  </Route>
-        
-        
+            <Route path="/home" element={<Homepage />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:userId" element={<Uprofile />} />
+            <Route path="/tag/:tag" element={<TagFeed />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/saved-items" element={<SavedPosts />} />
+            <Route path="/profileview" element={<ProfileViewers />} />
+            <Route path="/lost-found" element={<LostFoundPage />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+          </Route>
         </Routes>
       </UserProvider>
     </Router>

@@ -21,13 +21,14 @@ const RegisterForm = () => {
   const [checkmail, setcheckmail] = useState(false);
   const [resendTimer, setResendTimer] = useState(60); // 60 seconds countdown
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [userType, setUserType] = useState("");
   const [loading, setLoading] = useState(false);
   const server = process.env.REACT_APP_SERVER;
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    clubName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -213,28 +214,43 @@ const RegisterForm = () => {
   };
 
   // Extracted finish handler (calls API and navigates to "/")
-  const handleFinish = async () => {
-    // Basic validations
-    const errors = [];
+const handleFinish = async () => {
+  const errors = [];
 
-    // Validate DOB
-    if (!formData.birthDay || !formData.birthMonth || !formData.birthYear) {
-      errors.push("Please select a complete date of birth (day, month, year).");
+  /* ---------- DOB VALIDATION ---------- */
+  if (
+    userType !== "club" &&
+    (!formData.birthDay || !formData.birthMonth || !formData.birthYear)
+  ) {
+    errors.push("Please select a complete date of birth.");
+  }
+
+  let dob = null;
+
+  if (
+    userType !== "club" &&
+    formData.birthDay &&
+    formData.birthMonth &&
+    formData.birthYear
+  ) {
+    const monthIndex = months.indexOf(formData.birthMonth);
+
+    if (monthIndex < 0) {
+      errors.push("Invalid month selected.");
+    } else {
+      dob = `${formData.birthYear}-${("0" + (monthIndex + 1)).slice(-2)}-${(
+        "0" + formData.birthDay
+      ).slice(-2)}`;
     }
+  }
 
-    // Build DOB only if valid
-    let dob = "";
-    if (errors.length === 0) {
-      const monthIndex = months.indexOf(formData.birthMonth);
-      if (monthIndex < 0) errors.push("Invalid month selected.");
-      else {
-        dob = `${formData.birthYear}-${("0" + (monthIndex + 1)).slice(-2)}-${(
-          "0" + formData.birthDay
-        ).slice(-2)}`;
-      }
+  /* ---------- REQUIRED FIELD VALIDATION ---------- */
+
+  if (userType === "club") {
+    if (!formData.clubName || !formData.email || !formData.university) {
+      errors.push("Club name, email and university are required.");
     }
-
-    // required fields
+  } else {
     if (
       !formData.firstName ||
       !formData.lastName ||
@@ -242,155 +258,262 @@ const RegisterForm = () => {
       !formData.gender ||
       !userType
     ) {
-      errors.push("Missing required personal info.");
+      errors.push("Missing required personal information.");
     }
+  }
 
-    // if gender other but no text
-    if (formData.gender === "other" && !(formData.other_gender || "").trim()) {
-      errors.push("Please specify your gender in the 'Other' field.");
+  /* ---------- GENDER VALIDATION ---------- */
+
+  if (
+    userType !== "club" &&
+    formData.gender === "other" &&
+    !(formData.other_gender || "").trim()
+  ) {
+    errors.push("Please specify your gender.");
+  }
+
+  /* ---------- UNIVERSITY ---------- */
+
+  let finalUniversity = formData.university;
+
+  if (formData.university === "Other") {
+    if (!(formData.universityOther || "").trim()) {
+      errors.push("Please specify your university.");
+    } else {
+      finalUniversity = formData.universityOther.trim();
     }
+  }
 
-    // university: if "Other" chosen require universityOther
-    let finalUniversity = formData.university;
-    if (formData.university === "Other") {
-      if (!(formData.universityOther || "").trim()) {
-        errors.push("Please specify your university.");
-      } else {
-        finalUniversity = formData.universityOther.trim();
-      }
-    }
+  /* ---------- ROLE SPECIFIC ---------- */
 
-    if (userType === "student" && (!formData.course || !formData.duration)) {
-      errors.push("Course and duration are required for students.");
-    }
+  if (userType === "student" && (!formData.course || !formData.duration)) {
+    errors.push("Course and duration are required for students.");
+  }
 
-    if (userType === "professor" && !formData.specialization) {
-      errors.push("Specialization is required for professors.");
-    }
-    if (userType === "professor" && !formData.bloglink.trim()) {
-      errors.push("Blog link is required for professors.");
-    }
+  if (userType === "professor" && !formData.specialization) {
+    errors.push("Specialization is required for professors.");
+  }
 
-    const interests = (selectedOptions || []).map((opt) => opt.value);
-    if (interests.length === 0 || interests.length > 4) {
-      errors.push("Select between 1 and 4 interests.");
-    }
+  if (userType === "professor" && !formData.bloglink.trim()) {
+    errors.push("Blog link is required for professors.");
+  }
 
-    if (!formData.password || !formData.confirmPassword) {
-      errors.push("Password and confirm password are required.");
-    } else if (formData.password !== formData.confirmPassword) {
-      errors.push("Passwords do not match.");
-    } else if (formData.password.length < 6) {
-      errors.push("Password must be at least 6 characters.");
-    }
+  /* ---------- INTERESTS ---------- */
 
-    // simple email regex
+  const interests = (selectedOptions || []).map((opt) => opt.value);
 
-    const allowedDomains = Object.values(universityEmailDomains);
-    const emailRegex = new RegExp(
-      `^[^\\s@]+@(${allowedDomains
-        .map((d) => d.replace(".", "\\."))
-        .join("|")})$`,
-      "i"
-    );
+  if (interests.length === 0 || interests.length > 4) {
+    errors.push("Select between 1 and 4 interests.");
+  }
 
-    if (!emailRegex.test(formData.email)) {
-      errors.push("Please enter a valid email address.");
-    }
+  /* ---------- PASSWORD ---------- */
 
-    if (errors.length > 0) {
-      alert(errors.join("\n"));
-      return;
-    }
+  if (!formData.password || !formData.confirmPassword) {
+    errors.push("Password and confirm password are required.");
+  } else if (formData.password !== formData.confirmPassword) {
+    errors.push("Passwords do not match.");
+  } else if (formData.password.length < 6) {
+    errors.push("Password must be at least 6 characters.");
+  }
 
-    const payload = {
-      first_name: formData.firstName.trim(),
-      last_name: formData.lastName.trim(),
-      email: formData.email.trim(),
-      password: formData.password,
-      gender:
-        formData.gender === "other"
-          ? formData.other_gender.trim()
-          : formData.gender,
-      user_type: userType, // ✅ match backend
-      dob,
-      university: finalUniversity,
-      interests,
-      ...(userType === "student" && {
-        course: formData.course,
-        duration: formData.duration,
-      }),
-      ...(userType === "professor" && {
-        specialization: formData.specialization,
-        blog_link: formData.bloglink.trim(), // ✅ match DB column
-      }),
-    };
+  /* ---------- EMAIL ---------- */
 
-    try {
-      setLoading(true);
-      await axios.post(`${server}/api/auth/register`, payload);
-      alert("Registration successful! You can now login.");
-      navigate("/", { replace: true });
-    } catch (err) {
-      alert("Error: " + (err.response?.data?.msg || err.message));
-    } finally {
-      setLoading(false);
-    }
+  const allowedDomains = Object.values(universityEmailDomains);
+
+  const emailRegex = new RegExp(
+    `^[^\\s@]+@(${allowedDomains
+      .map((d) => d.replace(".", "\\."))
+      .join("|")})$`,
+    "i"
+  );
+
+  if (!emailRegex.test(formData.email)) {
+    errors.push("Please enter a valid email address.");
+  }
+
+  /* ---------- STOP IF ERRORS ---------- */
+
+  if (errors.length > 0) {
+    alert(errors.join("\n"));
+    return;
+  }
+
+  /* ---------- PAYLOAD ---------- */
+
+  const payload = {
+    first_name:
+      userType === "club"
+        ? formData.clubName.trim()
+        : formData.firstName.trim(),
+
+    last_name:
+      userType === "club"
+        ? "club"
+        : formData.lastName.trim(),
+
+    email: formData.email.trim(),
+
+    password: formData.password,
+
+    gender:
+      userType === "club"
+        ? null
+        : formData.gender === "other"
+        ? formData.other_gender.trim()
+        : formData.gender,
+
+    user_type: userType,
+
+    dob,
+
+    university: finalUniversity,
+
+    interests,
+
+    ...(userType === "student" && {
+      course: formData.course,
+      duration: formData.duration,
+    }),
+
+    ...(userType === "professor" && {
+      specialization: formData.specialization,
+      blog_link: formData.bloglink.trim(),
+    }),
   };
-  const validateEmail = () => {
-    const value = formData.email;
-    const selectedUni = formData.university;
-    const requiredDomain = universityEmailDomains[selectedUni];
 
-    if (!value) return alert("Email is required");
+  /* ---------- API CALL ---------- */
 
-    if (requiredDomain) {
-      const regex = new RegExp(`^[^\\s@]+@${requiredDomain}$`, "i");
-      if (!regex.test(value)) {
-        return alert(`Please enter a valid ${requiredDomain} email address`);
-      }
+  try {
+    setLoading(true);
+
+    await axios.post(`${server}/api/auth/register`, payload);
+
+    alert("Registration successful! You can now login.");
+
+    navigate("/", { replace: true });
+
+  } catch (err) {
+    alert("Error: " + (err.response?.data?.msg || err.message));
+  } finally {
+    setLoading(false);
+  }
+};
+const validateEmail = (nextStep) => {
+  const value = formData.email;
+  const selectedUni = formData.university;
+  const requiredDomain = universityEmailDomains[selectedUni];
+
+  if (!value) return alert("Email is required");
+
+  if (requiredDomain) {
+    const regex = new RegExp(`^[^\\s@]+@${requiredDomain}$`, "i");
+    if (!regex.test(value)) {
+      return alert(`Please enter a valid ${requiredDomain} email address`);
     }
+  }
 
-    handleCheckEmail();
-  };
+  handleCheckEmail(nextStep);
+};
 
   // 2) handleCheckEmail: set step on success
-  const handleCheckEmail = async () => {
-    setcheckmail(true);
-    const email = (formData.email || "").trim();
-    if (!email) {
-      alert("Please enter your email.");
-      setcheckmail(false);
-      return;
+const handleCheckEmail = async (nextStep) => {
+  setcheckmail(true);
+  const email = (formData.email || "").trim();
+
+  if (!email) {
+    alert("Please enter your email.");
+    setcheckmail(false);
+    return;
+  }
+
+  try {
+    const { data } = await axios.post(
+      `${server}/api/auth/check-email`,
+      { email }
+    );
+
+    setcheckmail(false);
+
+    if (data.exists) {
+      alert("Email already exists.");
+    } else {
+      setStep(nextStep);   // ✅ move step here
     }
 
-    try {
-      console.log("Checking email:", server);
-      const { data, status } = await axios.post(
-        `${server}/api/auth/check-email`,
-        { email }
-      );
-      // axios will throw for non-2xx, so here status is 2xx and data should be parsed JSON
-      setcheckmail(false);
-      if (data.exists) {
-        alert("Email already exists.");
-      } else {
-        setStep(2);
-      }
-    } catch (err) {
-      // If server returned HTML or 404 you can inspect err.response.data
-      console.error(
-        "Error checking email:",
-        err.response?.status,
-        err.response?.data || err.message
-      );
-      alert(
-        "Something went wrong while checking email. See console for details."
-      );
-      setcheckmail(false);
-    }
-  };
+  } catch (err) {
+    console.error("Error checking email:", err);
+    alert("Something went wrong while checking email.");
+    setcheckmail(false);
+  }
+};
 
+
+  const renderStepZero = () => (
+  <div className="form-step">
+    <h3>Select Account Type</h3>
+
+<div className="role-gender-container">
+
+  <div>
+    <label className="label-register">Role:</label>
+
+    <div className="gender-options">
+
+      <label>
+        <input
+          type="radio"
+          name="role"
+          value="student"
+          checked={userType === "student"}
+          onChange={() => setUserType("student")}
+        />
+        Student
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          name="role"
+          value="professor"
+          checked={userType === "professor"}
+          onChange={() => setUserType("professor")}
+        />
+        Professor
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          name="role"
+          value="club"
+          checked={userType === "club"}
+          onChange={() => setUserType("club")}
+        />
+        Club
+      </label>
+
+    </div>
+  </div>
+
+</div>
+    <div style={{ marginTop: "20px", textAlign: "right" }}>
+      <button
+        className="form-button"
+        onClick={() => {
+          if (!userType) return alert("Please select a role");
+
+          if (userType === "club") {
+            setStep(2.1);
+          } else {
+            setStep(1);
+          }
+        }}
+      >
+        Next
+      </button>
+    </div>
+  </div>
+);
   const renderStepOne = () => (
     <div className="form-step">
       <div className="register-1">
@@ -547,7 +670,10 @@ const RegisterForm = () => {
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div />
+        
+          <button onClick={() => setStep(0)} className="form-button">
+    Back
+  </button>
         <button
           className="form-button"
           onClick={() => {
@@ -562,12 +688,8 @@ const RegisterForm = () => {
             ];
             if (required.some((r) => !r))
               return alert("Please fill all required fields");
-            if (
-              formData.gender === "other" &&
-              !(formData.other_gender || "").trim()
-            )
-              return alert("Please specify your gender.");
-            validateEmail();
+            
+            validateEmail(2);
           }}
         >
           {checkmail ? <BeatLoader size={10} color="#FFFFFF" /> : "Next"}
@@ -579,27 +701,7 @@ const RegisterForm = () => {
   const renderStepTwo = () => (
     <div className="form-step">
       <div className="role-gender-container">
-        <div>
-          <label htmlFor="role" className="label-register">
-            Role:
-          </label>
-          <select
-            id="role"
-            value={userType}
-            onChange={(e) => setUserType(e.target.value)}
-            className="select-register"
-            style={{
-              flexGrow: 0, // don't expand with flex
-              flexShrink: 0, // don't shrink when siblings expand
-            }}
-          >
-            <option value="" disabled>
-              Select Role
-            </option>
-            <option value="student">Student</option>
-            <option value="professor">Professor</option>
-          </select>
-        </div>
+       
 
         {/* GENDER FIELD */}
         <div>
@@ -804,6 +906,119 @@ const RegisterForm = () => {
     </div>
   );
 
+
+  const renderClubStep = () => (
+  <div className="form-step">
+
+    <label className="label-register">
+      Club Name
+      <input
+        className="input-register"
+        value={formData.clubName}
+        onChange={(e) =>
+          setFormData({ ...formData, clubName: e.target.value })
+        }
+      />
+    </label>
+
+    <label className="label-register">
+      University:
+      <CustomSelect
+        options={universityOptions}
+        value={findOrCreateOption(universityOptions, formData.university)}
+        onChange={(selected) =>
+          setFormData({
+            ...formData,
+            university: selected?.value || "",
+          })
+        }
+      />
+    </label>
+
+  {formData.university === "Other" && (
+        <div style={{ marginTop: 8 }}>
+          <input
+            placeholder="Email"
+            value={formData.email}
+            onChange={(e) => {
+              let value = e.target.value;
+              const selectedUni = formData.university;
+              const requiredDomain = universityEmailDomains[selectedUni];
+
+              if (requiredDomain) {
+                // If user typed only username (no @)
+                if (!value.includes("@")) {
+                  value = value + "@" + requiredDomain;
+                } else {
+                  // If already contains an @, enforce correct domain
+                  const [user, domain] = value.split("@");
+                  if (user && domain && domain !== requiredDomain) {
+                    value = user + "@" + requiredDomain;
+                  }
+                }
+              }
+
+              setFormData({ ...formData, email: value });
+            }}
+            className="input-register"
+          />
+        </div>
+      )}
+      <label className="label-register">
+        Email
+        <input
+          placeholder="Email"
+          value={formData.email}
+          onChange={(e) =>
+            setFormData((f) => ({
+              ...f,
+              email: enforceEmailDomain(
+                e.target.value,
+                f.university || "Western New England University"
+              ),
+            }))
+          }
+          onBlur={(e) =>
+            setFormData((f) => ({
+              ...f,
+              email: enforceEmailDomain(
+                e.target.value,
+                f.university || "Western New England University"
+              ),
+            }))
+          }
+          className="input-register"
+        />
+      </label>
+    <label>Interests:</label>
+    <MultiSelectTags
+      options={interestOptions}
+      value={selectedOptions}
+      onChange={handleChange}
+      placeholder="Select up to 4"
+    />
+
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <button onClick={() => setStep(0)} className="form-button">
+        Back
+      </button>
+
+      <button
+        className="form-button"
+        onClick={() => {
+          if (!formData.clubName || !formData.email || !formData.university) {
+            return alert("Please fill all required fields");
+          }
+          validateEmail(3);
+        }}
+      >
+             {checkmail ? <BeatLoader size={10} color="#FFFFFF" /> : "Next"}
+
+      </button>
+       
+    </div>
+  </div>
+);
   const sendOtp = async () => {
     try {
       await axios.post(`${server}/api/AuthOtp/send-otp`, {
@@ -907,7 +1122,13 @@ const RegisterForm = () => {
               marginTop: "10px",
             }}
           >
-            <button onClick={() => setStep(2)} className="form-button">
+            <button onClick={() => {
+  if (userType === "club") {
+    setStep(0);
+  } else {
+    setStep(2);
+  }
+}} className="form-button">
               Back
             </button>
             <button
@@ -930,9 +1151,11 @@ const RegisterForm = () => {
     <div className="register-container">
       <div className="register-form">
         <h2>Create New Account</h2>
-        {step === 1 && renderStepOne()}
-        {step === 2 && renderStepTwo()}
-        {step === 3 && renderStepThree()}
+      {step === 0 && renderStepZero()}
+{step === 1 && renderStepOne()}
+{step === 2 && renderStepTwo()}
+{step === 2.1 && renderClubStep()}
+{step === 3 && renderStepThree()}
       </div>
     </div>
   );

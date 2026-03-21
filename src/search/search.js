@@ -53,11 +53,12 @@ export default function SearchPage() {
       setLoadingUsers(true);
       try {
         const token = localStorage.getItem("token");
-        const endpoint =
-          type === "students"
-            ? `${server}/api/search/students`
-            : `${server}/api/search/professors`;
-
+const endpoint =
+  type === "students"
+    ? `${server}/api/search/students`
+    : type === "professors"
+    ? `${server}/api/search/professors`
+    : `${server}/api/search/clubs`;
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
           params: { q: q, page },
@@ -82,21 +83,7 @@ export default function SearchPage() {
     params.set("type", newType);
     navigate(`/search?${params.toString()}`, { replace: true });
   };
-  const newsArray = [
-    "India, Canada reset diplomatic ties; 10m ago",
-    "More Indians invest in mutual funds; 10m ago",
-    "Big Four goes big on hiring; 5h ago • 4,851 readers",
-    "More recruiters get AI savvy; 5h ago • 3,599 readers",
-    "What's shaping IT deals; 5h ago • 3,294 readers",
-    "India, Canada reset diplomatic ties; 10m ago",
-    "More Indians invest in mutual funds; 10m ago",
-    "Big Four goes big on hiring; 5h ago • 4,851 readers",
-    "More recruiters get AI savvy; 5h ago • 3,599 readers",
-    "What's shaping IT deals; 5h ago • 3,294 readers",
-    "India, Canada reset diplomatic ties; 10m ago",
-    "More Indians invest in mutual funds; 10m ago",
-    "Big Four goes big on hiring; 5h ago • 4,851 readers",
-  ];
+
   return (
     <>
       {selectedPeer && (
@@ -126,6 +113,12 @@ export default function SearchPage() {
               className={`switch-btn  ${type === "professors" ? "active" : ""}`}
             >
               Professors
+            </button>
+            <button
+              onClick={() => switchType("clubs")}
+              className={`switch-btn  ${type === "clubs" ? "active" : ""}`}
+            >
+              Clubs
             </button>
             <button
               onClick={() => switchType("posts")}
@@ -179,7 +172,11 @@ export default function SearchPage() {
                           {u.first_name} {u.last_name}
                         </div>
                         <div style={{ color: "#555" }}>
-                          {type === "students" ? u.course : u.specialization}
+                          {type === "students"
+  ? u.course
+  : type === "professors"
+  ? u.specialization
+  : ""}
                         </div>
                         <div style={{ color: "#888", fontSize: 13 }}>
                           {u.university}

@@ -17,10 +17,12 @@ import ReportModal from "../utils/ReportModal";
 import BlockConfirmModal from "../utils/BlockConfirmModal";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getTokenPayload } from "../utils/getTokenPayload";
 // ...
 function PostFetch({ profile }) {
   const server = process.env.REACT_APP_SERVER;
   const navigate = useNavigate();
+  const tokenDetails = getTokenPayload();
   const queryClient = useQueryClient();
   const [openMenuPostId, setOpenMenuPostId] = useState(null);
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -522,19 +524,19 @@ const likeMutation = useMutation({
       <div className="homecontainer-2">
         <div className="postcontainer">
           <div className="postwrite-container">
-            {profile?.profile ? (
+            {/* {profile?.profile ? ( */}
               <img
                 src={profile?.profile || "/avatar.jpg"}
                 alt="profile"
                 className="postwrite-avatar"
               />
-            ) : (
+            {/* ) : (
               <div className="avatar-fallback">
-                {/* {`${profile.first_name?.[0] || ""}${
-                  profile.last_name?.[0] || ""
-                }`.toUpperCase()} */}
+                {`${tokenDetails.first_name?.[0] || ""}${
+                  tokenDetails.last_name?.[0] || ""
+                }`.toUpperCase()}
               </div>
-            )}
+            )} */}
             <input
               className="postwrite-input"
               type="text"
@@ -612,32 +614,39 @@ const likeMutation = useMutation({
           </div>
         </div>
 
-        <div className="switch-container">
-          <button
-            onClick={onClickAll}
-            className={`switch-btn ${tab === "all" ? "active" : ""}`}
-          >
-            All
-          </button>
-          <button
-            onClick={onClickInterests}
-            className={`switch-btn ${tab === "interests" ? "active" : ""}`}
-          >
-            Interests
-          </button>
-          <button
-            onClick={onClickSameUniversity}
-            className={`switch-btn ${tab === "university" ? "active" : ""}`}
-          >
-            Same University
-          </button>
-          <button
-            onClick={onClickSameCourse}
-            className={`switch-btn ${tab === "course" ? "active" : ""}`}
-          >
-            Same Course
-          </button>
-        </div>
+  <div className="switch-container">
+  <button
+    onClick={onClickAll}
+    className={`switch-btn ${tab === "all" ? "active" : ""}`}
+  >
+    All
+  </button>
+
+  <button
+    onClick={onClickInterests}
+    className={`switch-btn ${tab === "interests" ? "active" : ""}`}
+  >
+    Interests
+  </button>
+
+  {tokenDetails.user_type !== "club" && (
+    <>
+      <button
+        onClick={onClickSameUniversity}
+        className={`switch-btn ${tab === "university" ? "active" : ""}`}
+      >
+        Same University
+      </button>
+
+      <button
+        onClick={onClickSameCourse}
+        className={`switch-btn ${tab === "course" ? "active" : ""}`}
+      >
+        Same Course
+      </button>
+    </>
+  )}
+</div>
 
         <InfiniteScroll
           dataLength={posts.length}

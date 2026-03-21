@@ -21,7 +21,7 @@ function SavedPosts() {
         `${server}/api/user/saved-posts?page=${page}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const newPosts = res.data.posts || [];
@@ -58,97 +58,94 @@ function SavedPosts() {
 
   return (
     <>
+      <div className="saved-posts-container">
+        <h3>Saved Posts</h3>
 
-        <div className="saved-posts-container">
-          <h3>Saved Posts</h3>
+        {/* Tabs */}
+        <div className="switch-container">
+          <button
+            onClick={() => setSavedTab("posts")}
+            className={`switch-btn ${savedTab === "posts" ? "active" : ""}`}
+          >
+            Posts
+          </button>
+          <button
+            onClick={() => setSavedTab("discussion")}
+            className={`switch-btn ${
+              savedTab === "discussion" ? "active" : ""
+            }`}
+          >
+            Discussion
+          </button>
+        </div>
 
-          {/* Tabs */}
-          <div className="switch-container">
-            <button
-              onClick={() => setSavedTab("posts")}
-              className={`switch-btn ${
-                savedTab === "posts" ? "active" : ""
-              }`}
-            >
-              Posts
-            </button>
-            <button
-              onClick={() => setSavedTab("discussion")}
-              className={`switch-btn ${
-                savedTab === "discussion" ? "active" : ""
-              }`}
-            >
-              Discussion
-            </button>
+        {/* Loading skeleton */}
+        {loading && posts.length === 0 && (
+          <div
+            className="prof-2"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "30px",
+            }}
+          >
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="load-4"
+                style={{
+                  width: "230px",
+                  height: "300px",
+                  backgroundColor: "#f1f1f1ff",
+                }}
+              />
+            ))}
           </div>
+        )}
 
-          {/* Loading skeleton */}
-          {loading && posts.length === 0 && (
-            <div
-              className="prof-2"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "30px",
-              }}
-            >
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="load-4"
-                  style={{
-                    width: "230px",
-                    height: "300px",
-                    backgroundColor: "#f1f1f1ff",
-                  }}
-                />
+        {/* Grid */}
+        {!loading && filteredPosts.length === 0 ? (
+          <p className="no-posts">
+            {savedTab === "posts"
+              ? "No saved posts yet."
+              : "No saved discussions yet."}
+          </p>
+        ) : (
+          <InfiniteScroll
+            dataLength={filteredPosts.length}
+            next={fetchSavedPosts}
+            hasMore={hasMore}
+            loader={<p style={{ textAlign: "center" }}></p>}
+          >
+            <div className="grid-container">
+              {filteredPosts.map((post) => (
+                <div key={post.id} className="grid-item">
+                  {post.image_url ? (
+                    <img
+                      src={post.image_url}
+                      alt="saved post"
+                      onClick={() => setActivePostId(post.id)}
+                    />
+                  ) : (
+                    <div
+                      className="feed-container"
+                      onClick={() => setActivePostId(post.id)}
+                      style={{ padding: "15px", cursor: "pointer" }}
+                    >
+                      <b>
+                        {post.first_name} {post.last_name}
+                      </b>
+                      <div className="user-activity-caption">
+                        {post.caption}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
-          )}
-
-          {/* Grid */}
-          {!loading && filteredPosts.length === 0 ? (
-            <p className="no-posts">
-              {savedTab === "posts"
-                ? "No saved posts yet."
-                : "No saved discussions yet."}
-            </p>
-          ) : (
-            <InfiniteScroll
-              dataLength={filteredPosts.length}
-              next={fetchSavedPosts}
-              hasMore={hasMore}
-              loader={<p style={{ textAlign: "center" }}></p>}
-            >
-              <div className="grid-container">
-                {filteredPosts.map((post) => (
-                  <div key={post.id} className="grid-item">
-                    {post.image_url ? (
-                      <img
-                        src={post.image_url}
-                        alt="saved post"
-                        onClick={() => setActivePostId(post.id)}
-                      />
-                    ) : (
-                      <div
-                        className="feed-container"
-                        onClick={() => setActivePostId(post.id)}
-                        style={{ padding: "15px", cursor: "pointer" }}
-                      >
-                        <b>
-                          {post.first_name} {post.last_name}
-                        </b>
-                        <div className="user-activity-caption">
-                          {post.caption}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </InfiniteScroll>
-          )}
-        </div>
+          </InfiniteScroll>
+        )}
+      </div>
 
       {/* 🔥 SINGLE POST MODAL */}
       {activePostId && (

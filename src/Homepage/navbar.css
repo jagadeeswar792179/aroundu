@@ -1,5 +1,5 @@
 .search-input {
-  width: 150px;
+  width: 300px;
   padding: 10px 40px 10px 15px;
   border: 1px solid #eaeaea;
   border-radius: 20px;
@@ -18,7 +18,7 @@
   gap: 20px;
 }
 .search-input:focus {
-  width: 300px; /* expand */
+  /* width: 300px;  */
   outline: none;
 }
 /* ===== Overlay ===== */
@@ -91,7 +91,9 @@
   background: #fff;
   color: #111827;
   cursor: pointer;
-  transition: background 120ms ease, transform 80ms ease,
+  transition:
+    background 120ms ease,
+    transform 80ms ease,
     border-color 120ms ease;
 }
 
@@ -353,8 +355,8 @@
     display: flex;
     justify-content: center;
   }
-
   .switch-container {
+    width: 466px;
     flex-wrap: wrap;
   }
   .switch-btn {

@@ -108,6 +108,25 @@ label {
 .gap20 {
   gap: 20px;
 }
+.border1 {
+  border: 1px solid black;
+}
+.bdradius20 {
+  border-radius: 20px;
+}
+.circ {
+  border-radius: 50%;
+}
+.p-5 {
+  padding: 5px;
+}
+.p-10 {
+  padding: 10px;
+}
+.p-20 {
+  padding: 20px;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

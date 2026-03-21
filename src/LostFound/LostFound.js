@@ -15,7 +15,7 @@ export default function LostFound() {
   const [deletingId, setDeletingId] = useState(null); // which item is deleting (id or null)
 
   const [activeTab, setActiveTab] = useState("lost");
-const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   // modal state
   const [showModal, setShowModal] = useState(false);
@@ -41,7 +41,6 @@ const queryClient = useQueryClient();
   const [menuOpenId, setMenuOpenId] = useState(null);
   const menuRefs = useRef(new Map()); // id -> HTMLElement
 
-
   const listRef = useRef(null);
   const observer = useRef(null);
 
@@ -49,37 +48,29 @@ const queryClient = useQueryClient();
     const token = localStorage.getItem("token");
     return { headers: { Authorization: `Bearer ${token}` } };
   };
-const {
-  data,
-  fetchNextPage,
-  hasNextPage,
-  isFetchingNextPage,
-  isLoading,
-} = useInfiniteQuery({
-  queryKey: ["lostfound", activeTab],
-  queryFn: async ({ pageParam = 1 }) => {
-    const res = await axios.get(
-      `${process.env.REACT_APP_SERVER}/api/lostfound?filter=${activeTab}&page=${pageParam}&limit=${PAGE_SIZE}`,
-      getAuth()
-    );
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["lostfound", activeTab],
+      queryFn: async ({ pageParam = 1 }) => {
+        const res = await axios.get(
+          `${process.env.REACT_APP_SERVER}/api/lostfound?filter=${activeTab}&page=${pageParam}&limit=${PAGE_SIZE}`,
+          getAuth(),
+        );
 
-    return res.data;
-  },
-  getNextPageParam: (lastPage, pages) => {
-    const items = Array.isArray(lastPage?.items)
-      ? lastPage.items
-      : [];
-    return items.length < PAGE_SIZE ? undefined : pages.length + 1;
-  },
-  staleTime: 1000 * 60 * 5,
-});
-const items = data?.pages.flatMap(p => p.items) || [];
+        return res.data;
+      },
+      getNextPageParam: (lastPage, pages) => {
+        const items = Array.isArray(lastPage?.items) ? lastPage.items : [];
+        return items.length < PAGE_SIZE ? undefined : pages.length + 1;
+      },
+      staleTime: 1000 * 60 * 5,
+    });
+  const items = data?.pages.flatMap((p) => p.items) || [];
 
   const fmt = (ts) =>
     ts
       ? new Date(ts).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
       : "—";
-
 
   // 🔧 outside click that respects per-item refs
   useEffect(() => {
@@ -98,26 +89,23 @@ const items = data?.pages.flatMap(p => p.items) || [];
     return () => document.removeEventListener("mousedown", onDocMouseDown);
   }, [menuOpenId]);
 
-const lastItemRef = useCallback(
-  (node) => {
-    if (observer.current) observer.current.disconnect();
+  const lastItemRef = useCallback(
+    (node) => {
+      if (observer.current) observer.current.disconnect();
 
-    observer.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
-      },
-      { root: listRef.current || null, rootMargin: "400px", threshold: 0 }
-    );
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasNextPage) {
+            fetchNextPage();
+          }
+        },
+        { root: listRef.current || null, rootMargin: "400px", threshold: 0 },
+      );
 
-    if (node) observer.current.observe(node);
-  },
-  [fetchNextPage, hasNextPage]
-);
-
-
-
+      if (node) observer.current.observe(node);
+    },
+    [fetchNextPage, hasNextPage],
+  );
 
   // modal open helpers
   const openCreate = () => {
@@ -146,23 +134,20 @@ const lastItemRef = useCallback(
       setDeletingId(it.id);
       await axios.delete(
         `${process.env.REACT_APP_SERVER}/api/lostfound/${it.id}`,
-        getAuth()
+        getAuth(),
       );
 
-      queryClient.setQueriesData(
-  { queryKey: ["lostfound"] },
-  (old) => {
-    if (!old) return old;
+      queryClient.setQueriesData({ queryKey: ["lostfound"] }, (old) => {
+        if (!old) return old;
 
-    return {
-      ...old,
-      pages: old.pages.map(page => ({
-        ...page,
-        items: page.items.filter(x => x.id !== it.id),
-      })),
-    };
-  }
-);
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            items: page.items.filter((x) => x.id !== it.id),
+          })),
+        };
+      });
     } catch (e) {
       console.error("delete failed:", e);
       alert("Failed to delete item.");
@@ -190,36 +175,33 @@ const lastItemRef = useCallback(
         const res = await axios.post(
           `${process.env.REACT_APP_SERVER}/api/lostfound`,
           body,
-          getAuth()
+          getAuth(),
         );
         const newItem = res?.data?.item;
 
-       queryClient.invalidateQueries(["lostfound"]);
+        queryClient.invalidateQueries(["lostfound"]);
       } else {
         const res = await axios.put(
           `${process.env.REACT_APP_SERVER}/api/lostfound/${editId}`,
           body,
-          getAuth()
+          getAuth(),
         );
         const updated = res?.data?.item;
         if (updated) {
-  queryClient.setQueriesData(
-    { queryKey: ["lostfound"] },
-    (old) => {
-      if (!old) return old;
+          queryClient.setQueriesData({ queryKey: ["lostfound"] }, (old) => {
+            if (!old) return old;
 
-      return {
-        ...old,
-        pages: old.pages.map(page => ({
-          ...page,
-          items: page.items.map(x =>
-            x.id === updated.id ? { ...x, ...updated } : x
-          ),
-        })),
-      };
-    }
-  );
-}
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                items: page.items.map((x) =>
+                  x.id === updated.id ? { ...x, ...updated } : x,
+                ),
+              })),
+            };
+          });
+        }
       }
 
       setShowModal(false);
@@ -260,9 +242,7 @@ const lastItemRef = useCallback(
 
         <div className="items-list" ref={listRef}>
           {items.length === 0 && !isLoading && (
-            <div className="item-card-nope">
-            No items listed
-              </div>
+            <div className="item-card-nope">No items listed</div>
           )}
 
           {items.map((item, idx) => {
@@ -321,7 +301,7 @@ const lastItemRef = useCallback(
                         onClick={(e) => {
                           e.stopPropagation();
                           setMenuOpenId((s) =>
-                            s === item.id ? null : item.id
+                            s === item.id ? null : item.id,
                           );
                         }}
                         disabled={deletingId === item.id}
@@ -431,8 +411,8 @@ const lastItemRef = useCallback(
               </div>
             );
           })}
-          
-{isFetchingNextPage && <LFload />}
+
+          {isFetchingNextPage && <LFload />}
         </div>
 
         {showModal && (
@@ -488,8 +468,8 @@ const lastItemRef = useCallback(
                           <BeatLoader color="#ffffff" size={10} />
                         )
                       : modalMode === "create"
-                      ? "Submit"
-                      : "Save"}
+                        ? "Submit"
+                        : "Save"}
                   </button>
                   <button type="button" onClick={() => setShowModal(false)}>
                     Cancel

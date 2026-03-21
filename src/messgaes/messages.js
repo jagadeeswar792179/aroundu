@@ -6,12 +6,11 @@ import LoadMessage from "../Loading/LoadMessages";
 import LoadMess2 from "../Loading/LoadMess2";
 import LostFound from "../LostFound/LostFound";
 import { useNavigate } from "react-router-dom";
-import {
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import BlockConfirmModal from "../utils/BlockConfirmModal";
-
+import CreateGroupModal from "./CreateGroupModal";
+import GroupInfoModal from "./GroupInfoModal";
+import { FiTrash } from "react-icons/fi";
 const API_BASE = process.env.REACT_APP_SERVER;
 
 function Messages() {
@@ -19,14 +18,15 @@ function Messages() {
   const queryClient = useQueryClient();
   const token = localStorage.getItem("token");
   const me = JSON.parse(localStorage.getItem("user"));
-
+  const [modal, setModal] = useState({});
+  const [hoverMsg, setHoverMsg] = useState(null);
   const [active, setActive] = useState(null);
   const [text, setText] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [blockTarget, setBlockTarget] = useState(null);
   const [blockLoading, setBlockLoading] = useState(false);
-const [openMenuConvId, setOpenMenuConvId] = useState(null);
+  const [openMenuConvId, setOpenMenuConvId] = useState(null);
   const bottomRef = useRef(null);
 
   const socket = useMemo(
@@ -35,7 +35,7 @@ const [openMenuConvId, setOpenMenuConvId] = useState(null);
         autoConnect: false,
         transports: ["websocket"],
       }),
-    []
+    [],
   );
 
   const authFetch = (url, opts = {}) =>
@@ -56,10 +56,7 @@ const [openMenuConvId, setOpenMenuConvId] = useState(null);
   // ===============================
   // Conversations Query
   // ===============================
-  const {
-    data: convos = [],
-    isLoading: loadingConvos,
-  } = useQuery({
+  const { data: convos = [], isLoading: loadingConvos } = useQuery({
     queryKey: ["conversations"],
     queryFn: async () => {
       const res = await authFetch(`${API_BASE}/api/messages/conversations`);
@@ -72,15 +69,12 @@ const [openMenuConvId, setOpenMenuConvId] = useState(null);
   // ===============================
   // Messages Query (Per Conversation)
   // ===============================
-  const {
-    data: msgs = [],
-    isLoading: loadingMsgs,
-  } = useQuery({
+  const { data: msgs = [], isLoading: loadingMsgs } = useQuery({
     queryKey: ["messages", active?.conversation_id],
     queryFn: async () => {
       if (!active?.conversation_id) return [];
       const r = await authFetch(
-        `${API_BASE}/api/messages/${active.conversation_id}`
+        `${API_BASE}/api/messages/${active.conversation_id}`,
       );
       if (!r.ok) throw new Error("Failed");
       const data = await r.json();
@@ -89,7 +83,13 @@ const [openMenuConvId, setOpenMenuConvId] = useState(null);
     enabled: !!active?.conversation_id,
     staleTime: 1000 * 60 * 5,
   });
+  useEffect(() => {
+    if (!active?.conversation_id) return;
 
+    authFetch(`${API_BASE}/api/messages/${active.conversation_id}/seen`, {
+      method: "POST",
+    }).catch(console.error);
+  }, [active?.conversation_id]);
   // ===============================
   // Socket Logic
   // ===============================
@@ -103,13 +103,13 @@ const [openMenuConvId, setOpenMenuConvId] = useState(null);
       // Update messages cache
       queryClient.setQueryData(
         ["messages", msg.conversation_id],
-        (old = []) => [...old, msg]
+        (old = []) => [...old, msg],
       );
 
       // Update conversation preview
       queryClient.setQueryData(["conversations"], (old = []) => {
         const idx = old.findIndex(
-          (c) => c.conversation_id === msg.conversation_id
+          (c) => c.conversation_id === msg.conversation_id,
         );
         if (idx === -1) return old;
 
@@ -135,18 +135,35 @@ const [openMenuConvId, setOpenMenuConvId] = useState(null);
   const openConversation = (c) => {
     setActive({
       conversation_id: c.conversation_id,
+      type: c.type,
       peer_id: c.peer_id,
       peer_name:
-        `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || c.email,
+        c.type === "group"
+          ? c.title
+          : `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || c.email,
       profile: c.profile,
       university: c.university,
+      member_count: c.member_count,
     });
-
     if (window.innerWidth <= 700) {
       setMobileOpen(true);
     }
   };
+  const deleteMessage = async (messageId) => {
+    try {
+      await authFetch(`${API_BASE}/api/messages/message/${messageId}`, {
+        method: "DELETE",
+      });
 
+      queryClient.setQueryData(
+        ["messages", active.conversation_id],
+        (old = []) =>
+          old.map((m) => (m.id === messageId ? { ...m, deleted: true } : m)),
+      );
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
   // ===============================
   // Send Message (Optimistic)
   // ===============================
@@ -167,12 +184,12 @@ const [openMenuConvId, setOpenMenuConvId] = useState(null);
     // Optimistic update
     queryClient.setQueryData(
       ["messages", active.conversation_id],
-      (old = []) => [...old, optimisticMsg]
+      (old = []) => [...old, optimisticMsg],
     );
 
     queryClient.setQueryData(["conversations"], (old = []) => {
       const idx = old.findIndex(
-        (c) => c.conversation_id === active.conversation_id
+        (c) => c.conversation_id === active.conversation_id,
       );
       if (idx === -1) return old;
 
@@ -187,66 +204,82 @@ const [openMenuConvId, setOpenMenuConvId] = useState(null);
     try {
       const msg = await authFetch(
         `${API_BASE}/api/messages/${active.conversation_id}/send`,
-        { method: "POST", body: JSON.stringify({ body: optimisticMsg.body }) }
+        { method: "POST", body: JSON.stringify({ body: optimisticMsg.body }) },
       ).then((r) => r.json());
 
       queryClient.setQueryData(
         ["messages", active.conversation_id],
         (old = []) =>
-          old.map((m) =>
-            m.id === tempId ? { ...msg, pending: false } : m
-          )
+          old.map((m) => (m.id === tempId ? { ...msg, pending: false } : m)),
       );
     } catch (err) {
       console.error(err);
     }
   };
 
-
   const handleConfirmBlock = async () => {
-  if (!blockTarget) return;
+    if (!blockTarget) return;
 
-  setBlockLoading(true);
+    setBlockLoading(true);
 
-  try {
-    await authFetch(
-      `${API_BASE}/api/moderation/block/${blockTarget.peerId}`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          reason: "Blocked from messages",
-        }),
+    try {
+      await authFetch(
+        `${API_BASE}/api/moderation/block/${blockTarget.peerId}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            reason: "Blocked from messages",
+          }),
+        },
+      );
+
+      // Remove conversation from React Query cache
+      queryClient.setQueryData(["conversations"], (old = []) =>
+        old.filter((c) => c.peer_id !== blockTarget.peerId),
+      );
+
+      // Close chat if active
+      if (active?.peer_id === blockTarget.peerId) {
+        setActive(null);
       }
-    );
 
-    // Remove conversation from React Query cache
-    queryClient.setQueryData(["conversations"], (old = []) =>
-      old.filter((c) => c.peer_id !== blockTarget.peerId)
-    );
-
-    // Close chat if active
-    if (active?.peer_id === blockTarget.peerId) {
-      setActive(null);
+      setShowBlockModal(false);
+      setBlockTarget(null);
+    } catch (err) {
+      console.error("Block failed:", err);
+      alert("Blocking failed. Try again.");
+    } finally {
+      setBlockLoading(false);
     }
+  };
+  const openBlockModalFromConvo = (convo, name) => {
+    setBlockTarget({ peerId: convo.peer_id, name });
+    setShowBlockModal(true);
+  };
 
-    setShowBlockModal(false);
-    setBlockTarget(null);
-  } catch (err) {
-    console.error("Block failed:", err);
-    alert("Blocking failed. Try again.");
-  } finally {
-    setBlockLoading(false);
-  }
-};
-const openBlockModalFromConvo = (convo, name) => {
-  setBlockTarget({ peerId: convo.peer_id, name });
-  setShowBlockModal(true);
-};
-  // ===============================
-  // UI
-  // ===============================
   return (
     <>
+      {modal?.type === "recovery" && (
+        <CreateGroupModal
+          close={() => setModal(null)}
+          onCreated={() => {
+            queryClient.invalidateQueries(["conversations"]);
+          }}
+        />
+      )}
+
+      {modal?.type === "groupinfo" && (
+        <GroupInfoModal
+          conversationId={modal.conversation_id}
+          title={modal.title}
+          setActive={setActive}
+          memberCount={active.member_count}
+          close={() => setModal(null)}
+          onUpdated={() => {
+            queryClient.invalidateQueries(["conversations"]);
+          }}
+        />
+      )}
       <BlockConfirmModal
         isOpen={showBlockModal}
         isBlocking={blockLoading}
@@ -259,284 +292,336 @@ const openBlockModalFromConvo = (convo, name) => {
         onConfirm={handleConfirmBlock}
       />
 
-          <div className="mess-0">
-            <div className="mess-1">
-              <h2>Messaging</h2>
-            </div>
+      <div className="mess-0">
+        <div className="mess-1">
+          <h2>Messaging</h2>
+        </div>
 
-            {/* Add mobile-open class when mobileOpen is true */}
-            <div className={`mess-2 ${mobileOpen ? "mobile-open" : ""}`}>
-              <div className="mess-3 left-panel">
-                <div className="mess-3-1">
-                  {loadingConvos ? (
-                    <LoadMessage />
-                  ) : convos.length === 0 ? (
+        {/* Add mobile-open class when mobileOpen is true */}
+        <div className={`mess-2 ${mobileOpen ? "mobile-open" : ""}`}>
+          <div className="mess-3 left-panel">
+            <div className="switch-container" style={{ marginLeft: "10px" }}>
+              <button
+                className={`switch-btn `}
+                onClick={() => setModal({ type: "recovery" })}
+              >
+                <span style={{ fontSize: "20px" }}>+</span> Create Group
+              </button>
+            </div>
+            <div className="mess-3-1">
+              {loadingConvos ? (
+                <LoadMessage />
+              ) : convos.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    color: "#666",
+                  }}
+                >
+                  No conversations found
+                </div>
+              ) : (
+                convos.map((c) => {
+                  const name =
+                    c.type === "group"
+                      ? c.title
+                      : `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() ||
+                        c.email;
+                  const isActive =
+                    active?.conversation_id === c.conversation_id;
+                  return (
+                    <div
+                      className={`mess-4 conversation-item ${
+                        isActive ? "active" : ""
+                      }`}
+                      key={c.conversation_id}
+                      onClick={() => openConversation(c)}
+                    >
+                      {c.type === "group" ? (
+                        <div className="avatar-fallback">👥</div>
+                      ) : c.profile ? (
+                        <img
+                          src={c.profile}
+                          alt={name}
+                          style={{ width: 50, height: 50, borderRadius: "50%" }}
+                        />
+                      ) : (
+                        <div className="avatar-fallback">
+                          {`${c.first_name?.[0] || ""}${
+                            c.last_name?.[0] || ""
+                          }`.toUpperCase()}
+                        </div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <div className="mess-head">{name}</div>
+                          {c.unread_count > 0 && (
+                            <span className="pill">{c.unread_count}</span>
+                          )}
+                        </div>
+                        <div
+                          className="conversation-text"
+                          title={c.last_message || ""}
+                        >
+                          {c.last_message || "Say hello"}
+                        </div>
+                      </div>
+                      {c.type !== "group" && (
+                        <div className="kebab-wrapper">
+                          <div
+                            className="kebab-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuConvId(
+                                openMenuConvId === c.conversation_id
+                                  ? null
+                                  : c.conversation_id,
+                              );
+                            }}
+                          >
+                            ⋮
+                          </div>
+
+                          {openMenuConvId === c.conversation_id && (
+                            <div className="kebab-menu">
+                              <div
+                                className="kebab-item danger"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMenuConvId(null);
+                                  openBlockModalFromConvo(c, name);
+                                }}
+                              >
+                                Block this person
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* RIGHT: active conversation */}
+          <div className="mess-7">
+            {!active ? (
+              <div className="empty-state">
+                <div>Select a chat</div>
+                <div className="subtitle">
+                  Pick a conversation from the left
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="mess-8">
+                  {active && (
                     <div
                       style={{
-                        textAlign: "center",
-                        padding: "20px",
-                        color: "#666",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        justifyContent: "space-between",
                       }}
                     >
-                      No conversations found
-                    </div>
-                  ) : (
-                    convos.map((c) => {
-                      const name =
-                        `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() ||
-                        c.email;
-                      const isActive =
-                        active?.conversation_id === c.conversation_id;
-                      return (
-                        <div
-                          className={`mess-4 conversation-item ${
-                            isActive ? "active" : ""
-                          }`}
-                          key={c.conversation_id}
-                          onClick={() =>
-                            openConversation(
-                             c
-                            )
-                          }
-                        >
-                          {c.profile ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        {active.type !== "group" ? (
+                          active.profile ? (
                             <img
-                              src={c.profile || "/avatar.jpg"}
-                              alt={name}
+                              src={active.profile || "/avatar.jpg"}
+                              alt={active.peer_name}
                               style={{
-                                width: 50,
-                                height: 50,
+                                width: 40,
+                                height: 40,
                                 borderRadius: "50%",
                               }}
                             />
                           ) : (
                             <div className="avatar-fallback">
-                              {`${c.first_name?.[0] || ""}${
-                                c.last_name?.[0] || ""
-                              }`.toUpperCase()}
+                              {(() => {
+                                const full =
+                                  `${active?.peer_name || ""}`.trim();
+                                const parts = full.split(" ").filter(Boolean);
+                                const first = parts[0]?.[0] || "";
+                                const second = parts[1]?.[0] || "";
+                                return (first + second).toUpperCase();
+                              })()}
+                            </div>
+                          )
+                        ) : (
+                          <div className="avatar-fallback">👥</div>
+                        )}
+                        <div>
+                          <div
+                            className="convo-name-active"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => {
+                              if (active.type !== "group") {
+                                navigate(`/profile/${active.peer_id}`);
+                              }
+                            }}
+                          >
+                            {active.peer_name}
+                          </div>
+                          {active.type !== "group" && active.university && (
+                            <div style={{ fontSize: "13px", color: "#666" }}>
+                              {active.university}
                             </div>
                           )}
-                          <div style={{ flex: 1 }}>
+                          {active.type === "group" && (
                             <div
                               style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                gap: "6px",
+                                cursor: "pointer",
+                                fontSize: "13px",
+                                color: "#666",
                               }}
+                              onClick={() =>
+                                setModal({
+                                  type: "groupinfo",
+                                  conversation_id: active.conversation_id,
+                                  title: active.peer_name,
+                                })
+                              }
                             >
-                              <div className="mess-head">{name}</div>
-                              {c.unread_count > 0 && (
-                                <span className="pill">{c.unread_count}</span>
-                              )}
+                              View group
                             </div>
-                            <div
-                              className="conversation-text"
-                              title={c.last_message || ""}
-                            >
-                              {c.last_message || "Say hello"}
-                            </div>
-                          </div>
-                          <div className="kebab-wrapper">
-                            <div
-                              className="kebab-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenuConvId(
-                                  openMenuConvId === c.conversation_id
-                                    ? null
-                                    : c.conversation_id
-                                );
-                              }}
-                            >
-                              ⋮
-                            </div>
-
-                            {openMenuConvId === c.conversation_id && (
-                              <div className="kebab-menu">
-                                <div
-                                  className="kebab-item danger"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpenMenuConvId(null);
-                                    openBlockModalFromConvo(c, name);
-                                  }}
-                                >
-                                  Block this person
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
-                      );
-                    })
+                      </div>
+
+                      {/* mobile back button */}
+                      <button
+                        className="mobile-back-btn"
+                        onClick={() => setMobileOpen(false)}
+                        aria-label="Back"
+                      >
+                        {`< Back`}
+                      </button>
+                    </div>
                   )}
                 </div>
-              </div>
 
-              {/* RIGHT: active conversation */}
-              <div className="mess-7">
-                {!active ? (
-                  <div className="empty-state">
-                    <div>Select a chat</div>
-                    <div className="subtitle">
-                      Pick a conversation from the left
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="mess-8">
-                      {active && (
+                <div className="mess-9" style={{ overflowY: "auto" }}>
+                  {loadingMsgs && <LoadMess2 />}
+
+                  {msgs.map((m) => {
+                    const mine = m.sender_id === me?.id;
+                    return (
+                      <div
+                        key={m.id}
+                        onMouseEnter={() => setHoverMsg(m.id)}
+                        onMouseLeave={() => setHoverMsg(null)}
+                        style={{
+                          display: "flex",
+                          justifyContent: mine ? "flex-end" : "flex-start",
+                          margin: "6px 0",
+                          gap: 8,
+                          opacity: m.pending ? 0.6 : 1,
+                        }}
+                        className="center-c"
+                      >
+                        {mine && hoverMsg === m.id && !m.deleted && (
+                          <FiTrash
+                            size={14}
+                            style={{
+                              marginLeft: 6,
+                              cursor: "pointer",
+                              opacity: 0.7,
+                            }}
+                            onClick={() => deleteMessage(m.id)}
+                          />
+                        )}
+                        {!mine && (
+                          <img
+                            src={m.sender_profile || "/avatar.jpg"}
+                            alt="profile"
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "50%",
+                            }}
+                          />
+                        )}
                         <div
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            justifyContent: "space-between",
+                            maxWidth: "70%",
+                            background: mine ? "#DCF8C6" : "#f1f1f1",
+                            padding: "8px 12px",
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                            border: m.failed ? "1px solid red" : "none",
+                            borderRadius: "20px",
                           }}
                         >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "12px",
-                            }}
-                          >
-                            {active.profile ? (
-                              <img
-                                src={active.profile || "/avatar.jpg"}
-                                alt={active.peer_name}
-                                style={{
-                                  width: 40,
-                                  height: 40,
-                                  borderRadius: "50%",
-                                }}
-                              />
-                            ) : (
-                              <div className="avatar-fallback">
-                                {(() => {
-                                  const full = `${
-                                    active?.peer_name || ""
-                                  }`.trim();
-                                  const parts = full.split(" ").filter(Boolean);
-
-                                  const first = parts[0]?.[0] || "";
-                                  const second = parts[1]?.[0] || "";
-
-                                  return (first + second).toUpperCase();
-                                })()}
-                              </div>
-                            )}
-                            <div>
-                              <div
-                                className="convo-name-active"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                  navigate(`/profile/${active.peer_id}`);
-                                }}
-                              >
-                                {active.peer_name}
-                              </div>
-                              {/* <div style={{ fontSize: "13px", color: "#666" }}>
-                                {active.university ||
-                                  "University info not available"}
-                              </div> */}
+                          {!mine && active?.type === "group" && (
+                            <div className="group-sender-name">
+                              {m.first_name} {m.last_name}
                             </div>
-                          </div>
-
-                          {/* mobile back button */}
-                          <button
-                            className="mobile-back-btn"
-                            onClick={() => setMobileOpen(false)}
-                            aria-label="Back"
-                          >
-                            {`< Back`}
-                          </button>
+                          )}
+                          {m.deleted ? (
+                            <i style={{ color: "#777" }}>
+                              This message was deleted
+                            </i>
+                          ) : (
+                            m.body
+                          )}
+                          {m.pending && " ⏳"}
+                          {m.failed && " ❌"}
                         </div>
-                      )}
-                    </div>
-
-                    <div className="mess-9" style={{ overflowY: "auto" }}>
-                      {loadingMsgs && <LoadMess2 />}
-
-                      {msgs.map((m) => {
-                        const mine = m.sender_id === me?.id;
-                        return (
-                          <div
-                            key={m.id}
-                            style={{
-                              display: "flex",
-                              justifyContent: mine ? "flex-end" : "flex-start",
-                              margin: "6px 0",
-                              gap: 8,
-                              opacity: m.pending ? 0.6 : 1,
-                            }}
-                          >
-                            {!mine && (
-                              <img
-                                src={m.sender_profile || "/avatar.jpg"}
-                                alt="profile"
-                                style={{
-                                  width: 28,
-                                  height: 28,
-                                  borderRadius: "50%",
-                                }}
-                              />
-                            )}
-                            <div
-                              style={{
-                                maxWidth: "70%",
-                                background: mine ? "#DCF8C6" : "#f1f1f1",
-                                padding: "8px 12px",
-                                whiteSpace: "pre-wrap",
-                                wordBreak: "break-word",
-                                border: m.failed ? "1px solid red" : "none",
-                                borderRadius: "20px",
-                              }}
-                            >
-                              {m.body}
-                              {m.pending && " ⏳"}
-                              {m.failed && " ❌"}
-                            </div>
-                          </div>
-                        );
-                      })}
-                      <div ref={bottomRef} />
-                    </div>
-
-                    {/* Only show input box if chat is active */}
-                    {active && (
-                      <div className="mess-10">
-                        <div className="input-wrapper">
-                          <textarea
-                            placeholder="Write a message..."
-                            value={text}
-                            maxLength={1000}
-                            onChange={(e) => setText(e.target.value)}
-                            onKeyDown={(e) =>
-                              e.key === "Enter" &&
-                              !e.shiftKey &&
-                              (e.preventDefault(), send())
-                            }
-                            rows={1}
-                            className="message-input"
-                          />
-                          <button onClick={send} className="send-btn">
-                            <FiSend size={20} />
-                          </button>
-                        </div>
-                        <div className="char-count">{text.length}/1000</div>
                       </div>
-                    )}
-                  </>
+                    );
+                  })}
+                  <div ref={bottomRef} />
+                </div>
+
+                {/* Only show input box if chat is active */}
+                {active && (
+                  <div className="mess-10">
+                    <div className="input-wrapper">
+                      <textarea
+                        placeholder="Write a message..."
+                        value={text}
+                        maxLength={1000}
+                        onChange={(e) => setText(e.target.value)}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          (e.preventDefault(), send())
+                        }
+                        rows={1}
+                        className="message-input"
+                      />
+                      <button onClick={send} className="send-btn">
+                        <FiSend size={20} />
+                      </button>
+                    </div>
+                    <div className="char-count">{text.length}/1000</div>
+                  </div>
                 )}
-              </div>
-            </div>
+              </>
+            )}
           </div>
-          <div className="hider-small">
-            <LostFound />
-          </div>
-       
+        </div>
+      </div>
+      <div className="hider-small">
+        <LostFound />
+      </div>
     </>
   );
 }
