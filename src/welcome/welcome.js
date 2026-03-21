@@ -204,7 +204,7 @@ export default function AroundUHome() {
         </div>
       </section>
 
-      <div className="stats-bar reveal">
+      {/* <div className="stats-bar reveal">
         <div className="stats-inner">
           <div className="stat-item">
             <span className="stat-num">50+</span>
@@ -223,7 +223,7 @@ export default function AroundUHome() {
             <span className="stat-lbl">Verified Users</span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <section className="features-section" id="features">
         <div className="feat-header reveal">
@@ -650,7 +650,7 @@ export default function AroundUHome() {
         </div>
       </section>
 
-      <section className="testi-section" id="stories">
+      {/* <section className="testi-section" id="stories">
         <div className="testi-header reveal">
           <div className="sec-tag">💬 Real Stories</div>
           <h2 className="sec-title">Students &amp; Professors Love AroundU</h2>
@@ -759,7 +759,7 @@ export default function AroundUHome() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="cta-section" id="signup">
         <div className="cta-c1"></div>
