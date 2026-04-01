@@ -7,7 +7,12 @@
   border-radius: 20px;
   overflow: hidden; /* keeps rounded edges clean */
 }
-
+.timestamp-mess {
+  display: block;
+  text-align: right;
+  font-size: 8px;
+  opacity: 0.5;
+}
 .mess-1 {
   height: 60px;
   display: flex;
@@ -146,7 +151,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
 }
 
 .send-btn:hover {
@@ -199,7 +206,9 @@
   /* subtle shadow */
   box-shadow: var(--boxshadowmain);
   border-radius: 25px; /* optional: smooth corners */
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .conversation-item:hover {
@@ -254,7 +263,9 @@
   background: #fff;
   z-index: 1;
   overflow-y: auto;
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
 /* right panel default (desktop) */
@@ -366,7 +377,9 @@
     min-width: 300px;
     position: relative;
     z-index: 1;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
   }
 }
 .mobile-back-btn {

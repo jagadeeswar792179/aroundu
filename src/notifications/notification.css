@@ -23,3 +23,31 @@
   border-radius: 50%;
   background-color: aquamarine;
 }
+.notificationpage {
+  width: 600px;
+  border-radius: 30px;
+  margin: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(210, 210, 210, 0.15);
+  background-color: white;
+}
+.notification-item {
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(210, 210, 210, 0.15);
+
+  margin: 10px 5px;
+  border-radius: 10px;
+}
+.notification-item:hover {
+  background-color: var(--bcgcolor);
+}
+@media (min-width: 0px) and (max-width: 466px) {
+  .notificationpage {
+    width: 350px;
+  }
+}
+@media (min-width: 466px) and (max-width: 770px) {
+  .notificationpage {
+    width: 450px;
+  }
+}

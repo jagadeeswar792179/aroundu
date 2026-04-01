@@ -17,10 +17,19 @@ import LostFoundPage from "./LostFound/LostFoundPage";
 import Marketplace from "./marketplace/Marketplace";
 import { UserProvider } from "./UserContext/UserContext";
 import "./App.css";
+import { useEffect } from "react";
+import { initSocket } from "./socket";
 import Settings from "./settings/Settings";
 import Welcome from "./welcome/welcome";
+import NotificationsPage from "./notifications/NotificationsPage";
 
 const App = () => {
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.id) {
+      initSocket(user.id);
+    }
+  }, []);
   return (
     <Router>
       <UserProvider>
@@ -32,6 +41,7 @@ const App = () => {
           <Route element={<MainLayout />}>
             <Route path="/home" element={<Homepage />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:userId" element={<Uprofile />} />

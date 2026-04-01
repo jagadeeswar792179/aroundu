@@ -11,6 +11,8 @@ import BlockConfirmModal from "../utils/BlockConfirmModal";
 import CreateGroupModal from "./CreateGroupModal";
 import GroupInfoModal from "./GroupInfoModal";
 import { FiTrash } from "react-icons/fi";
+import { getSocket } from "../socket";
+import { formatTimestamp } from "../utils/formatTimestamp";
 const API_BASE = process.env.REACT_APP_SERVER;
 
 function Messages() {
@@ -29,14 +31,7 @@ function Messages() {
   const [openMenuConvId, setOpenMenuConvId] = useState(null);
   const bottomRef = useRef(null);
 
-  const socket = useMemo(
-    () =>
-      io(API_BASE, {
-        autoConnect: false,
-        transports: ["websocket"],
-      }),
-    [],
-  );
+  const socket = getSocket();
 
   const authFetch = (url, opts = {}) =>
     fetch(url, {
@@ -63,7 +58,7 @@ function Messages() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 
   // ===============================
@@ -81,53 +76,50 @@ function Messages() {
       return data.reverse();
     },
     enabled: !!active?.conversation_id,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
   useEffect(() => {
     if (!active?.conversation_id) return;
 
+    // 1. instant UI (🔥 WhatsApp feel)
+    queryClient.setQueryData(["conversations"], (old = []) =>
+      old.map((c) =>
+        c.conversation_id === active.conversation_id
+          ? { ...c, unread_count: 0 }
+          : c,
+      ),
+    );
+
+    // 2. backend update
     authFetch(`${API_BASE}/api/messages/${active.conversation_id}/seen`, {
       method: "POST",
-    }).catch(console.error);
+    })
+      .then(() => {
+        queryClient.invalidateQueries(["conversations"]); // 🔥 ADD THIS
+      })
+      .catch(console.error);
   }, [active?.conversation_id]);
   // ===============================
   // Socket Logic
   // ===============================
   useEffect(() => {
-    if (!me?.id) return;
-
-    socket.connect();
-    socket.emit("join", me.id);
+    if (!socket || !me?.id) return;
 
     const onNew = (msg) => {
-      // Update messages cache
       queryClient.setQueryData(
         ["messages", msg.conversation_id],
         (old = []) => [...old, msg],
       );
-
-      // Update conversation preview
-      queryClient.setQueryData(["conversations"], (old = []) => {
-        const idx = old.findIndex(
-          (c) => c.conversation_id === msg.conversation_id,
-        );
-        if (idx === -1) return old;
-
-        const convo = old[idx];
-        const others = [...old.slice(0, idx), ...old.slice(idx + 1)];
-        return [{ ...convo, last_message: msg.body }, ...others];
-      });
-
-      scrollDown();
+      queryClient.invalidateQueries(["messages", msg.conversation_id]);
     };
 
+    socket.off("message:new", onNew);
     socket.on("message:new", onNew);
 
     return () => {
       socket.off("message:new", onNew);
-      socket.disconnect();
     };
-  }, [me?.id, socket, queryClient]);
+  }, [socket, me?.id, queryClient]);
 
   // ===============================
   // Open Conversation
@@ -364,9 +356,7 @@ function Messages() {
                           }}
                         >
                           <div className="mess-head">{name}</div>
-                          {c.unread_count > 0 && (
-                            <span className="pill">{c.unread_count}</span>
-                          )}
+                          {c.unread_count > 0 && <span>{c.unread_count}</span>}
                         </div>
                         <div
                           className="conversation-text"
@@ -580,10 +570,17 @@ function Messages() {
                               This message was deleted
                             </i>
                           ) : (
-                            m.body
+                            <div style={{ display: "inline-block" }}>
+                              <div>
+                                {m.body}
+                                {m.pending && " ⏳"}
+                                {m.failed && " ❌"}
+                              </div>
+                              <div className="timestamp-mess">
+                                {formatTimestamp(m.created_at)}
+                              </div>
+                            </div>
                           )}
-                          {m.pending && " ⏳"}
-                          {m.failed && " ❌"}
                         </div>
                       </div>
                     );

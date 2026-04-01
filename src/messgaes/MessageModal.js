@@ -1,8 +1,8 @@
 // src/components/MessageModal.jsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { FiSend } from "react-icons/fi";
-import io from "socket.io-client";
 import LoadMess2 from "../Loading/LoadMess2";
+import { getSocket } from "../socket";
 /**
  * MessageModal
  * Props:
@@ -23,8 +23,7 @@ import LoadMess2 from "../Loading/LoadMess2";
  *  - Adjust API_BASE if your server runs elsewhere.
  */
 const API_BASE = process.env.REACT_APP_SERVER;
-let socket = null;
-
+const socket = getSocket();
 export default function MessageModal({
   isOpen,
   onClose,
@@ -69,7 +68,7 @@ export default function MessageModal({
   const scrollDown = () =>
     setTimeout(
       () => bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-      100
+      100,
     );
 
   // Initialize active and detect existing conversation on open
@@ -91,24 +90,6 @@ export default function MessageModal({
     setMsgs([]);
     setConversationId(null);
     setText("");
-
-    // ensure socket connected
-    if (!socket) {
-      socket = io(API_BASE, {
-        transports: ["websocket", "polling"],
-        auth: { token },
-      });
-
-      socket.on("connect", () => {
-        setSocketConnected(true);
-        // optionally emit auth if your server expects it:
-        // socket.emit('authenticate', { token });
-      });
-
-      socket.on("disconnect", () => setSocketConnected(false));
-    } else if (!socket.connected) {
-      socket.connect();
-    }
 
     // Listen for incoming messages (global)
     const onIncoming = (message) => {
@@ -285,8 +266,8 @@ export default function MessageModal({
       // replace optimistic message
       setMsgs((prev) =>
         prev.map((m) =>
-          m.id === tempId ? { ...serverMsg, pending: false } : m
-        )
+          m.id === tempId ? { ...serverMsg, pending: false } : m,
+        ),
       );
       scrollDown();
 
@@ -301,8 +282,8 @@ export default function MessageModal({
         prev.map((m) =>
           m.id?.toString().startsWith("temp-")
             ? { ...m, pending: false, failed: true }
-            : m
-        )
+            : m,
+        ),
       );
     } finally {
       setSending(false);
