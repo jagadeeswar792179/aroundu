@@ -9,10 +9,7 @@ import { BeatLoader } from "react-spinners";
 import CustomSelect from "../utils/CustomSelect";
 import MultiSelectTags from "../utils/MultiSelectTags";
 import { VerifiedIcon } from "lucide-react";
-import {
-  universityOptions,
-  universityEmailDomains
-} from "./universities";
+import { universityOptions, universityEmailDomains } from "./universities";
 const RegisterForm = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
@@ -62,15 +59,19 @@ const RegisterForm = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
   const [days, setDays] = useState([]);
-
   const interestOptions = [
     { value: "sports", label: "Sports" },
-    { value: "music", label: "Music" },
-    { value: "travel", label: "Travel" },
-    { value: "reading", label: "Reading" },
     { value: "technology", label: "Technology" },
-    { value: "other", label: "Other" },
+    { value: "career", label: "Career" },
+    { value: "campus_life", label: "Campus Life" },
+    { value: "social", label: "Social" },
+    { value: "music", label: "Music" },
+    { value: "food", label: "Food" },
+    { value: "entertainment", label: "Entertainment" },
+    { value: "academics", label: "Academics" },
+    { value: "community", label: "Community" },
   ];
+
   const [selectedOptions, setSelectedOptions] = useState([]);
   const courseOptions = [
     // Pharma
@@ -184,7 +185,7 @@ const RegisterForm = () => {
         const daysInMonth = new Date(
           Number(formData.birthYear),
           monthIndex + 1,
-          0
+          0,
         ).getDate();
         setDays(Array.from({ length: daysInMonth }, (_, i) => i + 1));
       } else {
@@ -214,306 +215,301 @@ const RegisterForm = () => {
   };
 
   // Extracted finish handler (calls API and navigates to "/")
-const handleFinish = async () => {
-  const errors = [];
+  const handleFinish = async () => {
+    const errors = [];
 
-  /* ---------- DOB VALIDATION ---------- */
-  if (
-    userType !== "club" &&
-    (!formData.birthDay || !formData.birthMonth || !formData.birthYear)
-  ) {
-    errors.push("Please select a complete date of birth.");
-  }
-
-  let dob = null;
-
-  if (
-    userType !== "club" &&
-    formData.birthDay &&
-    formData.birthMonth &&
-    formData.birthYear
-  ) {
-    const monthIndex = months.indexOf(formData.birthMonth);
-
-    if (monthIndex < 0) {
-      errors.push("Invalid month selected.");
-    } else {
-      dob = `${formData.birthYear}-${("0" + (monthIndex + 1)).slice(-2)}-${(
-        "0" + formData.birthDay
-      ).slice(-2)}`;
-    }
-  }
-
-  /* ---------- REQUIRED FIELD VALIDATION ---------- */
-
-  if (userType === "club") {
-    if (!formData.clubName || !formData.email || !formData.university) {
-      errors.push("Club name, email and university are required.");
-    }
-  } else {
+    /* ---------- DOB VALIDATION ---------- */
     if (
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.email ||
-      !formData.gender ||
-      !userType
+      userType !== "club" &&
+      (!formData.birthDay || !formData.birthMonth || !formData.birthYear)
     ) {
-      errors.push("Missing required personal information.");
+      errors.push("Please select a complete date of birth.");
     }
-  }
 
-  /* ---------- GENDER VALIDATION ---------- */
+    let dob = null;
 
-  if (
-    userType !== "club" &&
-    formData.gender === "other" &&
-    !(formData.other_gender || "").trim()
-  ) {
-    errors.push("Please specify your gender.");
-  }
+    if (
+      userType !== "club" &&
+      formData.birthDay &&
+      formData.birthMonth &&
+      formData.birthYear
+    ) {
+      const monthIndex = months.indexOf(formData.birthMonth);
 
-  /* ---------- UNIVERSITY ---------- */
+      if (monthIndex < 0) {
+        errors.push("Invalid month selected.");
+      } else {
+        dob = `${formData.birthYear}-${("0" + (monthIndex + 1)).slice(-2)}-${(
+          "0" + formData.birthDay
+        ).slice(-2)}`;
+      }
+    }
 
-  let finalUniversity = formData.university;
+    /* ---------- REQUIRED FIELD VALIDATION ---------- */
 
-  if (formData.university === "Other") {
-    if (!(formData.universityOther || "").trim()) {
-      errors.push("Please specify your university.");
+    if (userType === "club") {
+      if (!formData.clubName || !formData.email || !formData.university) {
+        errors.push("Club name, email and university are required.");
+      }
     } else {
-      finalUniversity = formData.universityOther.trim();
+      if (
+        !formData.firstName ||
+        !formData.lastName ||
+        !formData.email ||
+        !formData.gender ||
+        !userType
+      ) {
+        errors.push("Missing required personal information.");
+      }
     }
-  }
 
-  /* ---------- ROLE SPECIFIC ---------- */
+    /* ---------- GENDER VALIDATION ---------- */
 
-  if (userType === "student" && (!formData.course || !formData.duration)) {
-    errors.push("Course and duration are required for students.");
-  }
-
-  if (userType === "professor" && !formData.specialization) {
-    errors.push("Specialization is required for professors.");
-  }
-
-  if (userType === "professor" && !formData.bloglink.trim()) {
-    errors.push("Blog link is required for professors.");
-  }
-
-  /* ---------- INTERESTS ---------- */
-
-  const interests = (selectedOptions || []).map((opt) => opt.value);
-
-  if (interests.length === 0 || interests.length > 4) {
-    errors.push("Select between 1 and 4 interests.");
-  }
-
-  /* ---------- PASSWORD ---------- */
-
-  if (!formData.password || !formData.confirmPassword) {
-    errors.push("Password and confirm password are required.");
-  } else if (formData.password !== formData.confirmPassword) {
-    errors.push("Passwords do not match.");
-  } else if (formData.password.length < 6) {
-    errors.push("Password must be at least 6 characters.");
-  }
-
-  /* ---------- EMAIL ---------- */
-
-  const allowedDomains = Object.values(universityEmailDomains);
-
-  const emailRegex = new RegExp(
-    `^[^\\s@]+@(${allowedDomains
-      .map((d) => d.replace(".", "\\."))
-      .join("|")})$`,
-    "i"
-  );
-
-  if (!emailRegex.test(formData.email)) {
-    errors.push("Please enter a valid email address.");
-  }
-
-  /* ---------- STOP IF ERRORS ---------- */
-
-  if (errors.length > 0) {
-    alert(errors.join("\n"));
-    return;
-  }
-
-  /* ---------- PAYLOAD ---------- */
-
-  const payload = {
-    first_name:
-      userType === "club"
-        ? formData.clubName.trim()
-        : formData.firstName.trim(),
-
-    last_name:
-      userType === "club"
-        ? "club"
-        : formData.lastName.trim(),
-
-    email: formData.email.trim(),
-
-    password: formData.password,
-
-    gender:
-      userType === "club"
-        ? null
-        : formData.gender === "other"
-        ? formData.other_gender.trim()
-        : formData.gender,
-
-    user_type: userType,
-
-    dob,
-
-    university: finalUniversity,
-
-    interests,
-
-    ...(userType === "student" && {
-      course: formData.course,
-      duration: formData.duration,
-    }),
-
-    ...(userType === "professor" && {
-      specialization: formData.specialization,
-      blog_link: formData.bloglink.trim(),
-    }),
-  };
-
-  /* ---------- API CALL ---------- */
-
-  try {
-    setLoading(true);
-
-    await axios.post(`${server}/api/auth/register`, payload);
-
-    alert("Registration successful! You can now login.");
-
-    navigate("/", { replace: true });
-
-  } catch (err) {
-    alert("Error: " + (err.response?.data?.msg || err.message));
-  } finally {
-    setLoading(false);
-  }
-};
-const validateEmail = (nextStep) => {
-  const value = formData.email;
-  const selectedUni = formData.university;
-  const requiredDomain = universityEmailDomains[selectedUni];
-
-  if (!value) return alert("Email is required");
-
-  if (requiredDomain) {
-    const regex = new RegExp(`^[^\\s@]+@${requiredDomain}$`, "i");
-    if (!regex.test(value)) {
-      return alert(`Please enter a valid ${requiredDomain} email address`);
+    if (
+      userType !== "club" &&
+      formData.gender === "other" &&
+      !(formData.other_gender || "").trim()
+    ) {
+      errors.push("Please specify your gender.");
     }
-  }
 
-  handleCheckEmail(nextStep);
-};
+    /* ---------- UNIVERSITY ---------- */
 
-  // 2) handleCheckEmail: set step on success
-const handleCheckEmail = async (nextStep) => {
-  setcheckmail(true);
-  const email = (formData.email || "").trim();
+    let finalUniversity = formData.university;
 
-  if (!email) {
-    alert("Please enter your email.");
-    setcheckmail(false);
-    return;
-  }
+    if (formData.university === "Other") {
+      if (!(formData.universityOther || "").trim()) {
+        errors.push("Please specify your university.");
+      } else {
+        finalUniversity = formData.universityOther.trim();
+      }
+    }
 
-  try {
-    const { data } = await axios.post(
-      `${server}/api/auth/check-email`,
-      { email }
+    /* ---------- ROLE SPECIFIC ---------- */
+
+    if (userType === "student" && (!formData.course || !formData.duration)) {
+      errors.push("Course and duration are required for students.");
+    }
+
+    if (userType === "professor" && !formData.specialization) {
+      errors.push("Specialization is required for professors.");
+    }
+
+    if (userType === "professor" && !formData.bloglink.trim()) {
+      errors.push("Blog link is required for professors.");
+    }
+
+    /* ---------- INTERESTS ---------- */
+
+    const interests = (selectedOptions || []).map((opt) => opt.value);
+
+    if (interests.length === 0 || interests.length > 4) {
+      errors.push("Select between 1 and 4 interests.");
+    }
+
+    /* ---------- PASSWORD ---------- */
+
+    if (!formData.password || !formData.confirmPassword) {
+      errors.push("Password and confirm password are required.");
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.push("Passwords do not match.");
+    } else if (formData.password.length < 6) {
+      errors.push("Password must be at least 6 characters.");
+    }
+
+    /* ---------- EMAIL ---------- */
+
+    const allowedDomains = Object.values(universityEmailDomains);
+
+    const emailRegex = new RegExp(
+      `^[^\\s@]+@(${allowedDomains
+        .map((d) => d.replace(".", "\\."))
+        .join("|")})$`,
+      "i",
     );
 
-    setcheckmail(false);
-
-    if (data.exists) {
-      alert("Email already exists.");
-    } else {
-      setStep(nextStep);   // ✅ move step here
+    if (!emailRegex.test(formData.email)) {
+      errors.push("Please enter a valid email address.");
     }
 
-  } catch (err) {
-    console.error("Error checking email:", err);
-    alert("Something went wrong while checking email.");
-    setcheckmail(false);
-  }
-};
+    /* ---------- STOP IF ERRORS ---------- */
 
+    if (errors.length > 0) {
+      alert(errors.join("\n"));
+      return;
+    }
+
+    /* ---------- PAYLOAD ---------- */
+
+    const payload = {
+      first_name:
+        userType === "club"
+          ? formData.clubName.trim()
+          : formData.firstName.trim(),
+
+      last_name: userType === "club" ? "club" : formData.lastName.trim(),
+
+      email: formData.email.trim(),
+
+      password: formData.password,
+
+      gender:
+        userType === "club"
+          ? null
+          : formData.gender === "other"
+            ? formData.other_gender.trim()
+            : formData.gender,
+
+      user_type: userType,
+
+      dob,
+
+      university: finalUniversity,
+
+      interests,
+
+      ...(userType === "student" && {
+        course: formData.course,
+        duration: formData.duration,
+      }),
+
+      ...(userType === "professor" && {
+        specialization: formData.specialization,
+        blog_link: formData.bloglink.trim(),
+      }),
+    };
+
+    /* ---------- API CALL ---------- */
+
+    try {
+      setLoading(true);
+
+      await axios.post(`${server}/api/auth/register`, payload);
+
+      alert("Registration successful! You can now login.");
+
+      navigate("/", { replace: true });
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.msg || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+  const validateEmail = (nextStep) => {
+    const value = formData.email;
+    const selectedUni = formData.university;
+    const requiredDomain = universityEmailDomains[selectedUni];
+
+    if (!value) return alert("Email is required");
+
+    if (requiredDomain) {
+      const regex = new RegExp(`^[^\\s@]+@${requiredDomain}$`, "i");
+      if (!regex.test(value)) {
+        return alert(`Please enter a valid ${requiredDomain} email address`);
+      }
+    }
+
+    handleCheckEmail(nextStep);
+  };
+
+  // 2) handleCheckEmail: set step on success
+  const handleCheckEmail = async (nextStep) => {
+    setcheckmail(true);
+    const email = (formData.email || "").trim();
+
+    if (!email) {
+      alert("Please enter your email.");
+      setcheckmail(false);
+      return;
+    }
+
+    try {
+      const { data } = await axios.post(`${server}/api/auth/check-email`, {
+        email,
+      });
+
+      setcheckmail(false);
+
+      if (data.exists) {
+        alert("Email already exists.");
+      } else {
+        setStep(nextStep); // ✅ move step here
+      }
+    } catch (err) {
+      console.error("Error checking email:", err);
+      alert("Something went wrong while checking email.");
+      setcheckmail(false);
+    }
+  };
 
   const renderStepZero = () => (
-  <div className="form-step">
-    <h3>Select Account Type</h3>
+    <div className="form-step">
+      <h3>Select Account Type</h3>
 
-<div className="role-gender-container">
+      <div className="role-gender-container">
+        <div>
+          <label className="label-register">Role:</label>
 
-  <div>
-    <label className="label-register">Role:</label>
+          <div className="gender-options">
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="student"
+                checked={userType === "student"}
+                onChange={() => setUserType("student")}
+              />
+              Student
+            </label>
 
-    <div className="gender-options">
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="professor"
+                checked={userType === "professor"}
+                onChange={() => setUserType("professor")}
+              />
+              Professor
+            </label>
 
-      <label>
-        <input
-          type="radio"
-          name="role"
-          value="student"
-          checked={userType === "student"}
-          onChange={() => setUserType("student")}
-        />
-        Student
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="role"
-          value="professor"
-          checked={userType === "professor"}
-          onChange={() => setUserType("professor")}
-        />
-        Professor
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="role"
-          value="club"
-          checked={userType === "club"}
-          onChange={() => setUserType("club")}
-        />
-        Club
-      </label>
-
-    </div>
-  </div>
-
-</div>
-    <div style={{ marginTop: "20px", textAlign: "right" }}>
-      <button
-        className="form-button"
-        onClick={() => {
-          if (!userType) return alert("Please select a role");
-
-          if (userType === "club") {
-            setStep(2.1);
-          } else {
-            setStep(1);
-          }
-        }}
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="club"
+                checked={userType === "club"}
+                onChange={() => setUserType("club")}
+              />
+              Club
+            </label>
+          </div>
+        </div>
+      </div>
+      <div
+        style={{ marginTop: "20px", textAlign: "right" }}
+        className="flex-r jspacebtw"
       >
-        Next
-      </button>
+        <button onClick={() => navigate("/login")} className="form-button">
+          Back
+        </button>
+        <button
+          className="form-button"
+          onClick={() => {
+            if (!userType) return alert("Please select a role");
+
+            if (userType === "club") {
+              setStep(2.1);
+            } else {
+              setStep(1);
+            }
+          }}
+        >
+          Next
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
   const renderStepOne = () => (
     <div className="form-step">
       <div className="register-1">
@@ -596,7 +592,7 @@ const handleCheckEmail = async (nextStep) => {
               ...f,
               email: enforceEmailDomain(
                 e.target.value,
-                f.university || "Western New England University"
+                f.university || "Western New England University",
               ),
             }))
           }
@@ -605,7 +601,7 @@ const handleCheckEmail = async (nextStep) => {
               ...f,
               email: enforceEmailDomain(
                 e.target.value,
-                f.university || "Western New England University"
+                f.university || "Western New England University",
               ),
             }))
           }
@@ -670,10 +666,9 @@ const handleCheckEmail = async (nextStep) => {
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        
-          <button onClick={() => setStep(0)} className="form-button">
-    Back
-  </button>
+        <button onClick={() => setStep(0)} className="form-button">
+          Back
+        </button>
         <button
           className="form-button"
           onClick={() => {
@@ -688,7 +683,7 @@ const handleCheckEmail = async (nextStep) => {
             ];
             if (required.some((r) => !r))
               return alert("Please fill all required fields");
-            
+
             validateEmail(2);
           }}
         >
@@ -701,8 +696,6 @@ const handleCheckEmail = async (nextStep) => {
   const renderStepTwo = () => (
     <div className="form-step">
       <div className="role-gender-container">
-       
-
         {/* GENDER FIELD */}
         <div>
           <label className="label-register">Gender:</label>
@@ -849,7 +842,7 @@ const handleCheckEmail = async (nextStep) => {
                 { value: "Cloud Computing", label: "Cloud Computing" },
                 { value: "Other", label: "Other" },
               ],
-              formData.specialization
+              formData.specialization,
             )}
             onChange={(selected) =>
               setFormData({
@@ -906,36 +899,34 @@ const handleCheckEmail = async (nextStep) => {
     </div>
   );
 
-
   const renderClubStep = () => (
-  <div className="form-step">
+    <div className="form-step">
+      <label className="label-register">
+        Club Name
+        <input
+          className="input-register"
+          value={formData.clubName}
+          onChange={(e) =>
+            setFormData({ ...formData, clubName: e.target.value })
+          }
+        />
+      </label>
 
-    <label className="label-register">
-      Club Name
-      <input
-        className="input-register"
-        value={formData.clubName}
-        onChange={(e) =>
-          setFormData({ ...formData, clubName: e.target.value })
-        }
-      />
-    </label>
+      <label className="label-register">
+        University:
+        <CustomSelect
+          options={universityOptions}
+          value={findOrCreateOption(universityOptions, formData.university)}
+          onChange={(selected) =>
+            setFormData({
+              ...formData,
+              university: selected?.value || "",
+            })
+          }
+        />
+      </label>
 
-    <label className="label-register">
-      University:
-      <CustomSelect
-        options={universityOptions}
-        value={findOrCreateOption(universityOptions, formData.university)}
-        onChange={(selected) =>
-          setFormData({
-            ...formData,
-            university: selected?.value || "",
-          })
-        }
-      />
-    </label>
-
-  {formData.university === "Other" && (
+      {formData.university === "Other" && (
         <div style={{ marginTop: 8 }}>
           <input
             placeholder="Email"
@@ -974,7 +965,7 @@ const handleCheckEmail = async (nextStep) => {
               ...f,
               email: enforceEmailDomain(
                 e.target.value,
-                f.university || "Western New England University"
+                f.university || "Western New England University",
               ),
             }))
           }
@@ -983,42 +974,40 @@ const handleCheckEmail = async (nextStep) => {
               ...f,
               email: enforceEmailDomain(
                 e.target.value,
-                f.university || "Western New England University"
+                f.university || "Western New England University",
               ),
             }))
           }
           className="input-register"
         />
       </label>
-    <label>Interests:</label>
-    <MultiSelectTags
-      options={interestOptions}
-      value={selectedOptions}
-      onChange={handleChange}
-      placeholder="Select up to 4"
-    />
+      <label>Interests:</label>
+      <MultiSelectTags
+        options={interestOptions}
+        value={selectedOptions}
+        onChange={handleChange}
+        placeholder="Select up to 4"
+      />
 
-    <div style={{ display: "flex", justifyContent: "space-between" }}>
-      <button onClick={() => setStep(0)} className="form-button">
-        Back
-      </button>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <button onClick={() => setStep(0)} className="form-button">
+          Back
+        </button>
 
-      <button
-        className="form-button"
-        onClick={() => {
-          if (!formData.clubName || !formData.email || !formData.university) {
-            return alert("Please fill all required fields");
-          }
-          validateEmail(3);
-        }}
-      >
-             {checkmail ? <BeatLoader size={10} color="#FFFFFF" /> : "Next"}
-
-      </button>
-       
+        <button
+          className="form-button"
+          onClick={() => {
+            if (!formData.clubName || !formData.email || !formData.university) {
+              return alert("Please fill all required fields");
+            }
+            validateEmail(3);
+          }}
+        >
+          {checkmail ? <BeatLoader size={10} color="#FFFFFF" /> : "Next"}
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
   const sendOtp = async () => {
     try {
       await axios.post(`${server}/api/AuthOtp/send-otp`, {
@@ -1122,13 +1111,16 @@ const handleCheckEmail = async (nextStep) => {
               marginTop: "10px",
             }}
           >
-            <button onClick={() => {
-  if (userType === "club") {
-    setStep(0);
-  } else {
-    setStep(2);
-  }
-}} className="form-button">
+            <button
+              onClick={() => {
+                if (userType === "club") {
+                  setStep(0);
+                } else {
+                  setStep(2);
+                }
+              }}
+              className="form-button"
+            >
               Back
             </button>
             <button
@@ -1151,11 +1143,11 @@ const handleCheckEmail = async (nextStep) => {
     <div className="register-container">
       <div className="register-form">
         <h2>Create New Account</h2>
-      {step === 0 && renderStepZero()}
-{step === 1 && renderStepOne()}
-{step === 2 && renderStepTwo()}
-{step === 2.1 && renderClubStep()}
-{step === 3 && renderStepThree()}
+        {step === 0 && renderStepZero()}
+        {step === 1 && renderStepOne()}
+        {step === 2 && renderStepTwo()}
+        {step === 2.1 && renderClubStep()}
+        {step === 3 && renderStepThree()}
       </div>
     </div>
   );

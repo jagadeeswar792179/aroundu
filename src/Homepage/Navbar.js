@@ -9,7 +9,6 @@ import Modal from "../utils/Modal";
 import ProfileViewers from "../profileview/ProfileViewers";
 import Bugreport from "../bugreport/Bugreport";
 import useNotifications from "../hooks/useNotifications";
-import NotificationPanel from "../notifications/NotificationsPage";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -123,9 +122,9 @@ export default function Navbar() {
           >
             <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
           </svg>
-          {unreadMessages > 0 && (
+          {/* {unreadMessages > 0 && (
             <span className="notif-badge">{unreadMessages}</span>
-          )}
+          )} */}
           <p>Messages</p>
         </div>
 

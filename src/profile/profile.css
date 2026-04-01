@@ -156,7 +156,10 @@ h3 {
   box-sizing: border-box;
   resize: none; /* disable manual resize */
   overflow-y: hidden; /* auto-resize only */
-  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
 .modal-ins textarea:focus {
@@ -178,7 +181,10 @@ h3 {
   border-radius: 20px;
   cursor: pointer;
   white-space: nowrap; /* prevent wrapping */
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.15s,
+    box-shadow 0.2s;
 }
 
 .prof-btn:hover {
@@ -203,7 +209,10 @@ h3 {
   border: 1px solid #d1d5db; /* light gray border */
   border-radius: 8px; /* rounded corners */
   box-sizing: border-box; /* padding inside width */
-  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
 .modal-ins input:focus {
@@ -336,7 +345,7 @@ h3 {
     min-width: 74px;
   }
 }
-@media (min-width: 466px) and (max-width: 770px) {
+@media (min-width: 465px) and (max-width: 770px) {
   .wb-panel {
     width: 272px;
   }

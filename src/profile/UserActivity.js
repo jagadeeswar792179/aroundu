@@ -31,22 +31,16 @@ const UserActivity = ({ userId }) => {
       `${server}/api/user/activity?userId=${userId}&limit=${limit}&offset=${pageParam}`,
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
 
     return {
       posts: res.data,
-      nextOffset:
-        res.data.length === 0 ? undefined : pageParam + limit,
+      nextOffset: res.data.length === 0 ? undefined : pageParam + limit,
     };
   };
 
-  const {
-    data,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
+  const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["userActivity", userId],
     queryFn: fetchUserPosts,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
@@ -100,13 +94,12 @@ const UserActivity = ({ userId }) => {
         }}
       >
         <div className="load-4" style={{ width: "230px", height: "300px" }} />
-        <div className="load-4" style={{ width: "230px", height: "300px" }} />
-        <div className="load-4" style={{ width: "230px", height: "300px" }} />
+        {/* <div className="load-4" style={{ width: "230px", height: "300px" }} /> */}
+        {/* <div className="load-4" style={{ width: "230px", height: "300px" }} /> */}
       </div>
     );
 
-  const allPosts =
-    data?.pages.flatMap((page) => page.posts) || [];
+  const allPosts = data?.pages.flatMap((page) => page.posts) || [];
 
   if (allPosts.length === 0) {
     return (
@@ -118,10 +111,8 @@ const UserActivity = ({ userId }) => {
   }
 
   const filteredPosts = allPosts.filter((post) => {
-    if (activityTab === "posts")
-      return post.post_type !== "discussion";
-    if (activityTab === "discussion")
-      return post.post_type === "discussion";
+    if (activityTab === "posts") return post.post_type !== "discussion";
+    if (activityTab === "discussion") return post.post_type === "discussion";
     return true;
   });
 
@@ -141,9 +132,7 @@ const UserActivity = ({ userId }) => {
       <div className="switch-container">
         <button
           onClick={() => setActivityTab("posts")}
-          className={`switch-btn ${
-            activityTab === "posts" ? "active" : ""
-          }`}
+          className={`switch-btn ${activityTab === "posts" ? "active" : ""}`}
         >
           Posts
         </button>
@@ -160,9 +149,7 @@ const UserActivity = ({ userId }) => {
       <div className="posts-grid">
         {filteredPosts.length === 0 ? (
           <p className="no-posts">
-            {activityTab === "posts"
-              ? "No posts yet."
-              : "No discussions yet."}
+            {activityTab === "posts" ? "No posts yet." : "No discussions yet."}
           </p>
         ) : (
           filteredPosts.map((post) => (
@@ -178,19 +165,14 @@ const UserActivity = ({ userId }) => {
                   {userId == loggedinuser && (
                     <button
                       className="delete-btn"
-                      onClick={() =>
-                        deleteMutation.mutate(post.id)
-                      }
+                      onClick={() => deleteMutation.mutate(post.id)}
                     >
                       <MdDeleteOutline size={20} />
                     </button>
                   )}
                 </>
               ) : (
-                <div
-                  className="feed-container"
-                  style={{ padding: "20px" }}
-                >
+                <div className="feed-container" style={{ padding: "20px" }}>
                   <b>
                     {post.first_name}
                     {post.last_name}
@@ -199,17 +181,13 @@ const UserActivity = ({ userId }) => {
                   {userId == loggedinuser && (
                     <button
                       className="delete-btn"
-                      onClick={() =>
-                        deleteMutation.mutate(post.id)
-                      }
+                      onClick={() => deleteMutation.mutate(post.id)}
                     >
                       <MdDeleteOutline size={20} />
                     </button>
                   )}
 
-                  <div className="user-activity-caption">
-                    {post.caption}
-                  </div>
+                  <div className="user-activity-caption">{post.caption}</div>
                 </div>
               )}
             </div>
@@ -219,16 +197,13 @@ const UserActivity = ({ userId }) => {
 
       {hasNextPage && (
         <div className="show-more-container">
-          <button
-            onClick={() => fetchNextPage()}
-            className="show-more-btn"
-          >
+          <button onClick={() => fetchNextPage()} className="show-more-btn">
             Show more
           </button>
         </div>
       )}
 
-      <ToastContainer position="top-right" autoClose={2000} />
+      {/* <ToastContainer position="top-right" autoClose={2000} /> */}
     </div>
   );
 };
