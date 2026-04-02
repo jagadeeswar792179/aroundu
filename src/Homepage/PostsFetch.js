@@ -48,43 +48,54 @@ function PostFetch({ profile }) {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [posts, setPosts] = useState([]);
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isLoading,
-} = useInfiniteQuery({
-  queryKey: ["posts", tab, selectedUniversity, selectedCourse],
-  queryFn: async ({ pageParam = 1 }) => {
-    const token = localStorage.getItem("token");
+  const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
+    queryKey: ["posts", tab, selectedUniversity, selectedCourse],
+    queryFn: async ({ pageParam = 1 }) => {
+      const token = localStorage.getItem("token");
 
-    const endpoint = buildEndpoint(pageParam);
+      const endpoint = buildEndpoint(pageParam);
 
-    const res = await axios.get(endpoint, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const res = await axios.get(endpoint, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    return res.data;
-  },
-  getNextPageParam: (lastPage, pages) => {
-    if (!lastPage.posts || lastPage.posts.length === 0) return undefined;
-    return pages.length + 1;
-  },
-  staleTime: 1000 * 60 * 5,
-  keepPreviousData: true,
-});
-
+      return res.data;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (!lastPage.posts || lastPage.posts.length === 0) return undefined;
+      return pages.length + 1;
+    },
+    staleTime: 1000 * 60 * 5,
+    keepPreviousData: true,
+  });
   useEffect(() => {
-  if (data) {
-    const merged = data.pages.flatMap(page => page.posts);
-    setPosts(merged);
-  }
-}, [data]);
+    if (data) {
+      const merged = data.pages.flatMap((page) => page.posts);
 
+      const preloadImages = merged.flatMap((post) => {
+        const urls = [];
+
+        if (post.image_url) urls.push(post.image_url);
+        if (post.user?.avatar_url) urls.push(post.user.avatar_url);
+
+        return urls.map((url) => {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        });
+      });
+
+      Promise.all(preloadImages).then(() => {
+        setPosts(merged);
+      });
+    }
+  }, [data]);
 
   // Build endpoint for current tab using cached page
   const buildEndpoint = (page) => {
-
     if (tab === "interests") {
       // allow passing filters as well if selected
       let url = `${server}/api/posts/feed/interests?page=${page}`;
@@ -100,14 +111,14 @@ function PostFetch({ profile }) {
       const uni =
         selectedUniversity || storedUser?.university || profile?.university;
       return `${server}/api/posts/feed/university?page=${page}&university=${encodeURIComponent(
-        uni || ""
+        uni || "",
       )}`;
     }
 
     if (tab === "course") {
       const course = selectedCourse || storedUser?.course || profile?.course;
       return `${server}/api/posts/feed/course?page=${page}&course=${encodeURIComponent(
-        course || ""
+        course || "",
       )}`;
     }
 
@@ -119,57 +130,56 @@ function PostFetch({ profile }) {
     return url;
   };
 
+  const likeMutation = useMutation({
+    mutationFn: async (postId) => {
+      const token = localStorage.getItem("token");
+      return axios.patch(
+        `${server}/api/posts/${postId}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+    },
 
-const likeMutation = useMutation({
-  mutationFn: async (postId) => {
-    const token = localStorage.getItem("token");
-    return axios.patch(
-      `${server}/api/posts/${postId}/like`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-  },
+    onMutate: async (postId) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
 
-  onMutate: async (postId) => {
-    await queryClient.cancelQueries({ queryKey: ["posts"] });
+      const previousData = queryClient.getQueriesData({ queryKey: ["posts"] });
 
-    const previousData = queryClient.getQueriesData({ queryKey: ["posts"] });
+      previousData.forEach(([key, data]) => {
+        if (!data) return;
 
-    previousData.forEach(([key, data]) => {
-      if (!data) return;
+        queryClient.setQueryData(key, (old) => {
+          if (!old) return old;
 
-      queryClient.setQueryData(key, old => {
-        if (!old) return old;
-
-        return {
-          ...old,
-          pages: old.pages.map(page => ({
-            ...page,
-            posts: page.posts.map(post =>
-              post.id === postId
-                ? {
-                    ...post,
-                    liked_by_me: !post.liked_by_me,
-                    like_count: post.liked_by_me
-                      ? post.like_count - 1
-                      : post.like_count + 1,
-                  }
-                : post
-            ),
-          })),
-        };
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              posts: page.posts.map((post) =>
+                post.id === postId
+                  ? {
+                      ...post,
+                      liked_by_me: !post.liked_by_me,
+                      like_count: post.liked_by_me
+                        ? post.like_count - 1
+                        : post.like_count + 1,
+                    }
+                  : post,
+              ),
+            })),
+          };
+        });
       });
-    });
 
-    return { previousData };
-  },
+      return { previousData };
+    },
 
-  onError: (err, postId, context) => {
-    context.previousData.forEach(([key, data]) => {
-      queryClient.setQueryData(key, data);
-    });
-  },
-});
+    onError: (err, postId, context) => {
+      context.previousData.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
+    },
+  });
 
   // Save toggle
   const toggleSave = async (postId) => {
@@ -181,7 +191,7 @@ const likeMutation = useMutation({
       const res = await axios.post(
         `${server}/api/posts/${postId}/save`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setSavedPosts((prev) => ({ ...prev, [postId]: res.data.saved }));
     } catch (err) {
@@ -223,8 +233,6 @@ const likeMutation = useMutation({
 
       if (matchesUni && matchesCourse) setPosts((prev) => [newPost, ...prev]);
 
-
-    
       setSavedPosts((prev) => ({
         ...prev,
         [newPost.id]: newPost.saved_by_me || false,
@@ -245,7 +253,7 @@ const likeMutation = useMutation({
   const handleCreateDiscussion = async (
     content,
     visibility = "public",
-    tags = []
+    tags = [],
   ) => {
     try {
       // Basic validation client-side
@@ -308,7 +316,6 @@ const likeMutation = useMutation({
         });
       }
 
-     
       setSavedPosts((prev) => ({
         ...prev,
         [newPost.id]: !!newPost.saved_by_me,
@@ -341,7 +348,6 @@ const likeMutation = useMutation({
     setSelectedUniversity(uni);
     setSelectedCourse(null);
     setTab("university");
- 
   };
   const onClickSameCourse = () => {
     const course = storedUser?.course || profile?.course;
@@ -352,7 +358,6 @@ const likeMutation = useMutation({
     setSelectedCourse(course);
     setSelectedUniversity(null);
     setTab("course");
-  
   };
 
   // open report modals
@@ -374,7 +379,7 @@ const likeMutation = useMutation({
     });
     setReportTargetLabel(
       `${post.user?.first_name || ""} ${post.user?.last_name || ""}`.trim() ||
-        "this person"
+        "this person",
     );
     setReportModalOpen(true);
     setOpenMenuPostId(null);
@@ -392,14 +397,14 @@ const likeMutation = useMutation({
         await axios.post(
           `${server}/api/moderation/report/post/${reportTarget.postId}`,
           { type, reason },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         alert("Thank you. The post has been reported.");
       } else {
         await axios.post(
           `${server}/api/moderation/report/user/${reportTarget.userId}`,
           { type, reason },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         alert("Thank you. The user has been reported.");
       }
@@ -418,7 +423,7 @@ const likeMutation = useMutation({
     setBlockTargetUserId(post.user_id);
     setBlockTargetName(
       `${post.user?.first_name || ""} ${post.user?.last_name || ""}`.trim() ||
-        "this person"
+        "this person",
     );
     setBlockModalOpen(true);
     setOpenMenuPostId(null);
@@ -434,13 +439,11 @@ const likeMutation = useMutation({
       await axios.post(
         `${server}/api/moderation/block/${blockTargetUserId}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       // remove their posts from feed
       setPosts((prev) => prev.filter((p) => p.user_id !== blockTargetUserId));
-
-    
 
       alert(`You blocked ${blockTargetName || "this person"}.`);
     } catch (err) {
@@ -499,6 +502,12 @@ const likeMutation = useMutation({
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (data?.pages?.length > 0 && posts.length === 0) {
+      const merged = data.pages.flatMap((p) => p.posts);
+      setPosts(merged);
+    }
+  }, [data]);
   return (
     <>
       <ReportModal
@@ -525,11 +534,11 @@ const likeMutation = useMutation({
         <div className="postcontainer">
           <div className="postwrite-container">
             {/* {profile?.profile ? ( */}
-              <img
-                src={profile?.profile || "/avatar.jpg"}
-                alt="profile"
-                className="postwrite-avatar"
-              />
+            <img
+              src={profile?.profile || "/avatar.jpg"}
+              alt="profile"
+              className="postwrite-avatar"
+            />
             {/* ) : (
               <div className="avatar-fallback">
                 {`${tokenDetails.first_name?.[0] || ""}${
@@ -614,58 +623,57 @@ const likeMutation = useMutation({
           </div>
         </div>
 
-  <div className="switch-container">
-  <button
-    onClick={onClickAll}
-    className={`switch-btn ${tab === "all" ? "active" : ""}`}
-  >
-    All
-  </button>
+        <div className="switch-container">
+          <button
+            onClick={onClickAll}
+            className={`switch-btn ${tab === "all" ? "active" : ""}`}
+          >
+            All
+          </button>
 
-  <button
-    onClick={onClickInterests}
-    className={`switch-btn ${tab === "interests" ? "active" : ""}`}
-  >
-    Interests
-  </button>
+          <button
+            onClick={onClickInterests}
+            className={`switch-btn ${tab === "interests" ? "active" : ""}`}
+          >
+            Interests
+          </button>
 
-  {tokenDetails.user_type !== "club" && (
-    <>
-      <button
-        onClick={onClickSameUniversity}
-        className={`switch-btn ${tab === "university" ? "active" : ""}`}
-      >
-        Same University
-      </button>
+          {tokenDetails.user_type !== "club" && (
+            <>
+              <button
+                onClick={onClickSameUniversity}
+                className={`switch-btn ${tab === "university" ? "active" : ""}`}
+              >
+                Same University
+              </button>
 
-      <button
-        onClick={onClickSameCourse}
-        className={`switch-btn ${tab === "course" ? "active" : ""}`}
-      >
-        Same Course
-      </button>
-    </>
-  )}
-</div>
+              <button
+                onClick={onClickSameCourse}
+                className={`switch-btn ${tab === "course" ? "active" : ""}`}
+              >
+                Same Course
+              </button>
+            </>
+          )}
+        </div>
 
         <InfiniteScroll
           dataLength={posts.length}
-         next={fetchNextPage}
+          next={fetchNextPage}
           hasMore={!!hasNextPage}
           loader={<PostLoad />}
         >
           {posts.map((post) => (
-
-            
             <div className="feed-container" key={post.id}>
               <div className="feed-container-sep">
                 <div className="feed-container-1">
                   <div style={{ display: "flex", gap: "10px" }}>
                     {post.user?.avatar_url ? (
                       <img
-                      className="avatar-img"
+                        className="avatar-img"
                         src={post.user.avatar_url}
                         alt="profile"
+                        loading="eager"
                       />
                     ) : (
                       <div className="avatar-fallback">
@@ -708,7 +716,7 @@ const likeMutation = useMutation({
                             onClick={(e) => {
                               e.stopPropagation();
                               setOpenMenuPostId(
-                                openMenuPostId === post.id ? null : post.id
+                                openMenuPostId === post.id ? null : post.id,
                               );
                             }}
                           >
@@ -756,7 +764,12 @@ const likeMutation = useMutation({
               </div>
               {post.post_type === "photo" && (
                 <div className="feed-container-2">
-                  <img src={post.image_url} alt="post" className="feed-image" />
+                  <img
+                    src={post.image_url}
+                    alt="post"
+                    className="feed-image"
+                    loading="lazy"
+                  />
                 </div>
               )}
 
@@ -851,42 +864,41 @@ const likeMutation = useMutation({
 
               {post.post_type === "photo" && <>{contentdivform(post)}</>}
             </div>
-
-          ))
-          
-
-          }
+          ))}
 
           {activePostId && (
             <CommentModal
               postId={activePostId}
               onClose={() => setActivePostId(null)}
-             onCommentAdded={() => {
-  queryClient.setQueriesData({ queryKey: ["posts"] }, (old) => {
-    if (!old) return old;
+              onCommentAdded={() => {
+                queryClient.setQueriesData({ queryKey: ["posts"] }, (old) => {
+                  if (!old) return old;
 
-    return {
-      ...old,
-      pages: old.pages.map(page => ({
-        ...page,
-        posts: page.posts.map(post =>
-          post.id === activePostId
-            ? { ...post, comment_count: (post.comment_count || 0) + 1 }
-            : post
-        ),
-      })),
-    };
-  });
-}}
+                  return {
+                    ...old,
+                    pages: old.pages.map((page) => ({
+                      ...page,
+                      posts: page.posts.map((post) =>
+                        post.id === activePostId
+                          ? {
+                              ...post,
+                              comment_count: (post.comment_count || 0) + 1,
+                            }
+                          : post,
+                      ),
+                    })),
+                  };
+                });
+              }}
             />
           )}
         </InfiniteScroll>
 
-        {posts.length === 0  && (
+        {posts.length === 0 && (
           <div
             style={{ textAlign: "center", marginTop: "2rem", color: "#888" }}
           >
-            No posts found.
+            <PostLoad />
           </div>
         )}
       </div>
