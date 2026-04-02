@@ -51,7 +51,7 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
         const { url } = await urlRes.json();
 
@@ -72,65 +72,64 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
   if (!isOpen) return null;
 
   return (
-<>
-        <div className="profup-1 flex-r center-c">
-          <h3>Upload Profile Picture</h3>
-          <span onClick={onClose}>✕</span>
-        </div>
-        <div className="flex-c center-c">
-          <br />
-          {!imageSrc && (
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
-              <button onClick={handleClick} className="upload-btn">
-                Upload Image
-              </button>
-            </div>
-          )}
+    <>
+      <div className="profup-1 flex-r center-c">
+        <h3>Upload Profile Picture</h3>
+      </div>
+      <div className="flex-c center-c">
+        <br />
+        {!imageSrc && (
+          <div>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+            <button onClick={handleClick} className="upload-btn">
+              Upload Image
+            </button>
+          </div>
+        )}
 
-          {imageSrc && !finalBlob && (
-            <>
-              <div className="final-cropper-1">
-                <Cropper
-                  image={imageSrc}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={onCropComplete}
-                />
-              </div>
-              <button onClick={handleCropConfirm} className="upload-btn">
-                Confirm Crop
-              </button>
-            </>
-          )}
-
-          {finalBlob && (
-            <div>
-              <img
-                src={URL.createObjectURL(finalBlob)}
-                alt="Preview"
-                style={{ width: 150, height: 150, borderRadius: "50%" }}
+        {imageSrc && !finalBlob && (
+          <>
+            <div className="final-cropper-1">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
               />
-              <br />
-              <button onClick={() => setFinalBlob(null)} className="upload-btn">
-                Re-Crop
-              </button>
-              <button onClick={handleUploadClick} className="post-btn">
-                Save
-              </button>
             </div>
-          )}
-        </div>
-     </>
+            <button onClick={handleCropConfirm} className="upload-btn">
+              Confirm Crop
+            </button>
+          </>
+        )}
+
+        {finalBlob && (
+          <div>
+            <img
+              src={URL.createObjectURL(finalBlob)}
+              alt="Preview"
+              style={{ width: 150, height: 150, borderRadius: "50%" }}
+            />
+            <br />
+            <button onClick={() => setFinalBlob(null)} className="upload-btn">
+              Re-Crop
+            </button>
+            <button onClick={handleUploadClick} className="post-btn">
+              Save
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

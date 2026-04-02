@@ -11,6 +11,7 @@ import ProfileLoadFull from "../Loading/profileLoadfull";
 import WeekBooking from "../slotbooking/weekbookings";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTokenPayload } from "../utils/getTokenPayload";
+import CustomSelect from "../utils/CustomSelect";
 
 export default function Profile() {
   const server = process.env.REACT_APP_SERVER;
@@ -18,7 +19,8 @@ export default function Profile() {
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const queryClient = useQueryClient();
   const { location, status } = useLocation();
-
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   /* =========================
      LOCAL STATE (UNCHANGED)
      ========================= */
@@ -292,15 +294,52 @@ export default function Profile() {
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
     if (modalType === "experience") {
-      setExperienceForm({ ...experienceForm, [e.target.name]: e.target.value });
+      setExperienceForm((prev) => ({ ...prev, [name]: value }));
     } else if (modalType === "education") {
-      setEducationForm({ ...educationForm, [e.target.name]: e.target.value });
+      setEducationForm((prev) => ({ ...prev, [name]: value }));
     } else if (modalType === "projects") {
-      setprojectForm({ ...projectForm, [e.target.name]: e.target.value });
+      setprojectForm((prev) => ({ ...prev, [name]: value }));
     }
+
+    validateField(name, value);
   };
 
+  const validateField = (name, value) => {
+    let error = "";
+
+    if (!value || !value.toString().trim()) {
+      error = "Required";
+    }
+
+    if (name === "end_date") {
+      let start;
+
+      if (modalType === "experience") start = experienceForm.start_date;
+      if (modalType === "education") start = educationForm.start_date;
+      if (modalType === "projects") start = projectForm.start_date;
+
+      if (start && value && value < start) {
+        error = "End date cannot be before start date";
+      }
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+    }));
+  };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+  };
   function formatDuration(startDate, endDate) {
     const start = new Date(startDate);
     const end = endDate ? new Date(endDate) : new Date();
@@ -393,7 +432,35 @@ export default function Profile() {
   /* =========================
      DELETE (UPDATED CACHE)
      ========================= */
+  const handleSave = () => {
+    let form =
+      modalType === "experience"
+        ? experienceForm
+        : modalType === "education"
+          ? educationForm
+          : projectForm;
 
+    let newErrors = {};
+
+    Object.keys(form).forEach((key) => {
+      if (!form[key] || !form[key].toString().trim()) {
+        newErrors[key] = "Required";
+      }
+    });
+
+    if (form.start_date && form.end_date && form.end_date < form.start_date) {
+      newErrors.end_date = "Invalid date";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      alert("Fix errors before submitting");
+      return;
+    }
+
+    saveField();
+  };
   const deleteinfo = async (type, index) => {
     const updated = [...profile[type]];
     updated.splice(index, 1);
@@ -427,10 +494,26 @@ export default function Profile() {
     (opt) => !interestsTemp.includes(opt.value),
   );
 
+  //temp
+
   return (
     <>
       <div className="prof">
-        <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setModalOpen(false);
+
+            // 🔥 reset forms
+            setExperienceForm({});
+            setEducationForm({});
+            setprojectForm({});
+
+            // 🔥 reset validation
+            setErrors({});
+            setTouched({});
+          }}
+        >
           {modalType === "about" && (
             <>
               <h3>About</h3>
@@ -458,7 +541,7 @@ export default function Profile() {
 
               <p>{about.length}/150 characters</p>
               {about.trim() !== profile.about.trim() && about.trim() !== "" && (
-                <button onClick={saveField} className="prof-btn">
+                <button onClick={handleSave} className="prof-btn">
                   Save
                 </button>
               )}
@@ -476,60 +559,105 @@ export default function Profile() {
           {modalType === "experience" && (
             <>
               <h3>Add Experience</h3>
+
+              {/* TITLE */}
               <label className="input-register-label">
                 Title
                 <input
                   name="title"
-                  className="input-register"
+                  className={`input-register ${
+                    touched.title && errors.title ? "error-border" : ""
+                  }`}
                   placeholder="Title"
                   value={experienceForm.title}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {touched.title && errors.title && (
+                  <p className="error-text">{errors.title}</p>
+                )}
               </label>
+
+              {/* COMPANY */}
               <label className="input-register-label">
                 Company Name
                 <input
                   name="company_name"
+                  className={`input-register ${
+                    touched.company_name && errors.company_name
+                      ? "error-border"
+                      : ""
+                  }`}
                   placeholder="Company Name"
-                  className="input-register"
                   value={experienceForm.company_name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {touched.company_name && errors.company_name && (
+                  <p className="error-text">{errors.company_name}</p>
+                )}
               </label>
 
+              {/* DATES */}
               <div style={{ display: "flex", gap: "10px" }}>
-                <label htmlFor="start_date" className="input-register-label">
+                <label className="input-register-label">
                   Start Date
                   <input
                     type="date"
                     name="start_date"
-                    className="input-register"
+                    className={`input-register ${
+                      touched.start_date && errors.start_date
+                        ? "error-border"
+                        : ""
+                    }`}
                     value={experienceForm.start_date}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.start_date && errors.start_date && (
+                    <p className="error-text">{errors.start_date}</p>
+                  )}
                 </label>
-                <label htmlFor="end_Date" className="input-register-label">
-                  End date
+
+                <label className="input-register-label">
+                  End Date
                   <input
                     type="date"
                     name="end_date"
-                    className="input-register"
+                    className={`input-register ${
+                      touched.end_date && errors.end_date ? "error-border" : ""
+                    }`}
                     value={experienceForm.end_date}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.end_date && errors.end_date && (
+                    <p className="error-text">{errors.end_date}</p>
+                  )}
                 </label>
               </div>
-              <label className="input-register-label ">
+
+              {/* DESCRIPTION */}
+              <label className="input-register-label">
                 Description
                 <textarea
                   name="description"
-                  className="post-textarea"
+                  className={`post-textarea ${
+                    touched.description && errors.description
+                      ? "error-border"
+                      : ""
+                  }`}
                   placeholder="Role description"
                   value={experienceForm.description}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {touched.description && errors.description && (
+                  <p className="error-text">{errors.description}</p>
+                )}
               </label>
-              <button onClick={saveField} className="prof-btn">
+
+              <button onClick={handleSave} className="prof-btn">
                 Save
               </button>
             </>
@@ -541,48 +669,80 @@ export default function Profile() {
               <label className="input-register-label">
                 School Name
                 <input
-                  className="input-register"
                   name="university_name"
+                  className={`input-register ${
+                    touched.university_name && errors.university_name
+                      ? "error-border"
+                      : ""
+                  }`}
                   placeholder="School name"
                   value={educationForm.university_name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {touched.university_name && errors.university_name && (
+                  <p className="error-text">{errors.university_name}</p>
+                )}
               </label>
 
               <div style={{ display: "flex", gap: "10px" }}>
                 <label className="input-register-label">
                   Start Date
                   <input
-                    className="input-register"
                     type="date"
                     name="start_date"
+                    className={`input-register ${
+                      touched.start_date && errors.start_date
+                        ? "error-border"
+                        : ""
+                    }`}
                     value={educationForm.start_date}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.start_date && errors.start_date && (
+                    <p className="error-text">{errors.start_date}</p>
+                  )}
                 </label>
+
                 <label className="input-register-label">
                   End Date
                   <input
-                    className="input-register"
                     type="date"
                     name="end_date"
+                    className={`input-register ${
+                      touched.end_date && errors.end_date ? "error-border" : ""
+                    }`}
                     value={educationForm.end_date}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.end_date && errors.end_date && (
+                    <p className="error-text">{errors.end_date}</p>
+                  )}
                 </label>
               </div>
+
               <label className="input-register-label">
                 Course
                 <textarea
                   name="course_name"
-                  className="post-textarea"
+                  className={`post-textarea ${
+                    touched.course_name && errors.course_name
+                      ? "error-border"
+                      : ""
+                  }`}
                   placeholder="Course"
                   value={educationForm.course_name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {touched.course_name && errors.course_name && (
+                  <p className="error-text">{errors.course_name}</p>
+                )}
               </label>
 
-              <button onClick={saveField} className="prof-btn">
+              <button onClick={handleSave} className="prof-btn">
                 Save
               </button>
             </>
@@ -590,52 +750,84 @@ export default function Profile() {
           {modalType === "projects" && (
             <>
               <h3>Projects</h3>
+
               <label className="input-register-label">
                 Project Name
                 <input
                   name="project_name"
-                  className="input-register"
+                  className={`input-register ${
+                    touched.project_name && errors.project_name
+                      ? "error-border"
+                      : ""
+                  }`}
                   placeholder="Project name"
                   value={projectForm.project_name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {touched.project_name && errors.project_name && (
+                  <p className="error-text">{errors.project_name}</p>
+                )}
               </label>
+
               <div style={{ display: "flex", gap: "10px" }}>
                 <label className="input-register-label">
                   Start Date
                   <input
-                    className="input-register"
                     type="date"
                     name="start_date"
+                    className={`input-register ${
+                      touched.start_date && errors.start_date
+                        ? "error-border"
+                        : ""
+                    }`}
                     value={projectForm.start_date}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.start_date && errors.start_date && (
+                    <p className="error-text">{errors.start_date}</p>
+                  )}
                 </label>
 
                 <label className="input-register-label">
                   End Date
                   <input
                     type="date"
-                    className="input-register"
                     name="end_date"
+                    className={`input-register ${
+                      touched.end_date && errors.end_date ? "error-border" : ""
+                    }`}
                     value={projectForm.end_date}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                   />
+                  {touched.end_date && errors.end_date && (
+                    <p className="error-text">{errors.end_date}</p>
+                  )}
                 </label>
               </div>
 
               <label className="input-register-label">
                 Description
                 <textarea
-                  className="post-textarea"
                   name="description"
+                  className={`post-textarea ${
+                    touched.description && errors.description
+                      ? "error-border"
+                      : ""
+                  }`}
                   placeholder="Description"
                   value={projectForm.description}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {touched.description && errors.description && (
+                  <p className="error-text">{errors.description}</p>
+                )}
               </label>
 
-              <button onClick={saveField} className="prof-btn">
+              <button onClick={handleSave} className="prof-btn">
                 Save
               </button>
             </>
@@ -663,8 +855,8 @@ export default function Profile() {
 
                 {skillsTemp.length < 15 && (
                   <div className="select-container">
-                    <div className="flex-r gap20">
-                      <Select
+                    <div className="flex-r gap10">
+                      {/* <Select
                         className="skill-select"
                         options={filteredSkillOptions}
                         value={selectedSkill}
@@ -696,6 +888,14 @@ export default function Profile() {
                             overflowY: "auto",
                           }),
                         }}
+                      /> */}
+                      <CustomSelect
+                        options={filteredSkillOptions}
+                        value={selectedSkill}
+                        onChange={setSelectedSkill}
+                        placeholder="Select a skill"
+                        direction="up"
+                        style={{ width: "300px" }}
                       />
                       <button
                         onClick={() => {
@@ -713,7 +913,7 @@ export default function Profile() {
                     </div>
                   </div>
                 )}
-                <button onClick={saveField} className="prof-btn">
+                <button onClick={handleSave} className="prof-btn">
                   Save
                 </button>
               </div>
@@ -743,9 +943,17 @@ export default function Profile() {
                 </div>
 
                 {interestsTemp.length < 7 && (
-                  <div className="select-container">
+                  <div className="select-container gap10">
                     <div>
-                      <Select
+                      <CustomSelect
+                        options={filteredInterestOptions}
+                        value={selectedInterest}
+                        onChange={setSelectedInterest}
+                        placeholder="Select a skill"
+                        direction="up"
+                        style={{ width: "300px" }}
+                      />
+                      {/* <Select
                         className="skill-select"
                         options={filteredInterestOptions}
                         value={selectedInterest}
@@ -777,7 +985,7 @@ export default function Profile() {
                             overflowY: "auto",
                           }),
                         }}
-                      />
+                      /> */}
                     </div>
                     <button
                       onClick={() => {
@@ -794,7 +1002,7 @@ export default function Profile() {
                     </button>
                   </div>
                 )}
-                <button onClick={saveField} className="prof-btn">
+                <button onClick={handleSave} className="prof-btn">
                   Save
                 </button>
               </div>

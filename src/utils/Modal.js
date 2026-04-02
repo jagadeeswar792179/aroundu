@@ -5,9 +5,9 @@ const Modal = ({ isOpen, onClose, children }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-        {/* <button style={styles.closeBtn} onClick={onClose}>
-          ✕
-        </button> */}
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <span onClick={onClose}>✕</span>
+        </div>
         {children}
       </div>
     </div>
