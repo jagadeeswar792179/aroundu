@@ -68,13 +68,21 @@ export default function useNotifications() {
     const deleteHandler = (data) => {
       queryClient.setQueryData(["notifications"], (old = []) =>
         old.filter((n) => {
-          if (n.type === "like") {
+          // 🔥 HANDLE POST DELETE
+          if (data.type === "post") {
+            return !(
+              n.entity_id === data.postId || n.data?.postId === data.postId
+            );
+          }
+
+          // existing logic
+          if (data.type === "like") {
             return !(
               n.entity_id === data.entityId && n.actor_id === data.actorId
             );
           }
 
-          if (n.type === "comment") {
+          if (data.type === "comment") {
             return n.entity_id !== data.entityId;
           }
 
@@ -82,9 +90,8 @@ export default function useNotifications() {
         }),
       );
 
-      queryClient.setQueryData(["notifications-unread"], (old) => ({
-        count: Math.max((old?.count || 1) - 1, 0),
-      }));
+      // ✅ always correct
+      queryClient.invalidateQueries(["notifications-unread"]);
     };
 
     socket.on("notification:delete", deleteHandler);

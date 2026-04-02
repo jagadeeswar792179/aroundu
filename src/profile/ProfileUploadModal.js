@@ -1,19 +1,26 @@
 // src/profile/ProfileUploadModal.js
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "../Homepage/cropUtils"; // adjust path
 
-const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
+const ProfileUploadModal = ({ isOpen, onClose, onUploaded, existingImage }) => {
   const [imageSrc, setImageSrc] = useState(null);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [finalBlob, setFinalBlob] = useState(null);
   const server = process.env.REACT_APP_SERVER;
+  const [showExisting, setShowExisting] = useState(true);
   const onCropComplete = useCallback((_, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
-
+  useEffect(() => {
+    if (isOpen) {
+      setShowExisting(true);
+      setImageSrc(null);
+      setFinalBlob(null);
+    }
+  }, [isOpen]);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -78,7 +85,27 @@ const ProfileUploadModal = ({ isOpen, onClose, onUploaded }) => {
       </div>
       <div className="flex-c center-c">
         <br />
-        {!imageSrc && (
+        {/* SHOW EXISTING IMAGE */}
+        {existingImage && showExisting && !imageSrc && (
+          <div className="flex-c center-c">
+            <img
+              src={existingImage}
+              alt="Current Profile"
+              style={{ width: 150, height: 150, borderRadius: "50%" }}
+            />
+            <br />
+
+            <button
+              onClick={() => setShowExisting(false)}
+              className="upload-btn"
+            >
+              Change Image
+            </button>
+          </div>
+        )}
+
+        {/* SHOW UPLOAD BUTTON (ONLY IF NO EXISTING OR USER CLICKED CHANGE) */}
+        {(!existingImage || !showExisting) && !imageSrc && (
           <div>
             <input
               type="file"

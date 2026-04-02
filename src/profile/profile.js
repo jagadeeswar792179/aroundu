@@ -553,6 +553,7 @@ export default function Profile() {
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
                 onUploaded={(newUrl) => setProfileUrl(newUrl)} // update instantly
+                existingImage={profileUrl}
               />
             </>
           )}
