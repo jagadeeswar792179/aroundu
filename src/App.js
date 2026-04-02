@@ -38,6 +38,8 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<Welcome />} />
           <Route path="/register" element={<MultiStepRegister />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+
           <Route element={<MainLayout />}>
             <Route path="/home" element={<Homepage />} />
             <Route path="/settings" element={<Settings />} />
@@ -48,7 +50,6 @@ const App = () => {
             <Route path="/tag/:tag" element={<TagFeed />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/search" element={<SearchPage />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/saved-items" element={<SavedPosts />} />
             <Route path="/profileview" element={<ProfileViewers />} />
             <Route path="/lost-found" element={<LostFoundPage />} />
