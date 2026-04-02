@@ -138,45 +138,88 @@ export default function Profile() {
   ];
 
   const interestOptions = [
-    {
-      value: "Artificial Intelligence & Machine Learning",
-      label: "Artificial Intelligence & Machine Learning",
-    },
-    { value: "Cybersecurity", label: "Cybersecurity" },
-    { value: "Cloud Computing", label: "Cloud Computing" },
-    { value: "Robotics", label: "Robotics" },
-    { value: "Blockchain", label: "Blockchain" },
-    { value: "VR / AR", label: "VR / AR" },
-    { value: "Environmental Issues", label: "Environmental Issues" },
-    { value: "Finance & Investing", label: "Finance & Investing" },
-    { value: "Marketing & Branding", label: "Marketing & Branding" },
-    { value: "Creative Writing", label: "Creative Writing" },
-    { value: "Sports & Fitness", label: "Sports & Fitness" },
-    { value: "Music & Performing Arts", label: "Music & Performing Arts" },
-    { value: "Traveling & Culture", label: "Traveling & Culture" },
+    // {
+    //   value: "Artificial Intelligence & Machine Learning",
+    //   label: "Artificial Intelligence & Machine Learning",
+    // },
+    // { value: "Cybersecurity", label: "Cybersecurity" },
+    // { value: "Cloud Computing", label: "Cloud Computing" },
+    // { value: "Robotics", label: "Robotics" },
+    // { value: "Blockchain", label: "Blockchain" },
+    // { value: "VR / AR", label: "VR / AR" },
+    // { value: "Environmental Issues", label: "Environmental Issues" },
+    // { value: "Finance & Investing", label: "Finance & Investing" },
+    // { value: "Marketing & Branding", label: "Marketing & Branding" },
+    // { value: "Creative Writing", label: "Creative Writing" },
+    // { value: "Sports & Fitness", label: "Sports & Fitness" },
+    // { value: "Music & Performing Arts", label: "Music & Performing Arts" },
+    // { value: "Traveling & Culture", label: "Traveling & Culture" },
 
-    // Newly added interests you requested
+    // // Newly added interests you requested
+    // {
+    //   value: "Emerging Technologies in Education",
+    //   label: "Emerging Technologies in Education",
+    // },
+    // { value: "AI / ML Applications", label: "AI / ML Applications" },
+    // {
+    //   value: "Sustainability & Environmental Research",
+    //   label: "Sustainability & Environmental Research",
+    // },
+    // { value: "Policy & Governance", label: "Policy & Governance" },
+    // {
+    //   value: "Community Outreach & Service Learning",
+    //   label: "Community Outreach & Service Learning",
+    // },
+    // {
+    //   value: "Cross-Disciplinary Research",
+    //   label: "Cross-Disciplinary Research",
+    // },
+    // { value: "Educational Technology", label: "Educational Technology" },
+    // { value: "Industry Partnerships", label: "Industry Partnerships" },
+    // { value: "Lifelong Learning", label: "Lifelong Learning" },
+    { value: "sports", label: "Sports" },
+    { value: "technology", label: "Technology" },
+    { value: "career", label: "Career" },
+    { value: "campus_life", label: "Campus Life" },
+    { value: "social", label: "Social" },
+    { value: "music", label: "Music" },
+    { value: "food", label: "Food" },
+    { value: "entertainment", label: "Entertainment" },
+    { value: "academics", label: "Academics" },
+    { value: "community", label: "Community" },
+    { value: "travel", label: "Travel" },
+    { value: "tech", label: "Tech" },
+    { value: "fashion", label: "Fashion" },
+    { value: "fitness", label: "Fitness" },
+    { value: "nature", label: "Nature" },
+
+    // Student tags
+    { value: "stem-student", label: "STEM Student" },
+    { value: "humanities-student", label: "Humanities Student" },
+    { value: "arts-design-student", label: "Arts & Design" },
     {
-      value: "Emerging Technologies in Education",
-      label: "Emerging Technologies in Education",
+      value: "business-entrepreneurship-student",
+      label: "Business & Entrepreneurship",
     },
-    { value: "AI / ML Applications", label: "AI / ML Applications" },
+    { value: "innovation-startups-student", label: "Innovation & Startups" },
     {
-      value: "Sustainability & Environmental Research",
-      label: "Sustainability & Environmental Research",
+      value: "sustainability-social-impact-student",
+      label: "Sustainability & Social Impact",
     },
-    { value: "Policy & Governance", label: "Policy & Governance" },
-    {
-      value: "Community Outreach & Service Learning",
-      label: "Community Outreach & Service Learning",
-    },
-    {
-      value: "Cross-Disciplinary Research",
-      label: "Cross-Disciplinary Research",
-    },
-    { value: "Educational Technology", label: "Educational Technology" },
-    { value: "Industry Partnerships", label: "Industry Partnerships" },
-    { value: "Lifelong Learning", label: "Lifelong Learning" },
+    { value: "hackathons-competitions", label: "Hackathons / Competitions" },
+    { value: "internships", label: "Internships" },
+    { value: "volunteering", label: "Volunteering" },
+
+    // Faculty / professional tags
+    { value: "stem-faculty", label: "STEM Faculty" },
+    { value: "humanities-faculty", label: "Humanities Faculty" },
+    { value: "arts-design-faculty", label: "Arts & Design Faculty" },
+    { value: "business-management", label: "Business & Management" },
+    { value: "research-supervisor", label: "Research Supervisor" },
+    { value: "grant-recipient", label: "Grant Recipient" },
+    { value: "industry-collaboration", label: "Industry Collaboration" },
+    { value: "conference-speaker", label: "Conference Speaker" },
+    { value: "editorial-board-member", label: "Editorial Board Member" },
   ];
   if (isLoading) return <ProfileLoadFull />;
   if (isError) return <div>Error loading profile</div>;
@@ -629,24 +672,24 @@ export default function Profile() {
                         isClearable
                         isSearchable
                         placeholder="Select a skill"
-                        menuPortalTarget={null}
-                        menuPosition="absolute"
+                        menuPlacement="auto" // 🔥 IMPORTANT
+                        menuPosition="fixed" // 🔥 IMPORTANT
+                        menuPortalTarget={document.body} // 🔥 VERY IMPORTANT
                         styles={{
-                          /** outer wrapper */
                           container: (base) => ({
                             ...base,
                             width: 300,
                             flex: "0 0 auto",
                           }),
-                          /** the visible input/control */
                           control: (base) => ({
                             ...base,
                             minHeight: 36,
                             width: "100%",
                           }),
-                          /** dropdown panel */
-                          menu: (base) => ({ ...base, width: "100%" }),
-                          /** list inside the dropdown */
+                          menuPortal: (base) => ({
+                            ...base,
+                            zIndex: 9999, // 🔥 ensures it's above modal
+                          }),
                           menuList: (base) => ({
                             ...base,
                             maxHeight: 150,
@@ -709,25 +752,25 @@ export default function Profile() {
                         onChange={setSelectedInterest}
                         isClearable
                         isSearchable
-                        placeholder="Select a interest"
-                        menuPortalTarget={null} // keep it inside the modal
-                        menuPosition="absolute" // ensures it positions properly inside modal
+                        placeholder="   Select a interest"
+                        menuPlacement="auto" // 🔥 IMPORTANT
+                        menuPosition="fixed" // 🔥 IMPORTANT
+                        menuPortalTarget={document.body} // 🔥 VERY IMPORTANT
                         styles={{
-                          /** outer wrapper */
                           container: (base) => ({
                             ...base,
                             width: 300,
                             flex: "0 0 auto",
                           }),
-                          /** the visible input/control */
                           control: (base) => ({
                             ...base,
                             minHeight: 36,
                             width: "100%",
                           }),
-                          /** dropdown panel */
-                          menu: (base) => ({ ...base, width: "100%" }),
-                          /** list inside the dropdown */
+                          menuPortal: (base) => ({
+                            ...base,
+                            zIndex: 9999, // 🔥 ensures it's above modal
+                          }),
                           menuList: (base) => ({
                             ...base,
                             maxHeight: 150,
