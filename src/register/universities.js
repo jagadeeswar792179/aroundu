@@ -11744,8 +11744,8 @@ export const universityOptions = [
     label: "Western New England University",
   },
   {
-    value: "Spring Field College",
-    label: "Spring Field College",
+    value: "SpringField College",
+    label: "SpringField College",
   },
 ];
 export const universityEmailDomains = {
