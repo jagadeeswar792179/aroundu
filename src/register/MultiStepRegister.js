@@ -57,7 +57,8 @@ const RegisterForm = () => {
     "December",
   ];
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - 18 - i);
   const [days, setDays] = useState([]);
   const interestOptions = [
     { value: "sports", label: "Sports" },
@@ -70,6 +71,39 @@ const RegisterForm = () => {
     { value: "entertainment", label: "Entertainment" },
     { value: "academics", label: "Academics" },
     { value: "community", label: "Community" },
+    { value: "travel", label: "Travel" },
+    { value: "tech", label: "Tech" },
+    { value: "fashion", label: "Fashion" },
+    { value: "fitness", label: "Fitness" },
+    { value: "nature", label: "Nature" },
+
+    // Student tags
+    { value: "stem-student", label: "STEM Student" },
+    { value: "humanities-student", label: "Humanities Student" },
+    { value: "arts-design-student", label: "Arts & Design" },
+    {
+      value: "business-entrepreneurship-student",
+      label: "Business & Entrepreneurship",
+    },
+    { value: "innovation-startups-student", label: "Innovation & Startups" },
+    {
+      value: "sustainability-social-impact-student",
+      label: "Sustainability & Social Impact",
+    },
+    { value: "hackathons-competitions", label: "Hackathons / Competitions" },
+    { value: "internships", label: "Internships" },
+    { value: "volunteering", label: "Volunteering" },
+
+    // Faculty / professional tags
+    { value: "stem-faculty", label: "STEM Faculty" },
+    { value: "humanities-faculty", label: "Humanities Faculty" },
+    { value: "arts-design-faculty", label: "Arts & Design Faculty" },
+    { value: "business-management", label: "Business & Management" },
+    { value: "research-supervisor", label: "Research Supervisor" },
+    { value: "grant-recipient", label: "Grant Recipient" },
+    { value: "industry-collaboration", label: "Industry Collaboration" },
+    { value: "conference-speaker", label: "Conference Speaker" },
+    { value: "editorial-board-member", label: "Editorial Board Member" },
   ];
 
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -152,13 +186,120 @@ const RegisterForm = () => {
     "African American Studies",
     "Latin American Studies",
     "Legal Studies",
-
-    // Education
-    "Elementary Education",
-    "Secondary Education",
-    "Education",
   ].map((c) => ({ value: c, label: c }));
 
+  const specializationOptions = [
+    // Pharma
+    { value: "Pharmacogenomics", label: "Pharmacogenomics" },
+    { value: "Pharmaceutical Sciences", label: "Pharmaceutical Sciences" },
+    {
+      value: "Pharmacy Clinical Research Certificate",
+      label: "Pharmacy Clinical Research Certificate",
+    },
+    {
+      value: "Biopharmaceutical Technology",
+      label: "Biopharmaceutical Technology",
+    },
+
+    // Law
+    { value: "Juris Doctor (JD)", label: "Juris Doctor (JD)" },
+    {
+      value: "LLM in Elder Law and Estate Planning",
+      label: "LLM in Elder Law and Estate Planning",
+    },
+    { value: "Law and Society", label: "Law and Society" },
+    { value: "JD/MBA", label: "JD/MBA" },
+    { value: "JD/MSW", label: "JD/MSW" },
+    {
+      value: "JD/MS in Accounting & Finance",
+      label: "JD/MS in Accounting & Finance",
+    },
+    {
+      value: "JD/MS in Engineering Management",
+      label: "JD/MS in Engineering Management",
+    },
+    {
+      value: "JD/MS in Organizational Leadership",
+      label: "JD/MS in Organizational Leadership",
+    },
+    {
+      value: "JD/MRP (Master of Regional Planning)",
+      label: "JD/MRP (Master of Regional Planning)",
+    },
+
+    // Engineering
+    { value: "Civil Engineering", label: "Civil Engineering" },
+    { value: "Mechanical Engineering", label: "Mechanical Engineering" },
+    { value: "Electrical Engineering", label: "Electrical Engineering" },
+    { value: "Industrial Engineering", label: "Industrial Engineering" },
+    { value: "Biomedical Engineering", label: "Biomedical Engineering" },
+    { value: "Construction Management", label: "Construction Management" },
+    { value: "Engineering Management", label: "Engineering Management" },
+
+    // CS
+    { value: "Computer Science", label: "Computer Science" },
+    { value: "Computer Engineering", label: "Computer Engineering" },
+    { value: "Information Technology", label: "Information Technology" },
+    {
+      value: "Business Analytics and Information Management",
+      label: "Business Analytics and Information Management",
+    },
+    { value: "Cybersecurity", label: "Cybersecurity" },
+    {
+      value: "Data Science and Statistics",
+      label: "Data Science and Statistics",
+    },
+    { value: "Computer Forensics", label: "Computer Forensics" },
+    {
+      value: "Enterprise Resource Planning with SAP",
+      label: "Enterprise Resource Planning with SAP",
+    },
+
+    // Business
+    { value: "Finance", label: "Finance" },
+    { value: "Accounting", label: "Accounting" },
+    { value: "Marketing", label: "Marketing" },
+    { value: "Business Analytics", label: "Business Analytics" },
+    { value: "Management and Leadership", label: "Management and Leadership" },
+    { value: "Actuarial Science", label: "Actuarial Science" },
+    { value: "Human Resource Management", label: "Human Resource Management" },
+    { value: "Entrepreneurship", label: "Entrepreneurship" },
+    { value: "Sport Management", label: "Sport Management" },
+
+    // Science
+    { value: "Biology", label: "Biology" },
+    { value: "Chemistry", label: "Chemistry" },
+    { value: "Neuroscience", label: "Neuroscience" },
+    { value: "Health Sciences", label: "Health Sciences" },
+    { value: "Health Studies", label: "Health Studies" },
+    { value: "Forensic Biology", label: "Forensic Biology" },
+    { value: "Forensic Chemistry", label: "Forensic Chemistry" },
+    { value: "Mathematical Sciences", label: "Mathematical Sciences" },
+    { value: "Statistics", label: "Statistics" },
+    { value: "Environmental Science", label: "Environmental Science" },
+
+    // Arts / Humanities
+    { value: "Psychology", label: "Psychology" },
+    { value: "English", label: "English" },
+    { value: "History", label: "History" },
+    { value: "Political Science", label: "Political Science" },
+    { value: "International Studies", label: "International Studies" },
+    { value: "Creative Writing", label: "Creative Writing" },
+    { value: "Communication", label: "Communication" },
+    { value: "Music", label: "Music" },
+    { value: "Art", label: "Art" },
+    { value: "Spanish", label: "Spanish" },
+    { value: "Philosophy", label: "Philosophy" },
+    {
+      value: "Gender and Sexuality Studies",
+      label: "Gender and Sexuality Studies",
+    },
+    { value: "Theatre", label: "Theatre" },
+    { value: "Film Studies", label: "Film Studies" },
+    { value: "African American Studies", label: "African American Studies" },
+    { value: "Latin American Studies", label: "Latin American Studies" },
+    { value: "Legal Studies", label: "Legal Studies" },
+  ];
   const getDomainForUniversity = (uni) =>
     universityEmailDomains[uni] || "wne.edu"; // default domain if unknown
 
@@ -819,29 +960,9 @@ const RegisterForm = () => {
         <>
           <label>Specialization:</label>
           <Select
-            options={[
-              {
-                value: "Artificial Intelligence",
-                label: "Artificial Intelligence",
-              },
-              { value: "Machine Learning", label: "Machine Learning" },
-              { value: "Data Science", label: "Data Science" },
-              { value: "Cybersecurity", label: "Cybersecurity" },
-              { value: "Cloud Computing", label: "Cloud Computing" },
-              { value: "Other", label: "Other" },
-            ]}
+            options={specializationOptions}
             value={findOrCreateOption(
-              [
-                {
-                  value: "Artificial Intelligence",
-                  label: "Artificial Intelligence",
-                },
-                { value: "Machine Learning", label: "Machine Learning" },
-                { value: "Data Science", label: "Data Science" },
-                { value: "Cybersecurity", label: "Cybersecurity" },
-                { value: "Cloud Computing", label: "Cloud Computing" },
-                { value: "Other", label: "Other" },
-              ],
+              specializationOptions,
               formData.specialization,
             )}
             onChange={(selected) =>
@@ -853,7 +974,6 @@ const RegisterForm = () => {
             isSearchable
             placeholder="Select or search specialization"
           />
-
           {/* 👇 New blog link input */}
           <label className="label-register" style={{ marginTop: "10px" }}>
             Blog Link (required for professors)

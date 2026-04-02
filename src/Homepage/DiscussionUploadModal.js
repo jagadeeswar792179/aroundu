@@ -34,12 +34,20 @@ const DiscussionUploadModal = ({ isOpen, onClose, onCreate }) => {
   };
 
   const tagOptions = [
-    { value: "travel", label: "Travel" },
+    { value: "sports", label: "Sports" },
+    { value: "technology", label: "Technology" },
+    { value: "career", label: "Career" },
+    { value: "campus_life", label: "Campus Life" },
+    { value: "social", label: "Social" },
+    { value: "music", label: "Music" },
     { value: "food", label: "Food" },
+    { value: "entertainment", label: "Entertainment" },
+    { value: "academics", label: "Academics" },
+    { value: "community", label: "Community" },
+    { value: "travel", label: "Travel" },
     { value: "tech", label: "Tech" },
     { value: "fashion", label: "Fashion" },
     { value: "fitness", label: "Fitness" },
-    { value: "music", label: "Music" },
     { value: "nature", label: "Nature" },
 
     // Student tags

@@ -18,12 +18,20 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
   const [visibility, setVisibility] = useState("public"); // 'public' | 'university'
 
   const tagOptions = [
-    { value: "travel", label: "Travel" },
+    { value: "sports", label: "Sports" },
+    { value: "technology", label: "Technology" },
+    { value: "career", label: "Career" },
+    { value: "campus_life", label: "Campus Life" },
+    { value: "social", label: "Social" },
+    { value: "music", label: "Music" },
     { value: "food", label: "Food" },
+    { value: "entertainment", label: "Entertainment" },
+    { value: "academics", label: "Academics" },
+    { value: "community", label: "Community" },
+    { value: "travel", label: "Travel" },
     { value: "tech", label: "Tech" },
     { value: "fashion", label: "Fashion" },
     { value: "fitness", label: "Fitness" },
-    { value: "music", label: "Music" },
     { value: "nature", label: "Nature" },
 
     // Student tags
@@ -73,15 +81,15 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
     reader.readAsDataURL(file);
   };
 
- const handleCropConfirm = async () => {
-  const blob = await getCroppedImg(imageSrc, croppedAreaPixels, {
-    maxWidth: 1080,
-    maxHeight: 1350,
-    quality: 0.75,
-    mimeType: "image/jpeg",
-  });
-  setFinalBlob(blob);
-};
+  const handleCropConfirm = async () => {
+    const blob = await getCroppedImg(imageSrc, croppedAreaPixels, {
+      maxWidth: 1080,
+      maxHeight: 1350,
+      quality: 0.75,
+      mimeType: "image/jpeg",
+    });
+    setFinalBlob(blob);
+  };
 
   const handlePostClick = () => {
     if (!finalBlob) {
@@ -195,8 +203,8 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
                   options={tagOptions}
                   value={selectedTags}
                   onChange={setSelectedTags}
-                  placeholder="Select up to 15 tags"
-                  maxSelected={15}
+                  placeholder="Select up to 7 tags"
+                  maxSelected={7}
                 />
                 <div
                   style={{ display: "flex", justifyContent: "space-between" }}
@@ -218,7 +226,7 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
                         checked={visibility === "university"}
                         onChange={(e) =>
                           setVisibility(
-                            e.target.checked ? "university" : "public"
+                            e.target.checked ? "university" : "public",
                           )
                         }
                       />
