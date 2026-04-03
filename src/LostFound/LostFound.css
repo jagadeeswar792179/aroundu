@@ -59,7 +59,7 @@ h4 {
 .item-card {
   width: 250px;
   border-radius: 25px;
-  background-color: white;
+  background: white;
   padding: 10px 10px 5px 10px;
   margin: 12px 0;
   word-wrap: break-word;
@@ -71,7 +71,7 @@ h4 {
 }
 .item-card-nope {
   width: 250px;
-  background: #ffffff;
+  background: white;
   border-radius: 25px;
   padding: 10px 10px 5px 10px;
   margin: 12px 0;
@@ -80,7 +80,7 @@ h4 {
 .item-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(17, 24, 39, 0.1);
-  border-color: #ebedf7;
+  border-color: white;
 }
 
 /* =============== Status Pill =============== */
@@ -442,7 +442,7 @@ h4 {
   justify-content: center;
 }
 .kebab-btn:hover {
-  background: #f3f4f6;
+  background: white;
 }
 .kebab-btn:active {
   transform: translateY(1px);
@@ -453,7 +453,7 @@ h4 {
   top: 28px;
   right: 0;
   min-width: 160px;
-  background: #fff;
+  background: white;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
