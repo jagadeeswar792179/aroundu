@@ -667,7 +667,7 @@ function PostFetch({ profile }) {
             <div className="feed-container" key={post.id}>
               <div className="feed-container-sep">
                 <div className="feed-container-1">
-                  <div style={{ display: "flex", gap: "10px" }}>
+                  <div style={{ display: "flex", gap: "10px", width: "100%" }}>
                     {post.user?.avatar_url ? (
                       <img
                         className="avatar-img"
@@ -685,9 +685,11 @@ function PostFetch({ profile }) {
                     <div
                       style={{
                         display: "flex",
-                        gap: "40px",
+
                         width: "100%",
+                        padding: "0 20px 0 0",
                       }}
+                      className="jspacebtw"
                     >
                       <div className="feed-container-1-2">
                         <b
@@ -821,7 +823,23 @@ function PostFetch({ profile }) {
                 </div>
 
                 <div className="feed-container-3-2-1">
-                  <FaShare title="Share" size={24} className="icon" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="25"
+                    height="25"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    color="#747474ff"
+                    // onClick={() => handleShare(post.id)}
+                  >
+                    <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+                    <path d="M16 6l-4-4-4 4" />
+                    <path d="M12 2v14" />
+                  </svg>
                 </div>
                 <div
                   className="feed-container-3-2-1"

@@ -4,6 +4,7 @@ import TimeAgo from "../utils/TimeAgo";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
 import ExploreLoading1 from "../Loading/explore-loading-1";
+import { BeatLoader } from "react-spinners";
 const CommentModal = ({ postId, onClose, onCommentAdded }) => {
   const [comments, setComments] = useState([]);
   const [hasMore, setHasMore] = useState(true);
@@ -23,7 +24,7 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
       const data = await res.json();
 
@@ -45,8 +46,8 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
               liked_by_me: !c.liked_by_me,
               like_count: (c.like_count ?? 0) + (c.liked_by_me ? -1 : 1),
             }
-          : c
-      )
+          : c,
+      ),
     );
 
     try {
@@ -56,7 +57,7 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = await res.json();
@@ -69,8 +70,8 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
                 liked_by_me: data.liked,
                 like_count: data.like_count,
               }
-            : c
-        )
+            : c,
+        ),
       );
     } catch (err) {
       console.error("❌ Failed to toggle like:", err);
@@ -84,8 +85,8 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
                 liked_by_me: !c.liked_by_me,
                 like_count: c.like_count + (c.liked_by_me ? 1 : -1),
               }
-            : c
-        )
+            : c,
+        ),
       );
     }
   };
@@ -180,10 +181,10 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
                 <div
                   style={{
                     cursor: "pointer",
-                    display: "flex",
                     padding: "10px 0 0 0",
                     gap: "5px",
                   }}
+                  className="flex-r center-c"
                   onClick={() => toggleCommentLike(comment.id)}
                 >
                   {comment.liked_by_me ? (
@@ -200,26 +201,23 @@ const CommentModal = ({ postId, onClose, onCommentAdded }) => {
           {loading && <ExploreLoading1 count={5} />}
         </div>
 
-        <div className="comment-input-box">
-          <textarea
+        <div className="flex-r center-c jspacebtw gap10">
+          <input
             placeholder="Add a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             disabled={posting}
-            className="comment-input"
-            rows={1}
-            onInput={(e) => {
-              e.target.style.height = "auto"; // reset height
-              e.target.style.height =
-                Math.min(e.target.scrollHeight, 120) + "px"; // grow upto 120px
-            }}
+            className="input-register"
+            style={{ borderRadius: "30px" }}
+            // rows={1}
           />
           <button
             onClick={handleAddComment}
             disabled={posting || !newComment.trim()}
             className="comment-submit-btn"
+            style={{ width: "70px" }}
           >
-            {posting ? "Posting..." : "Post"}
+            {posting ? <BeatLoader size={6} color="#FFFFFF" /> : "Post"}
           </button>
         </div>
       </div>

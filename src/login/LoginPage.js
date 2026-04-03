@@ -16,7 +16,7 @@ const LoginPage = () => {
     }
   }, [navigate]);
 
-const { refreshUser } = useUser();
+  const { refreshUser } = useUser();
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [password, setPassword] = useState("");
@@ -45,48 +45,45 @@ const { refreshUser } = useUser();
     setShowPassword((prev) => !prev);
   };
 
-
-
-
-const handleLogin = async () => {
-  if (emailError || passwordError || !email || !password) {
-    alert("Please fix the errors before logging in.");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const response = await fetch(`${server}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.msg || "Login failed");
+  const handleLogin = async () => {
+    if (emailError || passwordError || !email || !password) {
+      alert("Please fix the errors before logging in.");
+      return;
     }
 
-    // ✅ clear any old session
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    try {
+      setLoading(true);
 
-    // ✅ save new token
-    saveAuth(data.token, data.user);
+      const response = await fetch(`${server}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // 🔥 THIS IS THE MISSING PIECE
-    await refreshUser();
+      const data = await response.json();
 
-    // ✅ now navigate
-    navigate("/home");
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      if (!response.ok) {
+        throw new Error(data.msg || "Login failed");
+      }
+
+      // ✅ clear any old session
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      // ✅ save new token
+      saveAuth(data.token, data.user);
+
+      // 🔥 THIS IS THE MISSING PIECE
+      await refreshUser();
+
+      // ✅ now navigate
+      navigate("/home");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -163,8 +160,8 @@ const handleLogin = async () => {
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
-            {passwordError && <p className="error-text">{passwordError}</p>}
           </div>
+          {passwordError && <p className="error-text">{passwordError}</p>}
 
           <button
             type="submit"

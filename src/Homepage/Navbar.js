@@ -3,9 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { useUser } from "../UserContext/UserContext";
 import "./navbar.css";
 import useMessageBadge from "../hooks/useMessageBadge";
+import { motion } from "framer-motion";
 
 import Modal from "../utils/Modal";
-
+import { useLocation } from "react-router-dom";
 import ProfileViewers from "../profileview/ProfileViewers";
 import Bugreport from "../bugreport/Bugreport";
 import useNotifications from "../hooks/useNotifications";
@@ -15,7 +16,7 @@ export default function Navbar() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [ModalType, setModalType] = useState(null);
   const { notifications, unread, setUnread } = useNotifications();
-
+  const location = useLocation();
   const [searchInput, setSearchInput] = useState("");
   const [kebabOpen, setKebabOpen] = useState(false);
   const drawerRef = useRef(null);
@@ -89,7 +90,7 @@ export default function Navbar() {
         <div>
           <svg
             onClick={() => navigate("/home")}
-            className="icon"
+            className={`icon ${location.pathname.startsWith("/home") ? "iconactive" : ""}`}
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -109,7 +110,7 @@ export default function Navbar() {
         <div style={{ position: "relative" }}>
           <svg
             onClick={() => navigate("/messages")}
-            className="icon"
+            className={`icon ${location.pathname.startsWith("/messages") ? "iconactive" : ""}`}
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -131,7 +132,7 @@ export default function Navbar() {
         <div className="logout-hide-small-screen">
           <svg
             onClick={() => navigate(`/explore`)}
-            className="icon"
+            className={`icon ${location.pathname.startsWith("/explore") ? "iconactive" : ""}`}
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -150,7 +151,7 @@ export default function Navbar() {
         <div style={{ position: "relative" }}>
           <svg
             onClick={() => navigate("/notifications")}
-            className="icon"
+            className={`icon ${location.pathname.startsWith("/notifications") ? "iconactive" : ""}`}
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -171,7 +172,7 @@ export default function Navbar() {
         <div className="logout-hide-small-screen">
           <svg
             onClick={() => navigate("/marketplace")}
-            className="icon"
+            className={`icon ${location.pathname.startsWith("/marketplace") ? "iconactive" : ""}`}
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -200,59 +201,34 @@ export default function Navbar() {
 
         <div className="logout-hide-small-screen">
           <svg
-            onClick={() => navigate("/settings")}
-            className="icon"
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="25"
+            height="25"
             viewBox="0 0 24 24"
             fill="none"
+            className={`icon ${location.pathname.startsWith("/settings") ? "iconactive" : ""}`}
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
+            color="#747474ff"
+            onClick={() => navigate("/settings")}
           >
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M12 2v2"></path>
-            <path d="M12 20v2"></path>
-            <path d="M4.93 4.93l1.41 1.41"></path>
-            <path d="M17.66 17.66l1.41 1.41"></path>
-            <path d="M2 12h2"></path>
-            <path d="M20 12h2"></path>
-            <path d="M6.34 17.66l-1.41 1.41"></path>
-            <path d="M19.07 4.93l-1.41 1.41"></path>
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.66 0 1.26-.39 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06c.46.46 1.15.6 1.82.33h.01c.61-.25 1-.85 1-1.51V3a2 2 0 1 1 4 0v.09c0 .66.39 1.26 1 1.51.67.27 1.36.13 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06c-.46.46-.6 1.15-.33 1.82v.01c.25.61.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.66 0-1.26.39-1.51 1z" />
           </svg>
           <p>Settings</p>
         </div>
         <div>
           <img
-            className="profile-avatar"
             src={profile?.profile || "/avatar.jpg"}
             alt="profile"
             title="My Profile"
+            className={`profile-avatar ${location.pathname === "/profile" ? "iconactive" : ""}`}
             onClick={() => navigate("/profile")}
           />
           <p>My Profile</p>
         </div>
-        {/* <div className="logout-hide-small-screen">
-          <svg
-            onClick={handleLogout}
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            className="icon"
-          >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" x2="9" y1="12" y2="12" />
-          </svg>
-          <p>LogOut</p>
-        </div> */}
 
         <div className="hider-big">
           <svg
@@ -492,27 +468,20 @@ export default function Navbar() {
             className="flex-r center-c"
           >
             <svg
-              className="icon"
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="25"
+              height="25"
               viewBox="0 0 24 24"
               fill="none"
-              color="#205b99"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              color="#747474ff"
+              onClick={() => navigate("/settings")}
             >
-              <circle cx="12" cy="12" r="3"></circle>
-              <path d="M12 2v2"></path>
-              <path d="M12 20v2"></path>
-              <path d="M4.93 4.93l1.41 1.41"></path>
-              <path d="M17.66 17.66l1.41 1.41"></path>
-              <path d="M2 12h2"></path>
-              <path d="M20 12h2"></path>
-              <path d="M6.34 17.66l-1.41 1.41"></path>
-              <path d="M19.07 4.93l-1.41 1.41"></path>
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.66 0 1.26-.39 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06c.46.46 1.15.6 1.82.33h.01c.61-.25 1-.85 1-1.51V3a2 2 0 1 1 4 0v.09c0 .66.39 1.26 1 1.51.67.27 1.36.13 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06c-.46.46-.6 1.15-.33 1.82v.01c.25.61.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.66 0-1.26.39-1.51 1z" />
             </svg>
             <p>Settings</p>
           </div>

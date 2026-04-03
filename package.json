@@ -19,6 +19,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "framer-motion": "^12.38.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.513.0",
     "pg": "^8.16.3",

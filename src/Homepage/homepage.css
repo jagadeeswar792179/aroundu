@@ -66,12 +66,17 @@
 .icon {
   color: grey;
   margin-right: 10px;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
   cursor: pointer;
 }
 
 .icon:hover {
   color: var(--namehead);
+}
+.iconactive {
+  color: #0c4c90;
 }
 .homecontainer-1 {
   margin: 10px;
