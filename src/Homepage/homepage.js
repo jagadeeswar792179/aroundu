@@ -66,7 +66,7 @@ function Homepage() {
         )}
 
         {/* Profile viewers / bug modal */}
-        <Modal isOpen={isModalOpen}>
+        <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
           {ModalType === 1 ? (
             <ProfileViewers onClose={() => setModalOpen(false)} />
           ) : (

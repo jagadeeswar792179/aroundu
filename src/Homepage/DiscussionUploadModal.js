@@ -81,7 +81,7 @@ const DiscussionUploadModal = ({ isOpen, onClose, onCreate }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal">
+      <div className="modal-container">
         <div className="profup-1">
           <h3>Start a Discussion</h3>
           <span onClick={onClose}>✕</span>

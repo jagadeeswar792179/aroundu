@@ -117,7 +117,7 @@ const PostUploadModal = ({ isOpen, onClose, onPost }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal" style={{ width: "400px" }}>
+      <div className="modal-container" style={{ width: "400px" }}>
         <div className="profup-1">
           <h3>Create a Post</h3>
           <span onClick={onClose}>✕</span>

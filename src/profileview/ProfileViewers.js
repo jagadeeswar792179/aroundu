@@ -18,7 +18,7 @@ export default function ProfileViewers({ onClose }) {
     async (pageNo = 1) => {
       const res = await fetch(
         `${server}/api/profile-views/me?page=${pageNo}&limit=${limit}`,
-        { headers: { Authorization: token ? `Bearer ${token}` : "" } }
+        { headers: { Authorization: token ? `Bearer ${token}` : "" } },
       );
 
       if (!res.ok) {
@@ -30,7 +30,7 @@ export default function ProfileViewers({ onClose }) {
 
       return res.json();
     },
-    [server, token, limit]
+    [server, token, limit],
   );
 
   // initial load / reset
@@ -63,9 +63,6 @@ export default function ProfileViewers({ onClose }) {
           <h3>Profile viewers</h3>
           <span className="pv-count">{totalUnique} unique</span>
         </div>
-        <button className="modal-closeBtn" onClick={onClose}>
-          ✕
-        </button>
       </div>
 
       {/* When there are no items at all */}

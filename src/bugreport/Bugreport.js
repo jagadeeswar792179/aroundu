@@ -70,9 +70,6 @@ export default function Bugreport({ onClose }) {
     <div className="bugreport-container">
       <div className="bugreport-container-1">
         <h2>Submit Bug Report</h2>
-        <button className="modal-closeBtn" onClick={onClose}>
-          ✕
-        </button>
       </div>
       <form className="bugreport-form" onSubmit={handleSubmit}>
         <label>
