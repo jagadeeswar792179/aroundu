@@ -480,24 +480,6 @@ h4 {
   background: #f7f8ff;
 }
 
-/* Dark mode variants */
-@media (prefers-color-scheme: dark) {
-  .kebab-btn:hover {
-    background: #141833;
-  }
-  .kebab-menu {
-    background: #0f1220;
-    border-color: #1a1f3b;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  }
-  .kebab-item {
-    color: #e6e9f2;
-  }
-  .kebab-item:hover {
-    background: #151a3b;
-  }
-}
-
 /* =============== Responsive Tweaks =============== */
 @media (max-width: 600px) {
   .homecontainer-3-1 {
