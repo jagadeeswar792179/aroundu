@@ -34,8 +34,8 @@ const LoginPage = () => {
     setPassword(value);
     if (!value) {
       setPasswordError("Password is required");
-    } else if (value.length < 8) {
-      setPasswordError("Password must be at least 8 characters long.");
+    } else if (value.length < 6) {
+      setPasswordError("Password must be at least 6 characters long.");
     } else {
       setPasswordError("");
     }

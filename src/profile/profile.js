@@ -856,40 +856,7 @@ export default function Profile() {
 
                 {skillsTemp.length < 15 && (
                   <div className="select-container">
-                    <div className="flex-r gap10">
-                      {/* <Select
-                        className="skill-select"
-                        options={filteredSkillOptions}
-                        value={selectedSkill}
-                        onChange={setSelectedSkill}
-                        isClearable
-                        isSearchable
-                        placeholder="Select a skill"
-                        menuPlacement="auto" // 🔥 IMPORTANT
-                        menuPosition="fixed" // 🔥 IMPORTANT
-                        menuPortalTarget={document.body} // 🔥 VERY IMPORTANT
-                        styles={{
-                          container: (base) => ({
-                            ...base,
-                            width: 300,
-                            flex: "0 0 auto",
-                          }),
-                          control: (base) => ({
-                            ...base,
-                            minHeight: 36,
-                            width: "100%",
-                          }),
-                          menuPortal: (base) => ({
-                            ...base,
-                            zIndex: 9999, // 🔥 ensures it's above modal
-                          }),
-                          menuList: (base) => ({
-                            ...base,
-                            maxHeight: 150,
-                            overflowY: "auto",
-                          }),
-                        }}
-                      /> */}
+                    <div className="flex-r gap10" style={{ width: "100%" }}>
                       <CustomSelect
                         options={filteredSkillOptions}
                         value={selectedSkill}
@@ -944,63 +911,32 @@ export default function Profile() {
                 </div>
 
                 {interestsTemp.length < 7 && (
-                  <div className="select-container gap10">
-                    <div>
+                  <div
+                    className="select-container jspacebtw"
+                    style={{ width: "100%" }}
+                  >
+                    <div className="flex-r gap10" style={{ width: "100%" }}>
                       <CustomSelect
                         options={filteredInterestOptions}
                         value={selectedInterest}
                         onChange={setSelectedInterest}
                         placeholder="Select a skill"
                         direction="up"
-                        style={{ width: "300px" }}
                       />
-                      {/* <Select
-                        className="skill-select"
-                        options={filteredInterestOptions}
-                        value={selectedInterest}
-                        onChange={setSelectedInterest}
-                        isClearable
-                        isSearchable
-                        placeholder="   Select a interest"
-                        menuPlacement="auto" // 🔥 IMPORTANT
-                        menuPosition="fixed" // 🔥 IMPORTANT
-                        menuPortalTarget={document.body} // 🔥 VERY IMPORTANT
-                        styles={{
-                          container: (base) => ({
-                            ...base,
-                            width: 300,
-                            flex: "0 0 auto",
-                          }),
-                          control: (base) => ({
-                            ...base,
-                            minHeight: 36,
-                            width: "100%",
-                          }),
-                          menuPortal: (base) => ({
-                            ...base,
-                            zIndex: 9999, // 🔥 ensures it's above modal
-                          }),
-                          menuList: (base) => ({
-                            ...base,
-                            maxHeight: 150,
-                            overflowY: "auto",
-                          }),
-                        }}
-                      /> */}
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (!selectedInterest?.value) return;
-                        const next = selectedInterest.value;
+                      <button
+                        onClick={() => {
+                          if (!selectedInterest?.value) return;
+                          const next = selectedInterest.value;
 
-                        if (interestsTemp.length > 7) return; // enforce cap
-                        setinterestsTemp([...interestsTemp, next]); // preview list only
-                        setSelectedInterest(null);
-                      }}
-                      className="add-btn"
-                    >
-                      Add
-                    </button>
+                          if (interestsTemp.length > 7) return; // enforce cap
+                          setinterestsTemp([...interestsTemp, next]); // preview list only
+                          setSelectedInterest(null);
+                        }}
+                        className="add-btn"
+                      >
+                        Add
+                      </button>
+                    </div>
                   </div>
                 )}
                 <button onClick={handleSave} className="prof-btn">
