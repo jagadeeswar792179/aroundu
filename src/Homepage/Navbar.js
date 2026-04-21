@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "../UserContext/UserContext";
 import "./navbar.css";
-import useMessageBadge from "../hooks/useMessageBadge";
-import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 
 import Modal from "../utils/Modal";
 import { useLocation } from "react-router-dom";
@@ -20,8 +19,13 @@ export default function Navbar() {
   const [searchInput, setSearchInput] = useState("");
   const [kebabOpen, setKebabOpen] = useState(false);
   const drawerRef = useRef(null);
-  const { unreadMessages } = useMessageBadge();
-
+  const { data: convos = [] } = useQuery({
+    queryKey: ["conversations"],
+  });
+  const totalUnread = convos.reduce(
+    (sum, c) => sum + Number(c.unread_count || 0),
+    0,
+  );
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
@@ -123,9 +127,9 @@ export default function Navbar() {
           >
             <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
           </svg>
-          {/* {unreadMessages > 0 && (
-            <span className="notif-badge">{unreadMessages}</span>
-          )} */}
+          {totalUnread > 0 && (
+            <span className="notif-badge">{totalUnread}</span>
+          )}
           <p>Messages</p>
         </div>
 

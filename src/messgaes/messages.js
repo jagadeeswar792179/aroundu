@@ -12,6 +12,7 @@ import CreateGroupModal from "./CreateGroupModal";
 import GroupInfoModal from "./GroupInfoModal";
 import { FiTrash } from "react-icons/fi";
 import { getSocket } from "../socket";
+import { useOutletContext } from "react-router-dom";
 import { formatTimestamp } from "../utils/formatTimestamp";
 const API_BASE = process.env.REACT_APP_SERVER;
 
@@ -20,6 +21,7 @@ function Messages() {
   const queryClient = useQueryClient();
   const token = localStorage.getItem("token");
   const me = JSON.parse(localStorage.getItem("user"));
+  const { setActiveConversationId } = useOutletContext();
   const [modal, setModal] = useState({});
   const [hoverMsg, setHoverMsg] = useState(null);
   const [active, setActive] = useState(null);
@@ -51,16 +53,15 @@ function Messages() {
   // ===============================
   // Conversations Query
   // ===============================
-  const { data: convos = [], isLoading: loadingConvos } = useQuery({
+  const { data: convos } = useQuery({
     queryKey: ["conversations"],
     queryFn: async () => {
       const res = await authFetch(`${API_BASE}/api/messages/conversations`);
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    staleTime: 0,
+    staleTime: 60 * 1000,
   });
-
   // ===============================
   // Messages Query (Per Conversation)
   // ===============================
@@ -102,24 +103,24 @@ function Messages() {
   // ===============================
   // Socket Logic
   // ===============================
-  useEffect(() => {
-    if (!socket || !me?.id) return;
+  // useEffect(() => {
+  //   if (!socket || !me?.id) return;
 
-    const onNew = (msg) => {
-      queryClient.setQueryData(
-        ["messages", msg.conversation_id],
-        (old = []) => [...old, msg],
-      );
-      queryClient.invalidateQueries(["messages", msg.conversation_id]);
-    };
+  //   const onNew = (msg) => {
+  //     queryClient.setQueryData(
+  //       ["messages", msg.conversation_id],
+  //       (old = []) => [...old, msg],
+  //     );
+  //     queryClient.invalidateQueries(["messages", msg.conversation_id]);
+  //   };
 
-    socket.off("message:new", onNew);
-    socket.on("message:new", onNew);
+  //   socket.off("message:new", onNew);
+  //   socket.on("message:new", onNew);
 
-    return () => {
-      socket.off("message:new", onNew);
-    };
-  }, [socket, me?.id, queryClient]);
+  //   return () => {
+  //     socket.off("message:new", onNew);
+  //   };
+  // }, [socket, me?.id, queryClient]);
 
   // ===============================
   // Open Conversation
@@ -137,6 +138,10 @@ function Messages() {
       university: c.university,
       member_count: c.member_count,
     });
+
+    // 🔥 ADD THIS LINE
+    setActiveConversationId(c.conversation_id);
+
     if (window.innerWidth <= 700) {
       setMobileOpen(true);
     }
@@ -248,7 +253,16 @@ function Messages() {
     setBlockTarget({ peerId: convo.peer_id, name });
     setShowBlockModal(true);
   };
+  useEffect(() => {
+    return () => {
+      setActiveConversationId(null);
+    };
+  }, []);
+  // useEffect(() => {
+  //   if (!msgs || msgs.length === 0) return;
 
+  //   scrollDown();
+  // }, [msgs]);
   return (
     <>
       {modal?.type === "recovery" && (
@@ -302,7 +316,7 @@ function Messages() {
               </button>
             </div>
             <div className="mess-3-1">
-              {loadingConvos ? (
+              {!convos ? (
                 <LoadMessage />
               ) : convos.length === 0 ? (
                 <div

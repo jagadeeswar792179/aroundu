@@ -12,16 +12,11 @@ export const initSocket = (userId) => {
     });
   }
 
+  // 🔥 Always update auth BEFORE connect
+  socket.auth = { userId };
+
   if (!socket.connected) {
-    socket.auth = { userId }; // 🔥 IMPORTANT
     socket.connect();
-
-    socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
-
-      // your backend expects this
-      socket.emit("join", userId);
-    });
   }
 
   return socket;

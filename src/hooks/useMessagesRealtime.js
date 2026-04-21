@@ -1,40 +1,115 @@
 import { useEffect } from "react";
-import { getSocket } from "../socket";
 import { useQueryClient } from "@tanstack/react-query";
+import { getSocket } from "../socket";
 
-export default function useMessagesRealtime() {
+export default function useMessagesRealtime(activeConversationId, me) {
   const queryClient = useQueryClient();
+  const socket = getSocket();
 
   useEffect(() => {
-    const socket = getSocket();
     if (!socket) return;
 
-    const handler = (msg) => {
-      // 🔥 update conversations (badge)
+    // ===============================
+    // NEW MESSAGE
+    // ===============================
+    const onNew = (msg) => {
+      // 🔹 Update messages
+      queryClient.setQueryData(
+        ["messages", msg.conversation_id],
+        (old = []) => {
+          const exists = old.some((m) => m.id === msg.id);
+          if (exists) return old;
+          return [...old, msg];
+        },
+      );
+
+      // 🔹 Update conversations (GLOBAL)
       queryClient.setQueryData(["conversations"], (old = []) => {
-        const idx = old.findIndex(
+        if (!old || old.length === 0) {
+          return [
+            {
+              conversation_id: msg.conversation_id,
+              last_message: msg.body,
+              unread_count: 1,
+            },
+          ];
+        }
+
+        const exists = old.some(
           (c) => c.conversation_id === msg.conversation_id,
         );
 
-        if (idx === -1) return old;
+        if (!exists) {
+          return [
+            {
+              conversation_id: msg.conversation_id,
+              last_message: msg.body,
+              unread_count: 1,
+            },
+            ...old,
+          ];
+        }
 
-        const convo = old[idx];
-
-        const updated = {
-          ...convo,
-          last_message: msg.body,
-          unread_count: (convo.unread_count || 0) + 1,
-        };
-
-        return [updated, ...old.filter((_, i) => i !== idx)];
+        return old.map((c) =>
+          c.conversation_id === msg.conversation_id
+            ? {
+                ...c,
+                last_message: msg.body,
+                unread_count:
+                  activeConversationId === msg.conversation_id
+                    ? 0
+                    : Number(c.unread_count || 0) + 1, // 🔥 FIX
+              }
+            : c,
+        );
       });
-
-      // 🔥 optional: keep messages synced
-      queryClient.invalidateQueries(["messages", msg.conversation_id]);
     };
 
-    socket.on("message:new", handler);
+    // ===============================
+    // SEEN
+    // ===============================
+    const onSeen = ({ conversation_id }) => {
+      queryClient.setQueryData(["messages", conversation_id], (old = []) =>
+        old.map((m) => (m.sender_id === me?.id ? { ...m, seen: true } : m)),
+      );
 
-    return () => socket.off("message:new", handler);
-  }, [queryClient]);
+      // reset unread count
+      queryClient.setQueryData(["conversations"], (old = []) =>
+        old.map((c) =>
+          c.conversation_id === conversation_id ? { ...c, unread_count: 0 } : c,
+        ),
+      );
+    };
+
+    // ===============================
+    // DELETE
+    // ===============================
+    const onDelete = ({ messageId, conversation_id }) => {
+      queryClient.setQueryData(["messages", conversation_id], (old = []) =>
+        old.map((m) => (m.id === messageId ? { ...m, deleted: true } : m)),
+      );
+
+      queryClient.setQueryData(["conversations"], (old = []) =>
+        old.map((c) =>
+          c.conversation_id === conversation_id &&
+          c.last_message_id === messageId
+            ? { ...c, last_message: "Message deleted" }
+            : c,
+        ),
+      );
+    };
+
+    // ===============================
+    // REGISTER
+    // ===============================
+    socket.on("message:new", onNew);
+    socket.on("message:deleted", onDelete);
+    socket.on("message:seen", onSeen); // 🔥 ADD THIS
+
+    return () => {
+      socket.off("message:new", onNew);
+      socket.off("message:deleted", onDelete);
+      socket.off("message:seen", onSeen);
+    };
+  }, [socket, queryClient, activeConversationId, me]);
 }
