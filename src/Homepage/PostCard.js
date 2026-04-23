@@ -7,6 +7,8 @@ import {
   FaShare,
   FaBookmark,
 } from "react-icons/fa";
+import { MdVerifiedUser } from "react-icons/md";
+
 import TimeAgo from "../utils/TimeAgo";
 import Line from "../utils/line";
 import { useNavigate } from "react-router-dom";
@@ -65,13 +67,13 @@ export default function PostCard({
             )}
             <div className="feed-container-1-2">
               <b
-                // style={{
-                //   cursor:
-                //     post.user_id !== loggedInUserId ? "pointer" : "default",
-                // }}
+                style={{
+                  cursor:
+                    post.user_id !== loggedInUserId ? "pointer" : "default",
+                }}
                 className={`username ${
                   post.user_id !== loggedInUserId ? "clickable" : ""
-                }`}
+                } flex-r gap5 center-c`}
                 onClick={() => {
                   if (post.user_id !== loggedInUserId && onNavigateProfile)
                     onNavigateProfile(post.user_id);
@@ -80,6 +82,7 @@ export default function PostCard({
                 {`${post.user?.first_name || ""} ${
                   post.user?.last_name || ""
                 }`.trim() || "Unknown User"}
+                <MdVerifiedUser size={13} />
               </b>
               <p>{post.user?.course}</p>
               <p>{post.user?.university}</p>

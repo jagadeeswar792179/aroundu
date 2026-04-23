@@ -1,8 +1,13 @@
 import React from "react";
 import "./welcome.css";
 import { useNavigate } from "react-router-dom";
-
+import { IoPhonePortraitOutline } from "react-icons/io5";
 import { useEffect } from "react";
+import { TbMoneybag } from "react-icons/tb";
+import { FiShoppingBag } from "react-icons/fi";
+import { IoMdBook } from "react-icons/io";
+import { GoPackage } from "react-icons/go";
+import { IoSearchOutline } from "react-icons/io5";
 export default function AroundUHome() {
   const navigate = useNavigate();
 
@@ -60,9 +65,12 @@ export default function AroundUHome() {
         <div className="hero-inner">
           <div className="hero-content">
             <div className="hero-eyebrow">
-              <div className="eyebrow-dot"></div>
+              <div className=""></div>
               Built exclusively for verified students &amp; faculty
             </div>
+            {/* <div className="eyebrow-dot"></div>
+              Built exclusively for verified students &amp; faculty
+            </div> */}
             <h1>
               <span className="h1-navy">Keeping</span>
               <br />
@@ -79,10 +87,10 @@ export default function AroundUHome() {
             </p>
             <div className="hero-btns">
               <button className="btn-hero-a" onClick={() => navigate("/login")}>
-                🎓 Join as Student
+                Join as Student
               </button>
               <button className="btn-hero-b" onClick={() => navigate("/login")}>
-                👨‍🏫 Join as Professor
+                Join as Professor
               </button>
             </div>
             <div className="hero-trust">
@@ -227,7 +235,7 @@ export default function AroundUHome() {
 
       <section className="features-section" id="features">
         <div className="feat-header reveal">
-          <div className="sec-tag">✨ Everything in One Place</div>
+          <div className="sec-tag"> Everything in One Place</div>
           <h2 className="sec-title">One App. Your Entire Campus Life.</h2>
           <p className="sec-sub">
             From social posts to professor bookings, AroundU has every corner of
@@ -236,7 +244,9 @@ export default function AroundUHome() {
         </div>
         <div className="feat-grid">
           <div className="feat-card fc-teal reveal">
-            <div className="feat-icon fi-tl">📱</div>
+            <div className="feat-icon fi-tl">
+              <IoPhonePortraitOutline />
+            </div>
             <h3>Smart Campus Feed</h3>
             <p>
               Post photos and videos. Filter by your interests, university, or
@@ -245,7 +255,9 @@ export default function AroundUHome() {
             </p>
           </div>
           <div className="feat-card fc-green reveal">
-            <div className="feat-icon fi-gn">💰</div>
+            <div className="feat-icon fi-gn">
+              <TbMoneybag />
+            </div>
             <h3>Earn with Free Time</h3>
             <p>
               List your available time slots and help fellow students with
@@ -254,7 +266,9 @@ export default function AroundUHome() {
             </p>
           </div>
           <div className="feat-card fc-navy reveal">
-            <div className="feat-icon fi-nv">📚</div>
+            <div className="feat-icon fi-nv">
+              <IoMdBook />
+            </div>
             <h3>Professor Discovery</h3>
             <p>
               Find trending professors across universities. View their
@@ -263,7 +277,9 @@ export default function AroundUHome() {
             </p>
           </div>
           <div className="feat-card fc-teal reveal">
-            <div className="feat-icon fi-yw">🛍️</div>
+            <div className="feat-icon fi-yw">
+              <FiShoppingBag />
+            </div>
             <h3>Campus Marketplace</h3>
             <p>
               Buy, sell, and trade with verified students at your university.
@@ -272,7 +288,9 @@ export default function AroundUHome() {
             </p>
           </div>
           <div className="feat-card fc-green reveal">
-            <div className="feat-icon fi-or">📦</div>
+            <div className="feat-icon fi-or">
+              <GoPackage />
+            </div>
             <h3>Lost &amp; Found Board</h3>
             <p>
               Post lost or found items right on your campus. AroundU's built-in
@@ -281,7 +299,9 @@ export default function AroundUHome() {
             </p>
           </div>
           <div className="feat-card fc-navy reveal">
-            <div className="feat-icon fi-pu">🔍</div>
+            <div className="feat-icon fi-pu">
+              <IoSearchOutline />
+            </div>
             <h3>Explore &amp; Connect</h3>
             <p>
               Discover students and professors beyond your campus. Toggle
@@ -293,7 +313,7 @@ export default function AroundUHome() {
 
       <section className="screens-section" id="screenshots">
         <div className="screens-header reveal">
-          <div className="sec-tag">📱 See It Live</div>
+          <div className="sec-tag"> See It Live</div>
           <h2 className="sec-title">Designed for How Students Actually Live</h2>
           <p className="sec-sub" style={{ margin: "0 auto" }}>
             Clean, intuitive, and built around campus life — AroundU fits right
@@ -301,10 +321,10 @@ export default function AroundUHome() {
           </p>
         </div>
         <div className="screens-tabs reveal">
-          <button className="tab act">🏠 Home Feed</button>
-          <button className="tab">📦 Lost &amp; Found</button>
-          <button className="tab">🛍️ Marketplace</button>
-          <button className="tab">👨‍🏫 Professors</button>
+          <button className="tab act"> Home Feed</button>
+          <button className="tab"> Lost &amp; Found</button>
+          <button className="tab"> Marketplace</button>
+          <button className="tab"> Professors</button>
         </div>
         <div className="screens-row reveal">
           <div className="s-mock side">
@@ -320,7 +340,7 @@ export default function AroundUHome() {
               </div>
             </div>
             <div className="m-body">
-              <div className="m-search">🔍 Search students...</div>
+              <div className="m-search"> Search students...</div>
               <div
                 style={{
                   fontSize: "0.52rem",
@@ -511,7 +531,7 @@ export default function AroundUHome() {
               borderColor: "rgba(42, 191, 191, 0.2)",
             }}
           >
-            🎯 Two Accounts, One Community
+            Two Accounts, One Community
           </div>
           <h2 className="sec-title">Built for Every Corner of Campus</h2>
           <p className="sec-sub">
@@ -557,11 +577,11 @@ export default function AroundUHome() {
               className="btn-s btn-s-t"
               onClick={() => navigate("/login")}
             >
-              🎓 Join as Student →
+              Join as Student →
             </button>
           </div>
           <div className="s-card s-prof reveal">
-            <div className="s-chip chip-pr">👨‍🏫 For Professors</div>
+            <div className="s-chip chip-pr"> For Professors</div>
             <h2>Reach Students Beyond Your classNameroom</h2>
             <p>
               Create your verified faculty profile, post your availability, and
@@ -599,11 +619,11 @@ export default function AroundUHome() {
               onClick={() => navigate("/login")}
               s
             >
-              👨‍🏫 Join as Professor →
+              Join as Professor →
             </button>
           </div>
           <div className="s-card s-club reveal">
-            <div className="s-chip chip-cl">🏫 For Clubs</div>
+            <div className="s-chip chip-cl"> For Clubs</div>
 
             <h2>Build and Grow Your Campus Community</h2>
 
@@ -644,7 +664,7 @@ export default function AroundUHome() {
               className="btn-s btn-s-b"
               onClick={() => navigate("/login")}
             >
-              🏫 Join as Club →
+              Join as Club →
             </button>
           </div>
         </div>
@@ -765,7 +785,7 @@ export default function AroundUHome() {
         <div className="cta-c1"></div>
         <div className="cta-c2"></div>
         <div className="cta-inner reveal">
-          <div className="cta-badge">🚀 Free to Join Today</div>
+          <div className="cta-badge"> Free to Join Today</div>
           <h2>
             Ready to Make the Most
             <br />
@@ -778,15 +798,15 @@ export default function AroundUHome() {
           </p>
           <div className="cta-btns">
             <button className="btn-cta-a" onClick={() => navigate("/login")}>
-              🎓 Sign Up as Student
+              Sign Up as Student
             </button>
             <button className="btn-cta-b" onClick={() => navigate("/login")}>
-              👨‍🏫 Sign Up as Professor
+              Sign Up as Professor
             </button>
           </div>
           <p className="cta-note">
-            ✓ University email required &nbsp;·&nbsp; ✓ Free forever
-            &nbsp;·&nbsp; ✓ No fake accounts &nbsp;·&nbsp; ® Trademarked
+            University email required &nbsp;·&nbsp; Free forever &nbsp;·&nbsp;
+            No fake accounts &nbsp;·&nbsp; ® Trademarked
           </p>
         </div>
       </section>

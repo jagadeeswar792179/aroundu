@@ -1001,7 +1001,7 @@ export default function Profile() {
         </div>
         {tokenDetails.user_type !== "club" && (
           <div className="prof-2">
-            <h1>Have free time! Help students And earn Money</h1>
+            <h1>Turn your free time into income</h1>
 
             <WeekBooking user={profile} />
           </div>

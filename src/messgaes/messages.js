@@ -258,11 +258,7 @@ function Messages() {
       setActiveConversationId(null);
     };
   }, []);
-  // useEffect(() => {
-  //   if (!msgs || msgs.length === 0) return;
 
-  //   scrollDown();
-  // }, [msgs]);
   return (
     <>
       {modal?.type === "recovery" && (

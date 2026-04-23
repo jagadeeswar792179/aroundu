@@ -77,15 +77,17 @@ function ClubsSection({ initialSameUniversity = false }) {
         {clubs.map((c) => (
           <div className="prof-card" key={c.id}>
             <div className="prof-card-left">
-              {c.avatar_url ? (
+              {c.profile ? (
                 <img
-                  src={profileImage(c.avatar_url)}
+                  src={profileImage(c.profile)}
                   className="prof-avatar"
                   alt="club"
                 />
               ) : (
-                <div className="explore-fallback">
-                  <img src="/avatar.jpg" className="prof-avatar" alt="club" />
+                <div className="explore-fallback flex-r">
+                  {`${c.first_name?.[0] || ""}${
+                    c.last_name?.[0] || ""
+                  }`.toUpperCase()}
                 </div>
               )}
             </div>
@@ -117,6 +119,9 @@ function ClubsSection({ initialSameUniversity = false }) {
           </div>
         ))}
       </div>
+      {clubs.length === 0 && !isLoading && (
+        <div style={{ color: "#777" }}>No clubs found.</div>
+      )}
 
       {isLoading && <ExploreLoading1 count={4} />}
       <div className="showmore-btn-container flex-c">

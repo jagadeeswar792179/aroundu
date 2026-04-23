@@ -25,52 +25,37 @@ const fetchPeople = async ({ pageParam = 1, sameUniversity }) => {
 /* ---------------- COMPONENT ---------------- */
 
 function PeopleSection({ initialSameUniversity = true }) {
-  const loggedInUserId =
-    JSON.parse(localStorage.getItem("user"))?.id;
+  const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
 
-  const [sameUniversity, setSameUniversity] = useState(
-    initialSameUniversity
-  );
+  const [sameUniversity, setSameUniversity] = useState(initialSameUniversity);
   const [selectedPeer, setSelectedPeer] = useState(null);
 
   const navigate = useNavigate();
 
-  const profileImage = useCallback(
-    (url) => url || "/avatar.jpg",
-    []
-  );
+  const profileImage = useCallback((url) => url || "/avatar.jpg", []);
 
   /* ---------------- REACT QUERY ---------------- */
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isLoading,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["explore-people", sameUniversity],
-    queryFn: ({ pageParam = 1 }) =>
-      fetchPeople({ pageParam, sameUniversity }),
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.hasMore ? pages.length + 1 : undefined,
-    staleTime: 1000 * 60 * 5, // 5 minutes fresh
-    gcTime: 1000 * 60 * 30,  // cache 30 minutes
-    keepPreviousData: true,
-  });
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["explore-people", sameUniversity],
+      queryFn: ({ pageParam = 1 }) =>
+        fetchPeople({ pageParam, sameUniversity }),
+      getNextPageParam: (lastPage, pages) =>
+        lastPage.hasMore ? pages.length + 1 : undefined,
+      staleTime: 1000 * 60 * 5, // 5 minutes fresh
+      gcTime: 1000 * 60 * 30, // cache 30 minutes
+      keepPreviousData: true,
+    });
 
   /* ---------------- FLATTEN DATA ---------------- */
 
-  const people =
-    data?.pages?.flatMap((page) => page.people) ?? [];
+  const people = data?.pages?.flatMap((page) => page.people) ?? [];
 
   /* ---------------- UI ---------------- */
 
   return (
-    <div
-      className="explore-2-2"
-      style={{ padding: 12, marginTop: 16 }}
-    >
+    <div className="explore-2-2" style={{ padding: 12, marginTop: 16 }}>
       {selectedPeer && (
         <MessageModal
           isOpen={!!selectedPeer}
@@ -87,9 +72,7 @@ function PeopleSection({ initialSameUniversity = true }) {
           alignItems: "center",
         }}
       >
-        <h3 style={{ marginTop: 0 }}>
-          People you may know
-        </h3>
+        <h3 style={{ marginTop: 0 }}>People you may know</h3>
 
         <label
           style={{
@@ -103,9 +86,7 @@ function PeopleSection({ initialSameUniversity = true }) {
             <input
               type="checkbox"
               checked={sameUniversity}
-              onChange={(e) =>
-                setSameUniversity(e.target.checked)
-              }
+              onChange={(e) => setSameUniversity(e.target.checked)}
             />
             <span className="slider" />
           </div>
@@ -116,9 +97,7 @@ function PeopleSection({ initialSameUniversity = true }) {
       {/* Grid */}
       <div style={{ marginTop: 8 }}>
         {people.length === 0 && !isLoading && (
-          <div style={{ color: "black" }}>
-            No suggestions yet.
-          </div>
+          <div style={{ color: "black" }}>No suggestions yet.</div>
         )}
 
         <div style={{ marginTop: 8 }}>
@@ -130,9 +109,9 @@ function PeopleSection({ initialSameUniversity = true }) {
                 aria-label={`person-${p.first_name}-${p.last_name}`}
               >
                 <div className="prof-card-left">
-                  {p.avatar_url ? (
+                  {p.profile ? (
                     <img
-                      src={profileImage(p.avatar_url)}
+                      src={profileImage(p.profile)}
                       alt={`${p.first_name} ${p.last_name}`}
                       className="prof-avatar"
                     />
@@ -162,13 +141,9 @@ function PeopleSection({ initialSameUniversity = true }) {
 
                   <div className="prof-meta">
                     <div className="prof-role">
-                      {p.specialization ||
-                        p.course ||
-                        ""}
+                      {p.specialization || p.course || ""}
                     </div>
-                    <div className="prof-univ">
-                      {p.university || ""}
-                    </div>
+                    <div className="prof-univ">{p.university || ""}</div>
                   </div>
 
                   <button
@@ -196,9 +171,7 @@ function PeopleSection({ initialSameUniversity = true }) {
             disabled={isFetchingNextPage}
             className="show-more-btn"
           >
-            {isFetchingNextPage
-              ? "Loading..."
-              : "<< Show more"}
+            {isFetchingNextPage ? "Loading..." : "<< Show more"}
           </button>
         )}
       </div>

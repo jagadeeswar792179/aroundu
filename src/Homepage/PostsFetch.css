@@ -10,7 +10,22 @@
   padding: 4px 8px;
   color: #555;
 }
+.user-card {
+  position: relative;
+}
 
+.verified-hover {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 👇 show only on hover */
+.user-card:hover .verified-hover {
+  opacity: 1;
+}
 .kebab-menu {
   position: absolute;
   right: 100%; /* menu opens to the LEFT */

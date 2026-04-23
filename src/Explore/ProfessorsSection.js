@@ -24,46 +24,33 @@ const fetchProfessors = async ({ pageParam = 1, sameUniversity }) => {
 
 /* ---------------- COMPONENT ---------------- */
 
-function ProfessorsSection({
-  initialSameUniversity = false,
-}) {
+function ProfessorsSection({ initialSameUniversity = false }) {
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
 
-  const [sameUniversity, setSameUniversity] = useState(
-    initialSameUniversity
-  );
+  const [sameUniversity, setSameUniversity] = useState(initialSameUniversity);
   const [selectedPeer, setSelectedPeer] = useState(null);
 
   const navigate = useNavigate();
 
-  const profileImage = useCallback(
-    (url) => url || "/avatar.jpg",
-    []
-  );
+  const profileImage = useCallback((url) => url || "/avatar.jpg", []);
 
   /* ---------------- REACT QUERY ---------------- */
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isLoading,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["explore-professors", sameUniversity],
-    queryFn: ({ pageParam = 1 }) =>
-      fetchProfessors({ pageParam, sameUniversity }),
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.hasMore ? pages.length + 1 : undefined,
-    staleTime: 1000 * 60 * 5,      // 5 min no refetch
-    gcTime: 1000 * 60 * 30,       // cache 30 min
-    keepPreviousData: true,
-  });
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["explore-professors", sameUniversity],
+      queryFn: ({ pageParam = 1 }) =>
+        fetchProfessors({ pageParam, sameUniversity }),
+      getNextPageParam: (lastPage, pages) =>
+        lastPage.hasMore ? pages.length + 1 : undefined,
+      staleTime: 1000 * 60 * 5, // 5 min no refetch
+      gcTime: 1000 * 60 * 30, // cache 30 min
+      keepPreviousData: true,
+    });
 
   /* ---------------- FLATTEN DATA ---------------- */
 
-  const profs =
-    data?.pages?.flatMap((page) => page.professors) ?? [];
+  const profs = data?.pages?.flatMap((page) => page.professors) ?? [];
 
   /* ---------------- UI ---------------- */
 
@@ -99,9 +86,7 @@ function ProfessorsSection({
             <input
               type="checkbox"
               checked={sameUniversity}
-              onChange={(e) =>
-                setSameUniversity(e.target.checked)
-              }
+              onChange={(e) => setSameUniversity(e.target.checked)}
             />
             <span className="slider" />
           </div>
@@ -112,9 +97,7 @@ function ProfessorsSection({
       {/* Grid */}
       <div className="prof-grid" style={{ marginTop: 12 }}>
         {profs.length === 0 && !isLoading && (
-          <div style={{ color: "#777" }}>
-            No professors found.
-          </div>
+          <div style={{ color: "#777" }}>No professors found.</div>
         )}
 
         {profs.map((p) => (
@@ -124,9 +107,9 @@ function ProfessorsSection({
             aria-label={`professor-${p.first_name}-${p.last_name}`}
           >
             <div className="prof-card-left">
-              {p.avatar_url ? (
+              {p.profile ? (
                 <img
-                  src={profileImage(p.avatar_url)}
+                  src={profileImage(p.profile)}
                   alt={`${p.first_name} ${p.last_name}`}
                   className="prof-avatar"
                 />
@@ -158,9 +141,7 @@ function ProfessorsSection({
                 <div className="prof-role">
                   {p.specialization || p.course || "—"}
                 </div>
-                <div className="prof-univ">
-                  {p.university || "—"}
-                </div>
+                <div className="prof-univ">{p.university || "—"}</div>
               </div>
 
               <button
@@ -186,9 +167,7 @@ function ProfessorsSection({
             disabled={isFetchingNextPage}
             className="show-more-btn"
           >
-            {isFetchingNextPage
-              ? "Loading..."
-              : "<< Show more"}
+            {isFetchingNextPage ? "Loading..." : "<< Show more"}
           </button>
         )}
       </div>

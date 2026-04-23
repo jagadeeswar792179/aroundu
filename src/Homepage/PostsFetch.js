@@ -18,6 +18,7 @@ import BlockConfirmModal from "../utils/BlockConfirmModal";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getTokenPayload } from "../utils/getTokenPayload";
+import { MdVerifiedUser } from "react-icons/md";
 // ...
 function PostFetch({ profile }) {
   const server = process.env.REACT_APP_SERVER;
@@ -695,7 +696,7 @@ function PostFetch({ profile }) {
                         <b
                           className={`username ${
                             post.user_id !== loggedInUserId ? "clickable" : ""
-                          }`}
+                          } flex-r gap5 center-c`}
                           onClick={() => {
                             if (post.user_id !== loggedInUserId)
                               navigate(`/profile/${post.user_id}`);
@@ -704,6 +705,11 @@ function PostFetch({ profile }) {
                           {`${post.user?.first_name || ""} ${
                             post.user?.last_name || ""
                           }`.trim() || "Unknown User"}
+                          {post.user_id !== loggedInUserId && (
+                            <>
+                              <MdVerifiedUser size={13} />
+                            </>
+                          )}
                         </b>
 
                         <p>{post.user?.course}</p>

@@ -110,6 +110,9 @@ label {
   justify-content: center;
   align-items: center;
 }
+.gap5 {
+  gap: 5px;
+}
 .gap10 {
   gap: 10px;
 }
@@ -134,7 +137,9 @@ label {
 .p-20 {
   padding: 20px;
 }
-
+.m-10 {
+  margin: 10px;
+}
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

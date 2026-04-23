@@ -2,28 +2,12 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { FiSend } from "react-icons/fi";
 import LoadMess2 from "../Loading/LoadMess2";
-import { getSocket } from "../socket";
-/**
- * MessageModal
- * Props:
- *  - isOpen: boolean
- *  - onClose: function
- *  - peer: { id, first_name, last_name, profile, university, email }
- *  - onConversationCreated?: function(conversationId, peer)  // optional callback for parent refresh
- *
- * Notes:
- *  - Requires `token` in localStorage and `user` object in localStorage (same as your app).
- *  - Uses endpoints:
- *      GET /api/messages/conversations
- *      POST /api/messages/conversation  { peerId }
- *      GET /api/messages/:conversationId
- *      POST /api/messages/:conversationId/send   { body }
- *      POST /api/messages/:conversationId/seen
- *
- *  - Adjust API_BASE if your server runs elsewhere.
- */
+import { getSocket, initSocket } from "../socket"; // ✅ added initSocket
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { FiTrash } from "react-icons/fi";
+import { formatTimestamp } from "../utils/formatTimestamp";
 const API_BASE = process.env.REACT_APP_SERVER;
-const socket = getSocket();
+
 export default function MessageModal({
   isOpen,
   onClose,
@@ -34,48 +18,42 @@ export default function MessageModal({
   const token = localStorage.getItem("token");
   const bottomRef = useRef(null);
 
-  // mirrors 'active' in your messages.js — contains header info + conversation metadata
   const [active, setActive] = useState(null);
-
-  // conversation id (if exists). null means none yet.
   const [conversationId, setConversationId] = useState(null);
-
-  // messages list
-  const [msgs, setMsgs] = useState([]);
-
-  // loading flags
-  const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const queryClient = useQueryClient();
+  const [hoverMsg, setHoverMsg] = useState(null);
   const [sending, setSending] = useState(false);
-
-  // compose text
   const [text, setText] = useState("");
-
-  // for debounced scroll or socket connect indicator
+  const [resolved, setResolved] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
 
-  // helper fetch with auth
   const authFetch = (url, opts = {}) =>
     fetch(url, {
       ...opts,
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
-        "Content-Type": opts.body ? "application/json" : "application/json",
+        "Content-Type": "application/json",
         ...(opts.headers || {}),
       },
     });
 
-  // scroll to bottom helper
   const scrollDown = () =>
     setTimeout(
       () => bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
       100,
     );
 
-  // Initialize active and detect existing conversation on open
+  useEffect(() => {
+    if (me?.id) {
+      initSocket(me.id);
+    }
+  }, [me?.id]);
+
   useEffect(() => {
     if (!isOpen) return;
 
-    // set header immediately
+    const socket = getSocket();
+
     const headerObj = {
       id: peer.id,
       peer_name:
@@ -86,68 +64,68 @@ export default function MessageModal({
       university: peer.university || null,
       conversation_id: null,
     };
+
     setActive(headerObj);
-    setMsgs([]);
     setConversationId(null);
     setText("");
 
-    // Listen for incoming messages (global)
+    // ✅ FIXED: React Query-based socket update
     const onIncoming = (message) => {
-      // message expected shape: { conversation_id, sender_id, body, created_at, ... }
-      // Only add if belongs to our active conversation or if it's a new conversation with this peer.
       if (!message) return;
+
       const cid =
         message.conversation_id ||
         message.conversationId ||
         message.conversation;
-      const sender = message.sender_id || message.senderId || message.from;
 
-      // if we already have a conversation id and it matches, append
-      if (conversationId && cid && String(cid) === String(conversationId)) {
-        setMsgs((prev) => [...prev, message]);
-        scrollDown();
-      } else {
-        // if no conversation yet but incoming message is from this peer (maybe they started it),
-        // then set conversationId and load messages.
-        if (
-          !conversationId &&
-          (sender === peer.id ||
-            message.peer_id === peer.id ||
-            message.peerId === peer.id)
-        ) {
-          const newCid = cid;
-          if (newCid) {
-            setConversationId(newCid);
-            setActive((a) => ({ ...a, conversation_id: newCid }));
-            loadMessages(newCid);
-            if (typeof onConversationCreated === "function") {
-              onConversationCreated(newCid, peer);
-            }
+      const sender = message.sender_id || message.senderId || message.from;
+      if (!cid) return;
+
+      if (conversationId && String(cid) !== String(conversationId)) {
+        return; // ignore other chats
+      }
+      // 🔥 Always update React Query cache
+      queryClient.setQueryData(["messages", cid], (old = []) => {
+        const exists = old.some((m) => m.id === message.id);
+        if (exists) return old;
+        return [...old, message];
+      });
+
+      scrollDown();
+
+      // 🔥 If no conversation yet → initialize it
+      if (
+        !resolved &&
+        (String(sender) === String(peer.id) ||
+          String(message.peer_id) === String(peer.id) ||
+          String(message.peerId) === String(peer.id))
+      ) {
+        if (cid) {
+          setConversationId(cid);
+          setActive((a) => ({ ...a, conversation_id: cid }));
+
+          if (typeof onConversationCreated === "function") {
+            onConversationCreated(cid, peer);
           }
         }
       }
     };
 
-    socket.on("message:new", onIncoming);
-    socket.on("message", onIncoming); // support other event names
+    if (socket) {
+      socket.on("message:new", onIncoming);
+      socket.on("message", onIncoming);
+    }
 
-    // detect existing conversation by fetching conversations list
+    // ✅ detect existing conversation (NO loadMessages)
     (async function detectConversation() {
       try {
         const res = await authFetch(`${API_BASE}/api/messages/conversations`);
         if (!res.ok) throw new Error("Failed to fetch conversations");
+
         const convos = await res.json();
         if (!Array.isArray(convos)) return;
 
-        // your conversations may have different keys; check multiple possibilities
-        const found = convos.find((c) => {
-          return (
-            c.peer_id === peer.id ||
-            c.peerId === peer.id ||
-            c.user_id === peer.id ||
-            c.participants?.includes?.(peer.id)
-          );
-        });
+        const found = convos.find((c) => String(c.peer_id) === String(peer.id));
 
         if (found) {
           const cid =
@@ -155,140 +133,129 @@ export default function MessageModal({
             found.id ||
             found.conversationId ||
             found._id;
+
           if (cid) {
             setConversationId(cid);
             setActive((a) => ({ ...a, conversation_id: cid }));
-            await loadMessages(cid);
+            setResolved(true);
+            // ❌ DO NOT CALL loadMessages
           }
-        } else {
-          // no conversation yet — do nothing until send or incoming
         }
       } catch (err) {
         console.error("detectConversation error", err);
       }
     })();
 
-    // cleanup handlers when modal closes
     return () => {
-      socket.off("message:new", onIncoming);
-      socket.off("message", onIncoming);
-      // don't disconnect socket here globally (other parts might use it). If you want, you can disconnect.
-      // socket.disconnect();
+      if (socket) {
+        socket.off("message:new", onIncoming);
+        socket.off("message", onIncoming);
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, peer?.id]);
 
-  // Load messages for a conversation id
-  const loadMessages = async (convId) => {
-    if (!convId) return;
-    setLoadingMsgs(true);
-    try {
-      const r = await authFetch(`${API_BASE}/api/messages/${convId}`);
-      if (!r.ok) throw new Error("Failed to load messages");
+  const { data: msgs = [], isLoading: loadingMsgs } = useQuery({
+    queryKey: ["messages", conversationId],
+    queryFn: async () => {
+      if (!conversationId) return [];
+      const r = await authFetch(`${API_BASE}/api/messages/${conversationId}`);
+      if (!r.ok) throw new Error("Failed");
       const data = await r.json();
-      // backend might return newest-first, so reverse to chronological
-      const ordered = Array.isArray(data) ? data.slice().reverse() : [];
-      setMsgs(ordered);
-      scrollDown();
+      return data.reverse();
+    },
+    enabled: !!conversationId,
+    staleTime: 0,
+  });
 
-      // mark seen
-      authFetch(`${API_BASE}/api/messages/${convId}/seen`, {
-        method: "POST",
-      }).catch(() => {});
+  const deleteMessage = async (messageId) => {
+    try {
+      await authFetch(`${API_BASE}/api/messages/message/${messageId}`, {
+        method: "DELETE",
+      });
+
+      queryClient.setQueryData(["messages", conversationId], (old = []) =>
+        old.map((m) => (m.id === messageId ? { ...m, deleted: true } : m)),
+      );
     } catch (err) {
-      console.error("loadMessages error", err);
-      setMsgs([{ id: "err", body: "Failed to load messages", failed: true }]);
-    } finally {
-      setLoadingMsgs(false);
+      console.error("Delete failed", err);
     }
   };
 
-  // Create a conversation (only when sending first message)
+  useEffect(() => {
+    if (!conversationId) return;
+
+    authFetch(`${API_BASE}/api/messages/${conversationId}/seen`, {
+      method: "POST",
+    }).catch(() => {});
+  }, [conversationId]);
+
   const createConversation = async () => {
     const payload = { peerId: peer.id };
     const r = await authFetch(`${API_BASE}/api/messages/conversation`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    if (!r.ok) {
-      const txt = await r.text().catch(() => "");
-      throw new Error(txt || "Failed to create conversation");
-    }
+
     const data = await r.json();
     const cid =
       data.id || data.conversation_id || data.conversationId || data._id;
-    if (!cid) throw new Error("Conversation ID missing from create response");
+
     setConversationId(cid);
     setActive((a) => ({ ...a, conversation_id: cid }));
-    // inform parent (messages list) to refresh if provided
-    if (typeof onConversationCreated === "function")
+
+    if (typeof onConversationCreated === "function") {
       onConversationCreated(cid, peer);
+    }
+
     return cid;
   };
 
-  // Send message (optimistic). If no conversation, create it first, then send.
   const send = async () => {
     if (!text.trim()) return;
+
     const bodyText = text.trim();
     setText("");
 
+    let cid = conversationId;
+
+    if (!cid) {
+      cid = await createConversation();
+    }
+
     const tempId = `temp-${Date.now()}`;
-    const optimistic = {
+
+    const optimisticMsg = {
       id: tempId,
-      conversation_id: conversationId || null,
+      conversation_id: cid,
       sender_id: me?.id,
       body: bodyText,
       created_at: new Date().toISOString(),
       pending: true,
-      sender_profile: me?.profile || null,
+      sender_profile: me?.profile,
     };
 
-    setMsgs((prev) => [...prev, optimistic]);
+    // 🔥 Optimistic update
+    queryClient.setQueryData(["messages", cid], (old = []) => [
+      ...old,
+      optimisticMsg,
+    ]);
+
     scrollDown();
 
     try {
-      setSending(true);
-      let cid = conversationId;
-      if (!cid) {
-        cid = await createConversation();
-      }
-
-      // send to server
-      const r = await authFetch(`${API_BASE}/api/messages/${cid}/send`, {
+      const msg = await authFetch(`${API_BASE}/api/messages/${cid}/send`, {
         method: "POST",
         body: JSON.stringify({ body: bodyText }),
-      });
-      if (!r.ok) {
-        const txt = await r.text().catch(() => "");
-        throw new Error(txt || "Send failed");
-      }
-      const serverMsg = await r.json();
-      // replace optimistic message
-      setMsgs((prev) =>
-        prev.map((m) =>
-          m.id === tempId ? { ...serverMsg, pending: false } : m,
-        ),
-      );
-      scrollDown();
+      }).then((r) => r.json());
 
-      // emit socket event if needed (server should broadcast; but emit for immediate if required)
-      if (socket && socket.connected) {
-        socket.emit("message:sent", { conversation_id: cid, body: serverMsg });
-      }
-    } catch (err) {
-      console.error("send error", err);
-      // mark optimistic as failed
-      setMsgs((prev) =>
-        prev.map((m) =>
-          m.id?.toString().startsWith("temp-")
-            ? { ...m, pending: false, failed: true }
-            : m,
-        ),
+      queryClient.setQueryData(["messages", cid], (old = []) =>
+        old.map((m) => (m.id === tempId ? { ...msg, pending: false } : m)),
       );
-    } finally {
-      setSending(false);
+    } catch (err) {
+      console.error(err);
     }
   };
+
   const profileImage = useCallback((url) => url || "/avatar.jpg", []);
   const onKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -299,12 +266,12 @@ export default function MessageModal({
 
   if (!isOpen) return null;
 
-  // displayName for header
   const displayName =
     active?.peer_name ||
     `${peer.first_name || ""} ${peer.last_name || ""}`.trim() ||
     peer.email;
 
+  // ⛔ UI BELOW UNCHANGED
   return (
     <div
       style={{
@@ -358,15 +325,17 @@ export default function MessageModal({
                   }}
                 >
                   {active.profile ? (
-                    <img
-                      src={profileImage(active.profile) || "/avatar.jpg"}
-                      alt={active.peer_name}
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                      }}
-                    />
+                    <>
+                      <img
+                        src={active.profile || "/avatar.jpg"}
+                        alt={active.peer_name}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: "50%",
+                        }}
+                      />
+                    </>
                   ) : (
                     <div className="avatar-fallback">
                       {(() => {
@@ -409,9 +378,12 @@ export default function MessageModal({
             {loadingMsgs && <LoadMess2 />}
             {msgs.map((m) => {
               const mine = m.sender_id === me?.id;
+
               return (
                 <div
                   key={m.id}
+                  onMouseEnter={() => setHoverMsg(m.id)}
+                  onMouseLeave={() => setHoverMsg(null)}
                   style={{
                     display: "flex",
                     justifyContent: mine ? "flex-end" : "flex-start",
@@ -420,31 +392,45 @@ export default function MessageModal({
                     opacity: m.pending ? 0.6 : 1,
                   }}
                 >
+                  {mine && hoverMsg === m.id && !m.deleted && (
+                    <FiTrash
+                      size={14}
+                      style={{ cursor: "pointer", opacity: 0.7 }}
+                      onClick={() => deleteMessage(m.id)}
+                    />
+                  )}
+
                   {!mine && (
                     <img
                       src={m.sender_profile || active.profile || "/avatar.jpg"}
                       alt="profile"
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: "50%",
-                      }}
+                      style={{ width: 28, height: 28, borderRadius: "50%" }}
                     />
                   )}
+
                   <div
                     style={{
                       maxWidth: "70%",
                       background: mine ? "#DCF8C6" : "#f1f1f1",
                       borderRadius: 12,
                       padding: "8px 12px",
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-word",
-                      border: m.failed ? "1px solid red" : "none",
                     }}
                   >
-                    {m.body}
-                    {m.pending && " ⏳"}
-                    {m.failed && " ❌"}
+                    {m.deleted ? (
+                      <i style={{ color: "#777" }}>This message was deleted</i>
+                    ) : (
+                      <>
+                        <div>
+                          {m.body}
+                          {m.pending && " ⏳"}
+                          {m.failed && " ❌"}
+                        </div>
+
+                        <div className="timestamp-mess">
+                          {formatTimestamp(m.created_at)}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               );
