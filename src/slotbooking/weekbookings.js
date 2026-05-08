@@ -79,11 +79,16 @@ export default function WeekBookings({ profileOwnerId = null }) {
   const todayIso = formatDateISO(today);
 
   const weekStart = useMemo(() => startOfWeek(today, 1), []);
-  const days = useMemo(
-    () => Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i)),
-    [weekStart]
-  );
+  // const days = useMemo(
+  //   () => Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i)),
+  //   [weekStart],
+  // );
 
+  const days = Array.from({ length: 8 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return d;
+  });
   const [selectedDayIso, setSelectedDayIso] = useState(todayIso);
   const [instances, setInstances] = useState({}); // map date -> instances array
   const [loadingDay, setLoadingDay] = useState(false);
@@ -162,8 +167,8 @@ export default function WeekBookings({ profileOwnerId = null }) {
       const arr = Array.isArray(body.instances)
         ? body.instances
         : Array.isArray(body)
-        ? body
-        : [];
+          ? body
+          : [];
       setInstances((prev) => ({ ...prev, [dateIso]: arr }));
     } catch (err) {
       console.error("fetchDay error", err);
@@ -349,7 +354,7 @@ export default function WeekBookings({ profileOwnerId = null }) {
 
       // On first page we replace, on later pages we append
       setRequestsList((prev) =>
-        page === 0 ? pageRows : [...prev, ...pageRows]
+        page === 0 ? pageRows : [...prev, ...pageRows],
       );
       setRequestsPage(page);
       setRequestsTotal(total);
@@ -400,7 +405,7 @@ export default function WeekBookings({ profileOwnerId = null }) {
       fetchRequestsPage(
         requestsPage + 1,
         currentInstanceForRequests,
-        requestsSearch
+        requestsSearch,
       );
     }
   }
@@ -490,7 +495,7 @@ export default function WeekBookings({ profileOwnerId = null }) {
               onClick={() => onSelectDay(iso)}
             >
               <div className="wb-day-title">{dayLabel(d)}</div>
-              <div className="wb-day-date">{iso}</div>
+              {/* <div className="wb-day-date">{iso}</div> */}
             </div>
           );
         })}

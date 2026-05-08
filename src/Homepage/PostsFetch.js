@@ -49,26 +49,27 @@ function PostFetch({ profile }) {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [posts, setPosts] = useState([]);
-  const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ["posts", tab, selectedUniversity, selectedCourse],
-    queryFn: async ({ pageParam = 1 }) => {
-      const token = localStorage.getItem("token");
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } =
+    useInfiniteQuery({
+      queryKey: ["posts", tab, selectedUniversity, selectedCourse],
+      queryFn: async ({ pageParam = 1 }) => {
+        const token = localStorage.getItem("token");
 
-      const endpoint = buildEndpoint(pageParam);
+        const endpoint = buildEndpoint(pageParam);
 
-      const res = await axios.get(endpoint, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+        const res = await axios.get(endpoint, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      return res.data;
-    },
-    getNextPageParam: (lastPage, pages) => {
-      if (!lastPage.posts || lastPage.posts.length === 0) return undefined;
-      return pages.length + 1;
-    },
-    staleTime: 1000 * 60 * 5,
-    keepPreviousData: true,
-  });
+        return res.data;
+      },
+      getNextPageParam: (lastPage, pages) => {
+        if (!lastPage.posts || lastPage.posts.length === 0) return undefined;
+        return pages.length + 1;
+      },
+      staleTime: 1000 * 60 * 5,
+      keepPreviousData: true,
+    });
   useEffect(() => {
     if (data) {
       const merged = data.pages.flatMap((page) => page.posts);
@@ -97,6 +98,9 @@ function PostFetch({ profile }) {
 
   // Build endpoint for current tab using cached page
   const buildEndpoint = (page) => {
+    if (tab === "clubs") {
+      return `${server}/api/posts/feed/clubs?page=${page}`;
+    }
     if (tab === "interests") {
       // allow passing filters as well if selected
       let url = `${server}/api/posts/feed/interests?page=${page}`;
@@ -335,8 +339,14 @@ function PostFetch({ profile }) {
     setSelectedUniversity(null);
     setSelectedCourse(null);
   };
+
+  const onClickClubs = () => {
+    setTab("clubs");
+    setSelectedUniversity(null);
+    setSelectedCourse(null);
+  };
   const onClickInterests = () => {
-    setTab("interests");
+    setTab("interestsS");
     setSelectedUniversity(null);
     setSelectedCourse(null);
   };
@@ -497,6 +507,7 @@ function PostFetch({ profile }) {
       </div>
     );
   };
+
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuPostId(null);
     document.addEventListener("click", handleClickOutside);
@@ -509,6 +520,7 @@ function PostFetch({ profile }) {
       setPosts(merged);
     }
   }, [data]);
+
   return (
     <>
       <ReportModal
@@ -637,6 +649,12 @@ function PostFetch({ profile }) {
             className={`switch-btn ${tab === "interests" ? "active" : ""}`}
           >
             Interests
+          </button>
+          <button
+            onClick={onClickClubs}
+            className={`switch-btn ${tab === "clubs" ? "active" : ""}`}
+          >
+            Clubs
           </button>
 
           {tokenDetails.user_type !== "club" && (
@@ -918,13 +936,28 @@ function PostFetch({ profile }) {
           )}
         </InfiniteScroll>
 
-        {posts.length === 0 && (
+        {isLoading ? (
           <div
-            style={{ textAlign: "center", marginTop: "2rem", color: "#888" }}
+            style={{
+              textAlign: "center",
+              marginTop: "2rem",
+            }}
           >
             <PostLoad />
           </div>
-        )}
+        ) : !isLoading && !isFetching && posts.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: "2rem",
+              color: "#888",
+              fontSize: "15px",
+              fontWeight: 500,
+            }}
+          >
+            No posts found
+          </div>
+        ) : null}
       </div>
     </>
   );

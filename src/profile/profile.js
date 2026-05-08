@@ -3,7 +3,7 @@ import Modal from "../utils/Modal";
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import ProfileUploadModal from "./ProfileUploadModal";
-import useLocation from "../utils/useLocation";
+// import useLocation from "../utils/useLocation";
 import { IoMdAdd } from "react-icons/io";
 import { MdEdit, MdDelete } from "react-icons/md";
 import UserActivity from "./UserActivity";
@@ -18,7 +18,7 @@ export default function Profile() {
   const token = localStorage.getItem("token");
   const loggedInUserId = JSON.parse(localStorage.getItem("user"))?.id;
   const queryClient = useQueryClient();
-  const { location, status } = useLocation();
+  // const { location, status } = useLocation();
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   /* =========================
@@ -990,13 +990,13 @@ export default function Profile() {
             {profile.course && <p>{profile.course}</p>}
             {profile.university && <p>{profile.university}</p>}
 
-            {status ? (
+            {/* {status ? (
               <div>{profile.location}</div>
             ) : (
               <div>
                 {location.city}, {location.state}, {location.country}
               </div>
-            )}
+            )} */}
           </div>
         </div>
         {tokenDetails.user_type !== "club" && (

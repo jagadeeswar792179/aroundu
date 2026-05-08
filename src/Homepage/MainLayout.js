@@ -39,7 +39,7 @@ export default function MainLayout() {
 
       <div className="container-2">
         <div className="homecontainer">
-          <Outlet context={{ setActiveConversationId }} />;
+          <Outlet context={{ setActiveConversationId }} />
         </div>
       </div>
     </>

@@ -2,7 +2,7 @@ import "./homepage.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PostFetch from "./PostsFetch";
-import useLocation from "../utils/useLocation";
+// import useLocation from "../utils/useLocation";
 import Navbar from "./Navbar";
 import Modal from "../utils/Modal";
 import ProfileViewers from "../profileview/ProfileViewers";
@@ -13,7 +13,7 @@ import { useUser } from "../UserContext/UserContext";
 
 function Homepage() {
   const [ModalType, setModalType] = useState(null);
-  const { location, status } = useLocation();
+  // const { location, status } = useLocation();
   const navigate = useNavigate();
   const [isModalOpen, setModalOpen] = useState(false);
   const [isConnectionLost, setIsConnectionLost] = useState(false);
@@ -53,13 +53,13 @@ function Homepage() {
             <p>{profile.course}</p>
             <p>{profile.experience?.[0]?.title}</p>
 
-            {status ? (
+            {/* {status ? (
               <p>{profile.location}</p>
             ) : (
               <p>
                 {location.city}, {location.state}, {location.country}
               </p>
-            )}
+            )} */}
           </div>
         ) : (
           <UsercardLoad />

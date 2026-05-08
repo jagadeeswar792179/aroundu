@@ -222,7 +222,7 @@ export default function Uprofile() {
 
             {profile.course && <p>{profile.course}</p>}
             {profile.university && <p>{profile.university}</p>}
-            {profile.location && <div>{profile.location}</div>}
+            {/* {profile.location && <div>{profile.location}</div>} */}
 
             {/* Don't show any button on own profile */}
             {me?.id !== userId && (

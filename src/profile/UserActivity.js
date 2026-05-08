@@ -172,7 +172,11 @@ const UserActivity = ({ userId }) => {
                   )}
                 </>
               ) : (
-                <div className="feed-container" style={{ padding: "20px" }}>
+                <div
+                  className="feed-container"
+                  style={{ padding: "20px" }}
+                  onClick={() => setActivePostId(post.id)}
+                >
                   <b>
                     {post.first_name}
                     {post.last_name}

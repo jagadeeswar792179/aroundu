@@ -340,9 +340,10 @@ a {
 }
 
 .switch-container {
-  width: 100%;
+  width: 450px;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
   margin: 10px 0;
 }
 
