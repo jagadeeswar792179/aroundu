@@ -9,6 +9,7 @@ import DeleteAccountModal from "../settings modals/DeleteAccountModal";
 import { MdDeleteOutline } from "react-icons/md";
 import { FiTrash } from "react-icons/fi";
 import NotificationPreferencesModal from "../settings modals/NotificationPreferencesModal";
+import PreviousSlotModal from "../settings modals/PreviousSlotModal";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -47,6 +48,15 @@ const Settings = () => {
 
         <div className="settings-item" onClick={() => setModal("phone")}>
           <div>Add Phone Number</div>
+          <div>
+            <RightArrowIcon />
+          </div>
+        </div>
+        <div
+          className="settings-item"
+          onClick={() => setModal("previous-slots")}
+        >
+          <div>Previous Slots</div>
           <div>
             <RightArrowIcon />
           </div>
@@ -97,6 +107,9 @@ const Settings = () => {
         )}
         {modal === "notifications-preferences" && (
           <NotificationPreferencesModal close={() => setModal(null)} />
+        )}
+        {modal === "previous-slots" && (
+          <PreviousSlotModal close={() => setModal(null)} />
         )}
       </div>
     </div>

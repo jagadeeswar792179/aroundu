@@ -95,7 +95,12 @@ export default function WeekBookings({ profileOwnerId = null }) {
 
   // Add-slot modal state (single slot)
   const [modalOpen, setModalOpen] = useState(false);
-  const [slot, setSlot] = useState({ start: "09:00", end: "09:30" });
+  const [slot, setSlot] = useState({
+    start: "09:00",
+    end: "09:30",
+    price: "",
+    currency: "USD",
+  });
   const [saving, setSaving] = useState(false);
 
   // Requests modal state
@@ -192,10 +197,20 @@ export default function WeekBookings({ profileOwnerId = null }) {
 
   /* ---------- Add-slot modal helpers ---------- */
   function openModalForSelectedDay() {
-    setSlot({ start: "09:00", end: "09:30" });
+    setSlot({
+      start: "09:00",
+      end: "09:30",
+      price: "",
+      currency: "USD",
+    });
     setModalOpen(true);
   }
-
+  const currencyOptions = [
+    { value: "INR", label: "₹ INR" },
+    { value: "USD", label: "$ USD" },
+    { value: "EUR", label: "€ EUR" },
+    { value: "GBP", label: "£ GBP" },
+  ];
   function validateSlotSingle() {
     const { start, end } = slot;
     if (!start || !end) return { ok: false, msg: "Start & end required" };
@@ -248,7 +263,16 @@ export default function WeekBookings({ profileOwnerId = null }) {
         headers: authHeaders(),
         body: JSON.stringify({
           date,
-          ranges: [{ start_ts, end_ts, capacity: 0, notes: null }],
+          ranges: [
+            {
+              start_ts,
+              end_ts,
+              capacity: 0,
+              notes: null,
+              price: Number(slot.price || 0),
+              currency: slot.currency,
+            },
+          ],
         }),
       });
       if (!res.ok) {
@@ -528,45 +552,61 @@ export default function WeekBookings({ profileOwnerId = null }) {
             (instances[selectedDayIso] || []).map((si) => (
               <div key={si.id} className="wb-slot-row">
                 <div>
-                  <div className="wb-slot-time flex-r center">
-                    <div>
-                      {new Date(si.start_ts).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                  {si.price > 0 && (
+                    <div className="price-div">
+                      {si.currency === "INR" && "₹"}
+                      {si.currency === "USD" && "$"}
+                      {si.currency === "EUR" && "€"}
+                      {si.currency === "GBP" && "£"}
+                      {si.price}
+                      {"  "}for this session
                     </div>
-                    —{" "}
-                    <div>
-                      {new Date(si.end_ts).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                  )}
+                </div>
+                <div className="flex-r jspacebtw">
+                  <div>
+                    <div className="wb-slot-time flex-r center">
+                      <div>
+                        {new Date(si.start_ts).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                      —{" "}
+                      <div>
+                        {new Date(si.end_ts).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  {selectedDayIso >= todayIso ? (
-                    <MdDelete
-                      className="wb-btn-ghost"
-                      onClick={() => removeInstance(si.id)}
-                    />
-                  ) : (
-                    // <button
-                    //   className="wb-btn-ghost"
-                    //   onClick={() => removeInstance(si.id)}
-                    // >
-                    //   Delete
-                    // </button>
-                    <div className="wb-prev-note">previous slot</div>
-                  )}
-
-                  <button
-                    className="wb-btn"
-                    onClick={() => openRequestsModal(si.id)}
+                  <div
+                    style={{ display: "flex", gap: 8, alignItems: "center" }}
                   >
-                    Requests ({si.pending_count || 0})
-                  </button>
+                    {selectedDayIso >= todayIso ? (
+                      <MdDelete
+                        className="wb-btn-ghost"
+                        onClick={() => removeInstance(si.id)}
+                      />
+                    ) : (
+                      // <button
+                      //   className="wb-btn-ghost"
+                      //   onClick={() => removeInstance(si.id)}
+                      // >
+                      //   Delete
+                      // </button>
+                      <div className="wb-prev-note">previous slot</div>
+                    )}
+
+                    <button
+                      className="wb-btn"
+                      onClick={() => openRequestsModal(si.id)}
+                    >
+                      Requests ({si.pending_count || 0})
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -612,6 +652,46 @@ export default function WeekBookings({ profileOwnerId = null }) {
                       setSlot((s) => ({ ...s, end: e.target.value }))
                     }
                   />
+                </label>
+              </div>
+              <div className="wb-time-row">
+                <label className="wb-time-label">
+                  <span className="wb-time-caption">Price</span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="Enter price"
+                    className="wb-time-input"
+                    value={slot.price}
+                    onChange={(e) =>
+                      setSlot((s) => ({
+                        ...s,
+                        price: e.target.value,
+                      }))
+                    }
+                  />
+                </label>
+
+                <label className="wb-time-label">
+                  <span className="wb-time-caption">Currency</span>
+
+                  <select
+                    className="wb-time-input"
+                    value={slot.currency}
+                    onChange={(e) =>
+                      setSlot((s) => ({
+                        ...s,
+                        currency: e.target.value,
+                      }))
+                    }
+                  >
+                    {currencyOptions.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
                 </label>
               </div>
 

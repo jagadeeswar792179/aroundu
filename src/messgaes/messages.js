@@ -15,8 +15,38 @@ import { getSocket } from "../socket";
 import { useOutletContext } from "react-router-dom";
 import { formatTimestamp } from "../utils/formatTimestamp";
 const API_BASE = process.env.REACT_APP_SERVER;
+function getDateLabel(dateStr) {
+  const d = new Date(dateStr);
 
+  return d.toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getTimeLabel(dateStr) {
+  const d = new Date(dateStr);
+
+  return d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function isSameDay(a, b) {
+  const da = new Date(a);
+  const db = new Date(b);
+
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
+}
 function Messages() {
+  const [stickyDate, setStickyDate] = useState("");
+  const messagesContainerRef = useRef(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const token = localStorage.getItem("token");
@@ -258,7 +288,37 @@ function Messages() {
       setActiveConversationId(null);
     };
   }, []);
+  useEffect(() => {
+    const container = messagesContainerRef.current;
 
+    if (!container) return;
+
+    const handleScroll = () => {
+      const separators = container.querySelectorAll(".date-separator");
+
+      let current = "";
+
+      separators.forEach((sep) => {
+        const rect = sep.getBoundingClientRect();
+
+        if (rect.top <= 120) {
+          current = sep.dataset.date;
+        }
+      });
+
+      if (current) {
+        setStickyDate(current);
+      }
+    };
+
+    handleScroll();
+
+    container.addEventListener("scroll", handleScroll);
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, [msgs]);
   return (
     <>
       {modal?.type === "recovery" && (
@@ -518,81 +578,115 @@ function Messages() {
                   )}
                 </div>
 
-                <div className="mess-9" style={{ overflowY: "auto" }}>
+                <div
+                  className="mess-9"
+                  ref={messagesContainerRef}
+                  style={{
+                    overflowY: "auto",
+                    position: "relative",
+                  }}
+                >
                   {loadingMsgs && <LoadMess2 />}
-
-                  {msgs.map((m) => {
+                  {stickyDate && (
+                    <div className="sticky-date-header">{stickyDate}</div>
+                  )}
+                  {msgs.map((m, index) => {
                     const mine = m.sender_id === me?.id;
+
+                    const createdAt = new Date(m.created_at);
+                    const now = new Date();
+
+                    const canDelete =
+                      (now - createdAt) / (1000 * 60 * 60) <= 24;
+
+                    const prevMsg = msgs[index - 1];
+
+                    const showDateSeparator =
+                      !prevMsg || !isSameDay(prevMsg.created_at, m.created_at);
+
+                    const dateLabel = getDateLabel(m.created_at);
                     return (
-                      <div
-                        key={m.id}
-                        onMouseEnter={() => setHoverMsg(m.id)}
-                        onMouseLeave={() => setHoverMsg(null)}
-                        style={{
-                          display: "flex",
-                          justifyContent: mine ? "flex-end" : "flex-start",
-                          margin: "6px 0",
-                          gap: 8,
-                          opacity: m.pending ? 0.6 : 1,
-                        }}
-                        className="center-c"
-                      >
-                        {mine && hoverMsg === m.id && !m.deleted && (
-                          <FiTrash
-                            size={14}
-                            style={{
-                              marginLeft: 6,
-                              cursor: "pointer",
-                              opacity: 0.7,
-                            }}
-                            onClick={() => deleteMessage(m.id)}
-                          />
+                      <React.Fragment key={m.id}>
+                        {showDateSeparator && (
+                          <div className="date-separator" data-date={dateLabel}>
+                            <span>{dateLabel}</span>
+                          </div>
                         )}
-                        {!mine && (
-                          <img
-                            src={m.sender_profile || "/avatar.jpg"}
-                            alt="profile"
+                        <div>
+                          <div
+                            key={m.id}
+                            onMouseEnter={() => setHoverMsg(m.id)}
+                            onMouseLeave={() => setHoverMsg(null)}
                             style={{
-                              width: 28,
-                              height: 28,
-                              borderRadius: "50%",
+                              display: "flex",
+                              justifyContent: mine ? "flex-end" : "flex-start",
+                              margin: "6px 0",
+                              gap: 8,
+                              opacity: m.pending ? 0.6 : 1,
                             }}
-                          />
-                        )}
-                        <div
-                          style={{
-                            maxWidth: "70%",
-                            background: mine ? "#DCF8C6" : "#f1f1f1",
-                            padding: "8px 12px",
-                            whiteSpace: "pre-wrap",
-                            wordBreak: "break-word",
-                            border: m.failed ? "1px solid red" : "none",
-                            borderRadius: "20px",
-                          }}
-                        >
-                          {!mine && active?.type === "group" && (
-                            <div className="group-sender-name">
-                              {m.first_name} {m.last_name}
+                            className="center-c"
+                          >
+                            {mine &&
+                              hoverMsg === m.id &&
+                              !m.deleted &&
+                              canDelete && (
+                                <FiTrash
+                                  size={14}
+                                  style={{
+                                    marginLeft: 6,
+                                    cursor: "pointer",
+                                    opacity: 0.7,
+                                  }}
+                                  onClick={() => deleteMessage(m.id)}
+                                />
+                              )}
+                            {!mine && (
+                              <img
+                                src={m.sender_profile || "/avatar.jpg"}
+                                alt="profile"
+                                style={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: "50%",
+                                }}
+                              />
+                            )}
+                            <div
+                              style={{
+                                maxWidth: "70%",
+                                background: mine ? "#DCF8C6" : "#f1f1f1",
+                                padding: "8px 12px",
+                                whiteSpace: "pre-wrap",
+                                wordBreak: "break-word",
+                                border: m.failed ? "1px solid red" : "none",
+                                borderRadius: "20px",
+                              }}
+                            >
+                              {!mine && active?.type === "group" && (
+                                <div className="group-sender-name">
+                                  {m.first_name} {m.last_name}
+                                </div>
+                              )}
+                              {m.deleted ? (
+                                <i style={{ color: "#777" }}>
+                                  This message was deleted
+                                </i>
+                              ) : (
+                                <div style={{ display: "inline-block" }}>
+                                  <div>
+                                    {m.body}
+                                    {m.pending && " ⏳"}
+                                    {m.failed && " ❌"}
+                                  </div>
+                                  <div className="timestamp-mess">
+                                    {getTimeLabel(m.created_at)}
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                          )}
-                          {m.deleted ? (
-                            <i style={{ color: "#777" }}>
-                              This message was deleted
-                            </i>
-                          ) : (
-                            <div style={{ display: "inline-block" }}>
-                              <div>
-                                {m.body}
-                                {m.pending && " ⏳"}
-                                {m.failed && " ❌"}
-                              </div>
-                              <div className="timestamp-mess">
-                                {formatTimestamp(m.created_at)}
-                              </div>
-                            </div>
-                          )}
+                          </div>
                         </div>
-                      </div>
+                      </React.Fragment>
                     );
                   })}
                   <div ref={bottomRef} />

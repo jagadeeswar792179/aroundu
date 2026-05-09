@@ -13,6 +13,40 @@
   font-size: 8px;
   opacity: 0.5;
 }
+.date-separator {
+  display: flex;
+  justify-content: center;
+  margin: 18px 0;
+}
+
+.date-separator span {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+}
+
+.sticky-date-header {
+  position: sticky;
+  top: 10px;
+  z-index: 20;
+
+  width: fit-content;
+  margin: 0 auto;
+
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+
+  padding: 6px 14px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  backdrop-filter: blur(6px);
+}
 .mess-1 {
   height: 60px;
   display: flex;

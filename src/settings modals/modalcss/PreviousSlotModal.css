@@ -1,0 +1,9 @@
+.previous-slot-card {
+  max-height: 400px;
+  margin: 20px 0 0 0;
+  overflow: scroll;
+  scrollbar-width: none;
+}
+.previous-slot-item {
+  display: flex;
+}

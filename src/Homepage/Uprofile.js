@@ -280,12 +280,14 @@ export default function Uprofile() {
                       year: "numeric",
                     })}{" "}
                   -{" "}
-                  {exp.end_date
-                    ? new Date(exp.end_date).toLocaleDateString("en-US", {
-                        month: "long",
-                        year: "numeric",
-                      })
-                    : "Present"}{" "}
+                  {exp.currently_working
+                    ? "Present"
+                    : exp.end_date
+                      ? new Date(exp.end_date).toLocaleDateString("en-US", {
+                          month: "long",
+                          year: "numeric",
+                        })
+                      : "Present"}
                   <i>{formatDuration(exp.start_date, exp.end_date)}</i>
                 </p>
                 <p>{exp.title}</p>
@@ -318,6 +320,7 @@ export default function Uprofile() {
                     : "Present"}{" "}
                   <i>{formatDuration(edu.start_date, edu.end_date)}</i>
                 </p>
+                {edu.degree && <p>{edu.degree}</p>}
                 <p>{edu.course_name}</p>
               </div>
             ))
@@ -339,12 +342,14 @@ export default function Uprofile() {
                       year: "numeric",
                     })}{" "}
                   -{" "}
-                  {pro.end_date
-                    ? new Date(pro.end_date).toLocaleDateString("en-US", {
-                        month: "long",
-                        year: "numeric",
-                      })
-                    : "Present"}{" "}
+                  {pro.currently_working
+                    ? "Present"
+                    : pro.end_date
+                      ? new Date(pro.end_date).toLocaleDateString("en-US", {
+                          month: "long",
+                          year: "numeric",
+                        })
+                      : "Present"}
                   <i>{formatDuration(pro.start_date, pro.end_date)}</i>
                 </p>
                 <p>{pro.description}</p>

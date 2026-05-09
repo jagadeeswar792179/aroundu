@@ -47,10 +47,10 @@ function slotHasEnded(slot) {
 export default function ProfileWeekBookings({ profileOwnerId }) {
   const today = new Date();
   const todayIso = formatDateISO(today);
-  const weekStart = useMemo(() => startOfWeek(today, 1), []);
+  // const weekStart = useMemo(() => startOfWeek(today, 1), []);
   const days = useMemo(
-    () => Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i)),
-    [weekStart]
+    () => Array.from({ length: 7 }).map((_, i) => addDays(today, i)),
+    [today],
   );
 
   const [selectedDayIso, setSelectedDayIso] = useState(todayIso);
@@ -180,7 +180,7 @@ export default function ProfileWeekBookings({ profileOwnerId }) {
           method: "POST",
           headers: authHeaders(),
           body: JSON.stringify({ message: reqMessage || null }),
-        }
+        },
       );
 
       const body = await res.json().catch(() => null);
@@ -195,7 +195,7 @@ export default function ProfileWeekBookings({ profileOwnerId }) {
                   my_request_status: "pending",
                   pending_count: (si.pending_count || 0) + 1,
                 }
-              : si
+              : si,
           );
           return { ...prev, [selectedDayIso]: list };
         });
@@ -331,7 +331,7 @@ export default function ProfileWeekBookings({ profileOwnerId }) {
               onClick={() => onSelectDay(iso)}
             >
               <div className="wb-day-title">{dayLabel(d)}</div>
-              <div className="wb-day-date">{iso}</div>
+              {/* <div className="wb-day-date">{iso}</div> */}
               {/* <div className="wb-day-count">
                 {count} free slot{count !== 1 ? "s" : ""}
               </div> */}
@@ -359,23 +359,35 @@ export default function ProfileWeekBookings({ profileOwnerId }) {
               (instances[selectedDayIso] || []).map((si) => (
                 <div key={si.id} className="wb-slot-row">
                   <div>
-                    <div className="wb-slot-time flex-r center">
-                      <div>
-                        {new Date(si.start_ts).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                    {si.price > 0 && (
+                      <div className="price-div">
+                        {si.currency === "INR" && "₹"}
+                        {si.currency === "USD" && "$"}
+                        {si.currency === "EUR" && "€"}
+                        {si.currency === "GBP" && "£"}
+                        {si.price}
+                        {"  "}for this session
                       </div>
-                      —{" "}
-                      <div>
-                        {new Date(si.end_ts).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex-r jspacebtw">
+                      <div className="wb-slot-time flex-r center">
+                        <div>
+                          {new Date(si.start_ts).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                        —{" "}
+                        <div>
+                          {new Date(si.end_ts).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
                       </div>
-                    </div>
-
-                    {si.notes && (
+                      {/* {si.notes && (
                       <div className="wb-slot-notes">{si.notes}</div>
                     )}
                     <div style={{ fontSize: 12, color: "#6b7280" }}>
@@ -384,25 +396,28 @@ export default function ProfileWeekBookings({ profileOwnerId }) {
                             si.pending_count > 1 ? "s" : ""
                           } pending`
                         : ""}
+                    </div> */}
+
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 8,
+                          alignItems: "center",
+                        }}
+                      >
+                        <button
+                          className={`wb-btn ${
+                            si.pending_count > 0
+                              ? "wb-btn-disabled"
+                              : "wb-btn-primary"
+                          }`}
+                          disabled={si.pending_count > 0}
+                          onClick={() => openRequestModal(si)}
+                        >
+                          {si.pending_count > 0 ? "Requested" : "Request"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-
-                  <div
-                    style={{ display: "flex", gap: 8, alignItems: "center" }}
-                  >
-                    <button
-                      className={`wb-btn ${
-                        si.pending_count > 0
-                          ? "wb-btn-disabled"
-                          : "wb-btn-primary"
-                      }`}
-                      disabled={si.pending_count > 0}
-                      onClick={() => openRequestModal(si)}
-                    >
-                      {si.pending_count > 0 ? "Requested" : "Request"}
-                    </button>
-
-                    {/* {renderRequestButton(si)} */}
                   </div>
                 </div>
               ))

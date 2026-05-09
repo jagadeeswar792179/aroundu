@@ -392,13 +392,13 @@ export default function MessageModal({
                     opacity: m.pending ? 0.6 : 1,
                   }}
                 >
-                  {mine && hoverMsg === m.id && !m.deleted && (
+                  {/* {mine && hoverMsg === m.id && !m.deleted && (
                     <FiTrash
                       size={14}
                       style={{ cursor: "pointer", opacity: 0.7 }}
                       onClick={() => deleteMessage(m.id)}
                     />
-                  )}
+                  )} */}
 
                   {!mine && (
                     <img

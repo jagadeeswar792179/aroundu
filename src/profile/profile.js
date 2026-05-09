@@ -138,47 +138,16 @@ export default function Profile() {
       label: "Interdisciplinary Collaboration",
     },
   ];
-
+  const degreeOptions = [
+    { value: "High School", label: "High School" },
+    { value: "Diploma", label: "Diploma" },
+    { value: "Bachelor's", label: "Bachelor's" },
+    { value: "Master's", label: "Master's" },
+    { value: "MBA", label: "MBA" },
+    { value: "PhD", label: "PhD" },
+    { value: "Other", label: "Other" },
+  ];
   const interestOptions = [
-    // {
-    //   value: "Artificial Intelligence & Machine Learning",
-    //   label: "Artificial Intelligence & Machine Learning",
-    // },
-    // { value: "Cybersecurity", label: "Cybersecurity" },
-    // { value: "Cloud Computing", label: "Cloud Computing" },
-    // { value: "Robotics", label: "Robotics" },
-    // { value: "Blockchain", label: "Blockchain" },
-    // { value: "VR / AR", label: "VR / AR" },
-    // { value: "Environmental Issues", label: "Environmental Issues" },
-    // { value: "Finance & Investing", label: "Finance & Investing" },
-    // { value: "Marketing & Branding", label: "Marketing & Branding" },
-    // { value: "Creative Writing", label: "Creative Writing" },
-    // { value: "Sports & Fitness", label: "Sports & Fitness" },
-    // { value: "Music & Performing Arts", label: "Music & Performing Arts" },
-    // { value: "Traveling & Culture", label: "Traveling & Culture" },
-
-    // // Newly added interests you requested
-    // {
-    //   value: "Emerging Technologies in Education",
-    //   label: "Emerging Technologies in Education",
-    // },
-    // { value: "AI / ML Applications", label: "AI / ML Applications" },
-    // {
-    //   value: "Sustainability & Environmental Research",
-    //   label: "Sustainability & Environmental Research",
-    // },
-    // { value: "Policy & Governance", label: "Policy & Governance" },
-    // {
-    //   value: "Community Outreach & Service Learning",
-    //   label: "Community Outreach & Service Learning",
-    // },
-    // {
-    //   value: "Cross-Disciplinary Research",
-    //   label: "Cross-Disciplinary Research",
-    // },
-    // { value: "Educational Technology", label: "Educational Technology" },
-    // { value: "Industry Partnerships", label: "Industry Partnerships" },
-    // { value: "Lifelong Learning", label: "Lifelong Learning" },
     { value: "sports", label: "Sports" },
     { value: "technology", label: "Technology" },
     { value: "career", label: "Career" },
@@ -250,6 +219,7 @@ export default function Profile() {
           end_date: "",
           company_name: "",
           description: "",
+          currently_working: false,
         });
       }
     }
@@ -264,6 +234,7 @@ export default function Profile() {
           start_date: "",
           end_date: "",
           course_name: "",
+          degree: "",
         });
       }
     }
@@ -278,6 +249,7 @@ export default function Profile() {
           start_date: "",
           end_date: "",
           description: "",
+          currently_working: false,
         });
       }
     }
@@ -293,6 +265,11 @@ export default function Profile() {
     }
   };
 
+  const today = new Date().toISOString().split("T")[0];
+
+  const hasCurrentExperience = profile.experience.some(
+    (exp, idx) => exp.currently_working && idx !== editingIndex,
+  );
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -310,20 +287,37 @@ export default function Profile() {
   const validateField = (name, value) => {
     let error = "";
 
-    if (!value || !value.toString().trim()) {
+    const currentDate = new Date().toISOString().split("T")[0];
+
+    let form =
+      modalType === "experience"
+        ? experienceForm
+        : modalType === "projects"
+          ? projectForm
+          : educationForm;
+
+    const start = name === "start_date" ? value : form.start_date;
+
+    const end = name === "end_date" ? value : form.end_date;
+
+    // required
+    if (!value && !(name === "end_date" && form.currently_working)) {
       error = "Required";
     }
 
-    if (name === "end_date") {
-      let start;
+    // future start date
+    if (name === "start_date" && value > currentDate) {
+      error = "Start date cannot be in future";
+    }
 
-      if (modalType === "experience") start = experienceForm.start_date;
-      if (modalType === "education") start = educationForm.start_date;
-      if (modalType === "projects") start = projectForm.start_date;
+    // future end date
+    if (name === "end_date" && value > currentDate) {
+      error = "End date cannot be in future";
+    }
 
-      if (start && value && value < start) {
-        error = "End date cannot be before start date";
-      }
+    // start > end
+    if (start && end && start > end) {
+      error = "End date must be after start date";
     }
 
     setErrors((prev) => ({
@@ -443,13 +437,33 @@ export default function Profile() {
     let newErrors = {};
 
     Object.keys(form).forEach((key) => {
+      // skip boolean checkbox field
+      if (key === "currently_working") {
+        return;
+      }
+
+      // skip end date if current working
+      if (key === "end_date" && form.currently_working) {
+        return;
+      }
+
       if (!form[key] || !form[key].toString().trim()) {
         newErrors[key] = "Required";
       }
     });
 
-    if (form.start_date && form.end_date && form.end_date < form.start_date) {
-      newErrors.end_date = "Invalid date";
+    const currentDate = new Date().toISOString().split("T")[0];
+
+    if (form.start_date && form.start_date > currentDate) {
+      newErrors.start_date = "Start date cannot be future";
+    }
+
+    if (form.end_date && form.end_date > currentDate) {
+      newErrors.end_date = "End date cannot be future";
+    }
+
+    if (form.start_date && form.end_date && form.start_date > form.end_date) {
+      newErrors.end_date = "End date must be after start date";
     }
 
     setErrors(newErrors);
@@ -598,6 +612,30 @@ export default function Profile() {
                   <p className="error-text">{errors.company_name}</p>
                 )}
               </label>
+              {(!hasCurrentExperience || experienceForm.currently_working) && (
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginTop: "10px",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={experienceForm.currently_working || false}
+                    onChange={(e) => {
+                      setExperienceForm((prev) => ({
+                        ...prev,
+                        currently_working: e.target.checked,
+                        end_date: e.target.checked ? "" : prev.end_date,
+                      }));
+                    }}
+                  />
+                  I currently work here
+                </label>
+              )}
+              <br />
 
               {/* DATES */}
               <div style={{ display: "flex", gap: "10px" }}>
@@ -606,6 +644,7 @@ export default function Profile() {
                   <input
                     type="date"
                     name="start_date"
+                    max={today}
                     className={`input-register ${
                       touched.start_date && errors.start_date
                         ? "error-border"
@@ -620,22 +659,27 @@ export default function Profile() {
                   )}
                 </label>
 
-                <label className="input-register-label">
-                  End Date
-                  <input
-                    type="date"
-                    name="end_date"
-                    className={`input-register ${
-                      touched.end_date && errors.end_date ? "error-border" : ""
-                    }`}
-                    value={experienceForm.end_date}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                  {touched.end_date && errors.end_date && (
-                    <p className="error-text">{errors.end_date}</p>
-                  )}
-                </label>
+                {!experienceForm.currently_working && (
+                  <label className="input-register-label">
+                    End Date
+                    <input
+                      type="date"
+                      name="end_date"
+                      max={today}
+                      className={`input-register ${
+                        touched.end_date && errors.end_date
+                          ? "error-border"
+                          : ""
+                      }`}
+                      value={experienceForm.end_date}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                    />
+                    {touched.end_date && errors.end_date && (
+                      <p className="error-text">{errors.end_date}</p>
+                    )}
+                  </label>
+                )}
               </div>
 
               {/* DESCRIPTION */}
@@ -685,7 +729,24 @@ export default function Profile() {
                   <p className="error-text">{errors.university_name}</p>
                 )}
               </label>
-
+              <label className="input-register-label">
+                Degree
+                <CustomSelect
+                  options={degreeOptions}
+                  value={
+                    degreeOptions.find(
+                      (opt) => opt.value === educationForm.degree,
+                    ) || null
+                  }
+                  onChange={(selected) =>
+                    setEducationForm((prev) => ({
+                      ...prev,
+                      degree: selected?.value || "",
+                    }))
+                  }
+                  placeholder="Select Degree"
+                />
+              </label>
               <div style={{ display: "flex", gap: "10px" }}>
                 <label className="input-register-label">
                   Start Date
@@ -770,7 +831,28 @@ export default function Profile() {
                   <p className="error-text">{errors.project_name}</p>
                 )}
               </label>
-
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginTop: "10px",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={projectForm.currently_working || false}
+                  onChange={(e) => {
+                    setprojectForm((prev) => ({
+                      ...prev,
+                      currently_working: e.target.checked,
+                      end_date: e.target.checked ? "" : prev.end_date,
+                    }));
+                  }}
+                />
+                Currently working on this
+              </label>
+              <br />
               <div style={{ display: "flex", gap: "10px" }}>
                 <label className="input-register-label">
                   Start Date
@@ -791,22 +873,26 @@ export default function Profile() {
                   )}
                 </label>
 
-                <label className="input-register-label">
-                  End Date
-                  <input
-                    type="date"
-                    name="end_date"
-                    className={`input-register ${
-                      touched.end_date && errors.end_date ? "error-border" : ""
-                    }`}
-                    value={projectForm.end_date}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                  {touched.end_date && errors.end_date && (
-                    <p className="error-text">{errors.end_date}</p>
-                  )}
-                </label>
+                {!projectForm.currently_working && (
+                  <label className="input-register-label">
+                    End Date
+                    <input
+                      type="date"
+                      name="end_date"
+                      className={`input-register ${
+                        touched.end_date && errors.end_date
+                          ? "error-border"
+                          : ""
+                      }`}
+                      value={projectForm.end_date}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                    />
+                    {touched.end_date && errors.end_date && (
+                      <p className="error-text">{errors.end_date}</p>
+                    )}
+                  </label>
+                )}
               </div>
 
               <label className="input-register-label">
@@ -1120,6 +1206,7 @@ export default function Profile() {
                       {" . "}
                       <i>{formatDuration(edu.start_date, edu.end_date)}</i>
                     </p>
+                    <p>{edu.degree}</p>
                     <p>{edu.course_name}</p>
                   </div>
                 ))
